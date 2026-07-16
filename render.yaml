@@ -1,0 +1,14 @@
+# Render deployment blueprint. When you connect this repo on render.com,
+# Render reads this file and sets everything up automatically.
+services:
+  - type: web
+    name: meal-planner
+    runtime: node
+    plan: free
+    buildCommand: npm install
+    startCommand: node server.js
+    envVars:
+      # Your Gemini key is NOT stored here. sync:false means Render will ask you
+      # to paste it in the dashboard, so the secret never lands in the repo.
+      - key: GEMINI_API_KEY
+        sync: false

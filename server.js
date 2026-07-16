@@ -1,0 +1,204 @@
+/* ============================================================
+   MEAL PLANNER — BACKEND (the "middleman")
+   Uses Google Gemini's FREE tier (no credit card needed).
+   Run with:  node server.js   (from the folder this file is in)
+   Your key goes in a plain file next to this one: gemini-key.txt
+   ============================================================ */
+
+const http = require('http');
+const fs = require('fs');
+const path = require('path');
+
+/* ---- 1a. Optional .env support ---- */
+function loadEnv() {
+  const envPath = path.join(__dirname, '.env');
+  if (!fs.existsSync(envPath)) return;
+  for (const line of fs.readFileSync(envPath, 'utf8').split('\n')) {
+    const trimmed = line.trim();
+    if (!trimmed || trimmed.startsWith('#')) continue;
+    const eq = trimmed.indexOf('=');
+    if (eq === -1) continue;
+    const key = trimmed.slice(0, eq).trim();
+    let val = trimmed.slice(eq + 1).trim();
+    if ((val.startsWith('"') && val.endsWith('"')) || (val.startsWith("'") && val.endsWith("'"))) val = val.slice(1, -1);
+    process.env[key] = val;
+  }
+}
+loadEnv();
+
+/* ---- 1b. Key from plain file gemini-key.txt ---- */
+function readKeyFile() {
+  const p = path.join(__dirname, 'gemini-key.txt');
+  if (!fs.existsSync(p)) return '';
+  for (const line of fs.readFileSync(p, 'utf8').split('\n')) {
+    const t = line.trim();
+    if (!t || t.startsWith('#')) continue;
+    return t;
+  }
+  return '';
+}
+
+const API_KEY = readKeyFile() || process.env.GEMINI_API_KEY;
+const MODEL   = process.env.MODEL || 'gemini-flash-latest';
+const PORT    = process.env.PORT || 8787;   // host (e.g. Render) sets PORT; default 8787 for local use
+
+if (!API_KEY) {
+  console.log('\n⚠️  No API key found. Open the file "gemini-key.txt" in this folder and paste');
+  console.log('   your key on the first line, then save and run  node server.js  again.');
+  console.log('   Get a free key (no card) at https://aistudio.google.com → Get API key.\n');
+}
+
+/* ---- 2. The instructions we give the AI ---- */
+function buildPrompt(profile, mode, avoid = {}) {
+  const p = profile || {};
+  const city = (p.city && p.city.trim()) ? p.city.trim() : 'Paris, France';
+  const who = `
+Person's profile:
+- Weight: ${p.weight || 'unknown'} kg
+- Gender: ${p.gender || 'unspecified'}
+- Life stage: ${p.lifeStage || 'working'} (student=quick/cheap, working=fast weeknights, parent=family-friendly, flexible=has time)
+- Goal: ${p.goal || 'maintain'} (lose / maintain / gain muscle)
+- Activity: ${p.sport || 'none'}, ${p.frequency || 0} times per week
+- Cooking confidence: ${p.cookingLevel || 5}/10 (lower = keep recipes simple)
+- Dislikes to AVOID: ${(p.dislikes || []).join(', ') || 'none'}
+- Also cannot / will NOT eat (respect strictly): ${p.avoidText && p.avoidText.trim() ? p.avoidText.trim() : 'nothing extra'}
+- Allergies (STRICTLY EXCLUDE): ${(p.allergies || []).join(', ') || 'none'}
+- Weekly grocery budget: ${p.budget ? '€' + p.budget : 'no strict budget'}
+- Prices reflect a typical supermarket in: ${city}`;
+
+  const portions = `
+PORTION SIZES — make meals genuinely filling for a full-grown adult, enough to actually satisfy for the whole day. Do NOT under-portion. Rough guide per person:
+- Protein main: 130-200 g meat/fish (or 150-250 g tofu/legumes). Breakfast: 2-3 eggs, or 60-80 g oats/cereal, or 200 g yogurt.
+- Carbs: 75-100 g dry rice/pasta/grains, or 2 slices bread, or 250-350 g potatoes.
+- Vegetables/fruit: 150-250 g.
+The THREE meals of each day together should cover the person's realistic daily energy needs for their goal (lighter for "lose", larger and higher-protein for "gain"). If in doubt, make portions bigger, not smaller.`;
+
+  const pricing = `
+PRICING — use REALISTIC ${city} supermarket prices (2026), not cheap guesses. Reference anchors:
+- Chicken breast ≈ €11/kg, beef ≈ €15/kg, salmon ≈ €22/kg, white fish ≈ €18/kg, shrimp ≈ €20/kg
+- Eggs ≈ €0.35 each, milk ≈ €1.20/L, cheese ≈ €18/kg, yogurt ≈ €2/500 g
+- Rice/pasta ≈ €2/kg, bread ≈ €1.50/loaf, most vegetables €2-4/kg, fruit €2.5-5/kg, olive oil ≈ €0.10/tbsp
+Price EACH ingredient for its actual quantity. A realistic weekly grocery total for ONE person eating 3 real meals a day is typically €45-85. If your running total is far below ~€45, your prices are too low — raise them to be realistic. Respect the budget if given, but never make prices unrealistically cheap to fit it.`;
+
+  const shape = `
+Each meal MUST be an object with EXACTLY these fields:
+{
+  "type": "breakfast" | "lunch" | "dinner",
+  "name": "short dish name",
+  "desc": "4-6 word ingredient summary",
+  "time": integer minutes to prepare,
+  "difficulty": integer 1-5 (1=very easy, 5=advanced),
+  "emoji": "one food emoji",
+  "img": "1-2 lowercase photo keywords, e.g. salmon,dinner",
+  "ingredients": [
+    { "name": "Ingredient", "qty": number, "unit": "g|ml|tbsp|can|slices or '' for a count",
+      "category": "Produce" | "Meat & Fish" | "Dairy" | "Bakery" | "Frozen" | "Pantry",
+      "buyDayBefore": true for fresh/perishable, false otherwise,
+      "price": estimated EUR (number) for THIS quantity }
+  ],
+  "steps": [ "short step 1", "short step 2", ... 3 to 6 clear cooking steps ]
+}
+Rules: portions per ONE person (see PORTION SIZES). Match difficulty/time to cooking confidence and life stage. Realistic quantities, categories, and EUR prices (see PRICING). Output valid JSON only. No trailing commas.`;
+
+  if (mode === 'week') {
+    return `You are a meal-planning assistant. Create a 7-day meal plan (breakfast, lunch, dinner each day) personalised to this person. Vary meals across the week — no repeats.
+${who}
+${portions}
+${pricing}
+${shape}
+
+Return ONLY this JSON structure:
+{ "week": [ { "day": "Monday", "meals": [ <breakfast>, <lunch>, <dinner> ] }, ... 7 days Monday..Sunday ] }`;
+  }
+
+  return `You are a meal-planning assistant. Suggest ONE ${avoid.type || 'dinner'} for this person, DIFFERENT from these already-used dishes: ${(avoid.names || []).join(', ') || 'none'}.
+${who}
+${portions}
+${pricing}
+${shape}
+
+Return ONLY this JSON structure:
+{ "meal": <a single meal object of type "${avoid.type || 'dinner'}"> }`;
+}
+
+/* ---- 3. Call the Gemini API ---- */
+function sanitizeJson(text) {
+  let t = text.trim().replace(/^```(json)?/i, '').replace(/```\s*$/, '').trim();
+  t = t.replace(/,(\s*[}\]])/g, '$1');
+  return t;
+}
+async function callAIonce(prompt) {
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent`;
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json', 'x-goog-api-key': API_KEY },
+    body: JSON.stringify({
+      contents: [{ parts: [{ text: prompt }] }],
+      generationConfig: { temperature: 0.4, maxOutputTokens: 32768, responseMimeType: 'application/json' },
+    }),
+  });
+  if (!res.ok) { const detail = await res.text(); throw new Error(`Gemini API ${res.status}: ${detail}`); }
+  const data = await res.json();
+  const finish = data?.candidates?.[0]?.finishReason;
+  const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+  if (!text) throw new Error('Empty response from Gemini: ' + JSON.stringify(data).slice(0, 300));
+  if (finish && finish !== 'STOP') throw new Error(`Response cut off (finishReason=${finish})`);
+  return JSON.parse(sanitizeJson(text));
+}
+async function callAI(prompt) {
+  let lastErr;
+  for (let attempt = 1; attempt <= 2; attempt++) {
+    try { return await callAIonce(prompt); }
+    catch (e) { lastErr = e; console.warn(`Attempt ${attempt} failed: ${e.message}`); }
+  }
+  throw lastErr;
+}
+
+/* ---- 4. The web server ---- */
+function sendJson(res, status, obj) {
+  res.writeHead(status, {
+    'content-type': 'application/json',
+    'access-control-allow-origin': '*',
+    'access-control-allow-headers': 'content-type',
+    'access-control-allow-methods': 'POST, OPTIONS',
+  });
+  res.end(JSON.stringify(obj));
+}
+function readBody(req) {
+  return new Promise((resolve) => {
+    let data = '';
+    req.on('data', (c) => (data += c));
+    req.on('end', () => { try { resolve(JSON.parse(data || '{}')); } catch { resolve({}); } });
+  });
+}
+function sendHtml(res) {
+  const htmlPath = path.join(__dirname, 'meal-planner.html');
+  fs.readFile(htmlPath, (err, buf) => {
+    if (err) { res.writeHead(404, { 'content-type': 'text/plain' }); return res.end('meal-planner.html not found'); }
+    res.writeHead(200, { 'content-type': 'text/html; charset=utf-8' });
+    res.end(buf);
+  });
+}
+const server = http.createServer(async (req, res) => {
+  if (req.method === 'OPTIONS') return sendJson(res, 204, {});
+  // Serve the app itself so the whole thing lives at one URL (frontend + backend together).
+  if (req.method === 'GET' && (req.url === '/' || req.url === '/meal-planner.html')) return sendHtml(res);
+  if (req.method === 'POST' && req.url === '/generate-week') {
+    if (!API_KEY) return sendJson(res, 500, { error: 'No API key configured on the server.' });
+    try { const profile = await readBody(req); return sendJson(res, 200, await callAI(buildPrompt(profile, 'week'))); }
+    catch (e) { console.error(e.message); return sendJson(res, 500, { error: e.message }); }
+  }
+  if (req.method === 'POST' && req.url === '/generate-meal') {
+    if (!API_KEY) return sendJson(res, 500, { error: 'No API key configured on the server.' });
+    try { const { profile, type, avoidNames } = await readBody(req); return sendJson(res, 200, await callAI(buildPrompt(profile, 'meal', { type, names: avoidNames }))); }
+    catch (e) { console.error(e.message); return sendJson(res, 500, { error: e.message }); }
+  }
+  sendJson(res, 404, { error: 'Not found' });
+});
+server.listen(PORT, () => {
+  console.log(`\n✅ Meal Planner backend running at http://localhost:${PORT}`);
+  console.log(`   Provider: Google Gemini (free tier)`);
+  console.log(`   Model: ${MODEL}`);
+  console.log(`   Key loaded: ${API_KEY ? 'yes' : 'NO — add it to gemini-key.txt'}`);
+  console.log(`   Leave this window open while you use the app. Press Ctrl+C to stop.\n`);
+});

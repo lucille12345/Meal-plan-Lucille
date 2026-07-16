@@ -1,0 +1,13 @@
+{
+  "name": "meal-planner-backend",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Backend for the meal planner app — calls Google Gemini, holds the API key.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
