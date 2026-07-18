@@ -48,6 +48,27 @@ the public internet (Render free tier) — frontend + backend + AI generation al
 >
 > **Next candidates (STORM §10, not built):** diet-type/cuisine selectors → gentle "weeks
 > planned" counter → PWA → French/English toggle → Groq provider (needs Lucille's free account).
+>
+> **V2 — THE BIG ONE (2026-07-18, specced, not started).** Lucille commissioned a full
+> product evolution: real *app* (installable PWA), sign-up/sign-in (Supabase free tier),
+> marketing landing page, Woolworths-style planner (sidebar week + recipe carousels),
+> 3-course meals, no-repeat rule, per-day prices, sweet/savory breakfast, friendly wording
+> (never "maintain/lose/gain" in UI), real recipe links, user dish photos, Google Calendar
+> (.ics first, OAuth later), push/email reminders (SMS = paid, deferred, her call),
+> feedback form to lucillemonamie@icloud.com. Two authoritative briefs, division of labor:
+> - **`DESIGN-BRIEF.md`** → a dedicated Claude *design* session produces a `design/` folder
+>   (tokens.css, components.html, 9 screen mockups). Design direction: "Apple's restraint,
+>   Mob's appetite" + the exact structural references Lucille chose.
+> - **`OPUS-BUILD-BRIEF.md`** → the Opus build session implements the app in 11 phases,
+>   lifting the design 1:1. Includes the Supabase/Google/Resend/FormSubmit setup steps
+>   Lucille must do (all free) and the "no doubles" QA checklist.
+> Run the design session FIRST; Opus starts at its phase 1 only once `design/` exists.
+>
+> **Packaging decided 2026-07-19:** ship BOTH an installable **PWA** (phone + web) AND a
+> free **desktop download** (`.dmg`/`.exe` via **Tauri**, Electron fallback) from ONE web
+> codebase — Lucille wants it great on phone and computer equally, at zero spend. Desktop
+> files distribute via GitHub Releases; App Store (paid) is out of scope. See
+> `OPUS-BUILD-BRIEF.md` §0 (dual-target architecture) + phase 11.
 
 ---
 
