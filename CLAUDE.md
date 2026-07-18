@@ -20,6 +20,34 @@ the public internet (Render free tier) — frontend + backend + AI generation al
 > ticks, favorites, copy/print, new warm design system), and the roadmap. Read it before
 > touching the frontend — it is the design source of truth now. Changes are local, not yet
 > pushed/deployed.
+>
+> **Deep research (2026-07-18): `STORM-RESEARCH.md`** — a broader, multi-perspective research
+> report (nutrition/TDEE engine, monetization, retention, food-waste/leftovers, onboarding,
+> dietary frameworks, accessibility/EU law, free data APIs) with a ranked, zero-cost feature
+> backlog in its §10.
+>
+> **Phase 6 (2026-07-18): built STORM backlog items 1–4** (all local, verified in-browser with
+> AI off, not yet pushed/deployed):
+> 1. **Real calorie & protein target** — new profile fields *height* + *age*; `computeTargets()`
+>    (Mifflin–St Jeor → activity multiplier from weekly frequency → goal adjust → protein g/kg)
+>    lives in BOTH `meal-planner.html` and `server.js`. Shown as a 🎯 banner on the review
+>    screen; injected into the AI prompt so portions are numerically grounded. Silent if
+>    height/age/weight aren't all provided (backward-compatible).
+> 2. **"Cook once, eat twice"** — profile checkbox `profile.leftovers`. `applyLeftovers(week)`
+>    post-processes ANY week (AI or offline): turns Tue/Thu/Sat lunches into "Leftover <prev
+>    dinner>", **doubles the source dinner's ingredients** (batchNote badge "cook double"), and
+>    the leftover meal (`isLeftover:true`) is **skipped in the shopping list** so nothing is
+>    bought/counted twice. Verified: Mon salmon → 300 g, Tue leftover adds 0.
+> 3. **Pantry staples** — profile chip row `profile.pantry` (Salt, Olive oil, Rice, …).
+>    `pantryHas()` filters those out of the shopping list (substring match either direction);
+>    shows "Hiding N items you already have". `buildShoppingList()` now returns `skipped`.
+> 4. **Read-aloud cook mode + accessibility** — 🔊 "Read step aloud" button using the browser's
+>    free `speechSynthesis` (speech cancelled on close/step-change); WCAG AA pass: small orange
+>    labels darkened to `--accent-deep` (contrast), global `:focus-visible` outline,
+>    `prefers-reduced-motion`, ARIA on the cook dialog and icon buttons.
+>
+> **Next candidates (STORM §10, not built):** diet-type/cuisine selectors → gentle "weeks
+> planned" counter → PWA → French/English toggle → Groq provider (needs Lucille's free account).
 
 ---
 

@@ -78,7 +78,7 @@
   .thumb.lunch     { background:linear-gradient(135deg,#e6f3e8,#bfe0c6); }
   .thumb.dinner    { background:linear-gradient(135deg,#fde4d4,#f6b894); }
   .meal .body { flex:1; padding:12px 14px; display:flex; justify-content:space-between; gap:10px; }
-  .meal .type { font-size:11px; text-transform:uppercase; letter-spacing:.7px; color:var(--accent); font-weight:700; }
+  .meal .type { font-size:11px; text-transform:uppercase; letter-spacing:.7px; color:var(--accent-deep); font-weight:700; }
   .meal .name { font-weight:600; font-size:15.5px; }
   .meal .desc { font-size:13px; color:var(--muted); }
   .badges { margin-top:7px; display:flex; gap:6px; flex-wrap:wrap; }
@@ -99,7 +99,7 @@
   .status-bar .count { font-size:14px; color:var(--muted); }
   .btn-row { display:flex; gap:8px; flex-wrap:wrap; }
 
-  .cat { font-size:13px; text-transform:uppercase; letter-spacing:.6px; color:var(--accent); margin:16px 0 6px; font-weight:700; }
+  .cat { font-size:13px; text-transform:uppercase; letter-spacing:.6px; color:var(--accent-deep); margin:16px 0 6px; font-weight:700; }
   .item { display:flex; align-items:center; gap:10px; padding:7px 0; border-bottom:1px dashed var(--line); }
   .item input { width:18px; height:18px; accent-color:var(--green); }
   .item .nm { flex:1; }
@@ -125,7 +125,7 @@
   .day-tab:hover { border-color:var(--accent); }
   .day-tab.on { background:var(--accent); color:#fff; border-color:var(--accent); }
   .recipe { border:1px solid var(--line); border-radius:14px; padding:18px; margin-bottom:14px; background:#fff; }
-  .recipe .rtype { font-size:11px; text-transform:uppercase; letter-spacing:.7px; color:var(--accent); font-weight:700; }
+  .recipe .rtype { font-size:11px; text-transform:uppercase; letter-spacing:.7px; color:var(--accent-deep); font-weight:700; }
   .recipe .rname { font-size:20px; font-weight:700; margin:2px 0 2px; }
   .recipe .rdesc { color:var(--muted); font-size:13px; margin-bottom:10px; }
   .ing-head { font-size:12px; text-transform:uppercase; letter-spacing:.6px; color:var(--green); font-weight:700; margin:12px 0 6px; }
@@ -150,7 +150,7 @@
   .cook-dot { flex:1; height:5px; border-radius:99px; background:#e8e0d1; }
   .cook-dot.done { background:var(--green); }
   .cook-dot.now { background:var(--accent); }
-  .cook-step-label { font-size:13px; font-weight:700; color:var(--accent); text-transform:uppercase; letter-spacing:.7px; }
+  .cook-step-label { font-size:13px; font-weight:700; color:var(--accent-deep); text-transform:uppercase; letter-spacing:.7px; }
   .cook-step-text { font-size:26px; line-height:1.45; font-weight:500; margin:10px 0 24px; flex:1; }
   .cook-ing { background:#fff; border:1px solid var(--line); border-radius:12px; padding:12px 16px; margin-bottom:18px; font-size:14px; }
   .cook-ing summary { cursor:pointer; font-weight:600; }
@@ -168,6 +168,19 @@
     border-radius:50%; animation:spin .8s linear infinite; }
   @keyframes spin { to { transform:rotate(360deg); } }
   .hidden { display:none; }
+  .list-note { font-size:13px; color:var(--muted); margin:2px 0 12px; }
+  .badge.leftover { background:#eef4ea; color:#3f6b32; }
+  .badge.batch { background:#fff1e0; color:var(--accent-deep); }
+  .target-banner { background:linear-gradient(135deg,#fff4ea,#ffe8d6); border:1px solid #f2d3ba;
+    border-radius:14px; padding:14px 18px; margin-bottom:18px; display:flex; align-items:center; gap:14px; flex-wrap:wrap; }
+  .target-banner .tgt-ico { font-size:26px; }
+  .target-banner .tgt-main { font-weight:700; font-family:'Fraunces',Georgia,serif; font-size:18px; color:var(--ink); }
+  .target-banner .tgt-sub { font-size:12.5px; color:var(--muted); }
+  .cook-speak { background:#fff; border:1px solid var(--line); border-radius:10px; padding:8px 15px;
+    font-size:14px; font-weight:600; font-family:inherit; cursor:pointer; margin-bottom:18px; align-self:flex-start; }
+  .cook-speak:hover { border-color:var(--accent); color:var(--accent-deep); }
+  :focus-visible { outline:2px solid var(--accent-deep); outline-offset:2px; border-radius:4px; }
+  @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation:none !important; transition:none !important; } }
   .copied-toast { position:fixed; bottom:24px; left:50%; transform:translateX(-50%); background:var(--ink); color:#fff;
     padding:10px 20px; border-radius:99px; font-size:14px; z-index:60; animation:rise .25s ease both; }
 
@@ -259,6 +272,7 @@ const BACKEND_URL = location.protocol === 'file:' ? 'http://localhost:8787' : ''
 const DAYS = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
 const DISLIKE_OPTIONS = ['Fish','Beef','Chicken','Pork','Mushrooms','Eggs','Onion','Spicy food','Cheese'];
 const ALLERGY_OPTIONS = ['Nuts','Dairy','Gluten','Shellfish','Soy'];
+const PANTRY_OPTIONS = ['Salt','Pepper','Olive oil','Cooking oil','Butter','Flour','Sugar','Rice','Pasta','Onion','Garlic','Soy sauce','Honey','Spices'];
 
 /* ---- persistence (localStorage) ---- */
 const STORAGE_KEY = 'mealPlannerState';
@@ -299,6 +313,55 @@ function clearAllData(){
   state.favorites = [];
   state.checked = {};
   setScreen('profile');
+}
+
+/* ---- daily nutrition target (Mifflin–St Jeor → TDEE → goal → protein) ---- */
+function activityMult(p){
+  const f=Number(p.frequency)||0;
+  if(f<=0)return 1.2; if(f<=2)return 1.375; if(f<=4)return 1.55; if(f<=6)return 1.725; return 1.9;
+}
+function computeTargets(p){
+  if(!p)return null;
+  const kg=Number(p.weight), cm=Number(p.height), age=Number(p.age);
+  if(!(kg>0&&cm>0&&age>0))return null;               // need all three; else stay silent
+  let bmr;
+  if(p.gender==='male')bmr=10*kg+6.25*cm-5*age+5;
+  else if(p.gender==='female')bmr=10*kg+6.25*cm-5*age-161;
+  else bmr=10*kg+6.25*cm-5*age-78;                   // gender-neutral average constant
+  let tdee=bmr*activityMult(p);
+  const goal=p.goal||'maintain';
+  if(goal==='lose')tdee*=0.80; else if(goal==='gain')tdee*=1.12;
+  const kcal=Math.round(tdee/10)*10;
+  const protein=Math.round(kg*(goal==='maintain'?1.6:2.0));
+  return { kcal, protein };
+}
+
+/* ---- pantry staples: skip what the user already owns ---- */
+function pantryHas(name){
+  const list=state.profile?.pantry||[]; if(!list.length)return false;
+  const n=name.toLowerCase();
+  return list.some(term=>{ const t=term.toLowerCase(); return n.includes(t)||t.includes(n); });
+}
+
+/* ---- "cook once, eat twice": turn some lunches into leftovers of the prior dinner ---- */
+function applyLeftovers(week){
+  for(const di of [1,3,5]){
+    if(di>=week.length)continue;
+    const prevDay=week[di-1];
+    const dinner=prevDay.meals.find(m=>m.type==='dinner');
+    const lunch=week[di].meals.find(m=>m.type==='lunch');
+    if(!dinner||!dinner.recipe||!lunch)continue;
+    const d=dinner.recipe;
+    // cook double at dinner so half becomes tomorrow's lunch (buy 2× ingredients)
+    d.ingredients=(d.ingredients||[]).map(i=>({...i, qty:i.qty*2,
+      ...(typeof i.price==='number'?{price:i.price*2}:{})}));
+    d.batchNote=true;
+    lunch.recipe={ ...d, id:'lo'+(nextId++), type:'lunch', name:'Leftover '+d.name,
+      desc:'From '+prevDay.day+' night — just reheat', isLeftover:true, batchNote:false,
+      ingredients:(d.ingredients||[]).map(i=>({...i})),   // kept for display only; not bought again
+      steps:['Reheat the leftovers from '+prevDay.day+' until piping hot.'] };
+    lunch.rejected=false;
+  }
 }
 
 /* ---- favorites (per-person base quantities) ---- */
@@ -416,11 +479,12 @@ function buyDayFor(di){ return di===0?'Sunday (before the week)':DAYS[di-1]; }
 function priceOf(ing){ return typeof ing.price==='number'&&isFinite(ing.price)?ing.price:0; }
 function itemKey(ing){ return ing.name.toLowerCase()+'|'+ing.unit; }
 function buildShoppingList(){
-  const pantry=new Map(); const fresh={}; let total=0; let anyPrice=false;
+  const pantry=new Map(); const fresh={}; let total=0; let anyPrice=false; let skipped=0;
   state.week.forEach((day,di)=>{
     day.meals.forEach(meal=>{
-      if(meal.rejected||!meal.recipe)return;
+      if(meal.rejected||!meal.recipe||meal.recipe.isLeftover)return;   // leftovers: nothing new to buy
       meal.recipe.ingredients.forEach(ing=>{
+        if(pantryHas(ing.name)){ skipped++; return; }                  // already in your pantry
         const key=itemKey(ing);
         const pr=priceOf(ing); if(pr>0)anyPrice=true; total+=pr;
         if(ing.buyDayBefore){
@@ -434,7 +498,7 @@ function buildShoppingList(){
       });
     });
   });
-  return { pantry:[...pantry.values()], fresh, total, anyPrice };
+  return { pantry:[...pantry.values()], fresh, total, anyPrice, skipped };
 }
 
 /* ============================================================
@@ -470,13 +534,18 @@ function renderLoading(){
 
 /* ----- Screen 1: questionnaire ----- */
 function renderProfile(){
-  const p=state.profile||{weight:'',gender:'female',lifeStage:'working',goal:'maintain',sport:'none',frequency:0,cookingLevel:5,people:1,dislikes:[],allergies:[],avoidText:'',budget:'',city:''};
+  const p=state.profile||{weight:'',height:'',age:'',gender:'female',lifeStage:'working',goal:'maintain',sport:'none',frequency:0,cookingLevel:5,people:1,dislikes:[],allergies:[],pantry:[],leftovers:false,avoidText:'',budget:'',city:''};
   app.innerHTML=`
     <div class="card">
       <h2>Tell us about you</h2>
       <p class="sub">This shapes which meals we suggest, how involved they are, portions, and the budget.</p>
       <div class="row">
         <div><label>Weight (kg)</label><input type="number" id="weight" value="${p.weight}" placeholder="e.g. 65"></div>
+        <div><label>Height (cm)</label><input type="number" id="height" value="${p.height||''}" placeholder="e.g. 170"></div>
+        <div><label>Age</label><input type="number" id="age" value="${p.age||''}" min="1" max="120" placeholder="e.g. 30"></div>
+      </div>
+      <p class="hint" style="margin:-6px 0 0">Weight, height and age let us estimate your daily calorie & protein target — the meals are portioned to hit it. Leave blank to skip.</p>
+      <div class="row">
         <div><label>Gender</label><select id="gender">
           <option value="female" ${p.gender==='female'?'selected':''}>Female</option>
           <option value="male" ${p.gender==='male'?'selected':''}>Male</option>
@@ -524,6 +593,14 @@ function renderProfile(){
       <div class="chips" id="allergies">
         ${ALLERGY_OPTIONS.map(o=>`<div class="chip ${p.allergies.includes(o)?'on':''}" data-v="${o}">${o}</div>`).join('')}
       </div>
+      <label>Already in your cupboard <span class="hint">(tap what you have — we'll leave it off the shopping list)</span></label>
+      <div class="chips" id="pantry">
+        ${PANTRY_OPTIONS.map(o=>`<div class="chip ${(p.pantry||[]).includes(o)?'on':''}" data-v="${o}">${o}</div>`).join('')}
+      </div>
+      <label class="ai-toggle" style="display:flex;align-items:center;gap:8px;margin:16px 0 0;font-weight:normal">
+        <input type="checkbox" id="leftovers" ${p.leftovers?'checked':''}>
+        Cook once, eat twice <span class="hint">(reuse some dinners as next-day lunch — less cooking, less waste)</span>
+      </label>
       <label class="ai-toggle" style="display:flex;align-items:center;gap:8px;margin:14px 0;font-weight:normal">
         <input type="checkbox" id="useAI" ${state.useAI?'checked':''}>
         Use real AI generation <span class="hint">(personalized, but uses 1 of your ~20 free Gemini requests/day — off by default so testing doesn't burn your quota)</span>
@@ -541,6 +618,8 @@ function renderProfile(){
   document.getElementById('genBtn').onclick=async()=>{
     state.profile={
       weight:document.getElementById('weight').value,
+      height:document.getElementById('height').value,
+      age:document.getElementById('age').value,
       gender:document.getElementById('gender').value,
       lifeStage:document.getElementById('lifeStage').value,
       goal:document.getElementById('goal').value,
@@ -553,6 +632,8 @@ function renderProfile(){
       avoidText:document.getElementById('avoidText').value,
       dislikes:[...app.querySelectorAll('#dislikes .chip.on')].map(c=>c.dataset.v),
       allergies:[...app.querySelectorAll('#allergies .chip.on')].map(c=>c.dataset.v),
+      pantry:[...app.querySelectorAll('#pantry .chip.on')].map(c=>c.dataset.v),
+      leftovers:document.getElementById('leftovers').checked,
     };
     state.checked={};   // fresh week, fresh list
     setScreen('loading');
@@ -562,6 +643,7 @@ function renderProfile(){
     } else {
       state.week=generateWeek(state.profile); state.usedFallback=false;
     }
+    if(state.profile.leftovers) applyLeftovers(state.week);
     setScreen('review');
   };
 }
@@ -579,15 +661,17 @@ function mealCard(meal,di,mi){
   const r=meal.recipe;
   if(!r)return `<div class="meal"><div class="body"><div><div class="type">${meal.type}</div><div class="name">— no option —</div></div></div></div>`;
   const diffLabel=['','Very easy','Easy','Medium','Involved','Advanced'][r.difficulty]||'';
+  const extra=(r.isLeftover?'<span class="badge leftover">♻️ Leftover — just reheat</span>':'')
+    +(r.batchNote?'<span class="badge batch">🍲 Cook double → tomorrow\'s lunch</span>':'');
   return `<div class="meal ${meal.rejected?'rejected':''}">
-    <div class="thumb ${meal.type}">${r.emoji||'🍽️'}</div>
+    <div class="thumb ${meal.type}">${r.isLeftover?'♻️':(r.emoji||'🍽️')}</div>
     <div class="body"><div>
       <div class="type">${meal.type}</div><div class="name">${r.name}</div><div class="desc">${r.desc}</div>
-      <div class="badges"><span class="badge">⏱ ${r.time} min</span><span class="badge diff">${diffLabel}</span>${nutriBadges(r)}</div>
+      <div class="badges"><span class="badge">⏱ ${r.time} min</span><span class="badge diff">${diffLabel}</span>${nutriBadges(r)}${extra}</div>
     </div>
     <div class="side-btns">
-      <button class="swap-btn" data-swap="${di}-${mi}" title="Don't like it — swap">✕</button>
-      <button class="fav-btn ${isFavorite(r.name)?'on':''}" data-fav="${di}-${mi}" title="Save as favorite">♥</button>
+      <button class="swap-btn" data-swap="${di}-${mi}" title="Don't like it — swap" aria-label="Swap this ${meal.type}">✕</button>
+      <button class="fav-btn ${isFavorite(r.name)?'on':''}" data-fav="${di}-${mi}" title="Save as favorite" aria-label="Save ${r.name} as favorite">♥</button>
     </div></div>
   </div>`;
 }
@@ -599,6 +683,11 @@ function dayKcal(day){
 function renderReview(){
   let html=`<div class="card"><h2>Your week</h2>
     <p class="sub">Tap ✕ on anything you don't fancy — it swaps to a new dish. Tap ♥ to keep a meal in your favorites forever.</p>`;
+  const tgt=computeTargets(state.profile);
+  if(tgt)html+=`<div class="target-banner">
+    <div class="tgt-ico">🎯</div>
+    <div><div class="tgt-main">Your daily target: ~${tgt.kcal} kcal · ${tgt.protein} g protein <span class="hint">per person</span></div>
+    <div class="tgt-sub">Estimated from your height, weight, age, activity and goal (Mifflin–St Jeor). The 3 meals are portioned toward this.</div></div></div>`;
   if(state.usedFallback)html+=`<div class="notice">⚠️ Backend offline — showing built-in meals, not AI (no budget/prices). Start the backend and regenerate.</div>`;
   else if(!state.useAI)html+=`<div class="notice info">ℹ️ Showing built-in meals — AI generation is off. Tick "Use real AI generation" on the profile page for a personalized week.</div>`;
   state.week.forEach((day,di)=>{
@@ -658,11 +747,19 @@ function renderRecipes(){
       <h3 class="day-title" style="margin:0 0 14px">${day.day}</h3>
       ${meals.map((m,idx)=>{
         const r=m.recipe;
+        if(r.isLeftover){
+          return `<div class="recipe">
+            <div class="rtype">${m.type}</div>
+            <div class="rname">♻️ ${r.name}</div>
+            <p class="list-note">${r.desc||''}. You already bought and cooked this — nothing extra to shop for. Just reheat until piping hot.</p>
+            <div class="badges"><span class="badge leftover">♻️ Leftover</span>${nutriBadges(r)}</div>
+          </div>`;
+        }
         return `<div class="recipe">
           <div class="rtype">${m.type}</div>
           <div class="rname">${r.emoji||''} ${r.name}</div>
           <div class="rdesc">${r.desc||''}</div>
-          <div class="ing-head">🧾 Ingredients ${peopleCount()>1?`<span class="hint">(for ${peopleCount()} people)</span>`:''}</div>
+          <div class="ing-head">🧾 Ingredients ${peopleCount()>1?`<span class="hint">(for ${peopleCount()} people)</span>`:''}${r.batchNote?' <span class="hint">— double batch, half becomes tomorrow\'s lunch</span>':''}</div>
           <ul class="ing-list">
             ${r.ingredients.map(i=>`<li><span>${i.name}</span><span class="iq">${formatQty(i.qty,i.unit)}${typeof i.price==='number'?' · €'+i.price.toFixed(2):''}</span></li>`).join('')}
           </ul>
@@ -691,20 +788,33 @@ function renderRecipes(){
 }
 
 /* ----- Cook mode (full-screen, one step at a time) ----- */
+function speakStep(text){
+  try{
+    if(!('speechSynthesis' in window))return;
+    speechSynthesis.cancel();
+    const u=new SpeechSynthesisUtterance(text); u.rate=0.95; speechSynthesis.speak(u);
+  }catch(e){}
+}
+function stopSpeaking(){ try{ if('speechSynthesis' in window)speechSynthesis.cancel(); }catch(e){} }
 function openCookMode(recipe){
   let step=0;
   const overlay=document.createElement('div');
   overlay.className='cook-overlay';
+  overlay.setAttribute('role','dialog');
+  overlay.setAttribute('aria-modal','true');
+  overlay.setAttribute('aria-label','Cooking '+recipe.name);
+  const canSpeak=('speechSynthesis' in window);
   function paint(){
     const steps=recipe.steps||[];
     overlay.innerHTML=`<div class="cook-inner">
       <div class="cook-top">
         <div class="cook-title">${recipe.emoji||''} ${recipe.name}</div>
-        <button class="cook-close" title="Close">✕</button>
+        <button class="cook-close" title="Close" aria-label="Close cook mode">✕</button>
       </div>
       <div class="cook-progress">${steps.map((_,i)=>`<div class="cook-dot ${i<step?'done':i===step?'now':''}"></div>`).join('')}</div>
       <div class="cook-step-label">Step ${step+1} of ${steps.length}</div>
       <div class="cook-step-text">${steps[step]||''}</div>
+      ${canSpeak?`<button class="cook-speak" aria-label="Read this step aloud">🔊 Read step aloud</button>`:''}
       <details class="cook-ing"><summary>🧾 Ingredients</summary>
         <ul class="ing-list" style="margin-top:8px">${recipe.ingredients.map(i=>`<li><span>${i.name}</span><span class="iq">${formatQty(i.qty,i.unit)}</span></li>`).join('')}</ul>
       </details>
@@ -716,9 +826,11 @@ function openCookMode(recipe){
     overlay.querySelector('.cook-close').onclick=close;
     overlay.querySelector('.cook-prev').onclick=()=>{ if(step>0){step--;paint();} };
     overlay.querySelector('.cook-next').onclick=()=>{ if(step<steps.length-1){step++;paint();} else close(); };
+    const sp=overlay.querySelector('.cook-speak');
+    if(sp)sp.onclick=()=>speakStep(steps[step]||'');
   }
   function onKey(e){ if(e.key==='Escape')close(); if(e.key==='ArrowRight')overlay.querySelector('.cook-next').click(); if(e.key==='ArrowLeft')overlay.querySelector('.cook-prev').click(); }
-  function close(){ document.removeEventListener('keydown',onKey); overlay.remove(); }
+  function close(){ stopSpeaking(); document.removeEventListener('keydown',onKey); overlay.remove(); }
   document.addEventListener('keydown',onKey);
   paint();
   document.body.appendChild(overlay);
@@ -726,7 +838,7 @@ function openCookMode(recipe){
 
 /* ----- Screen 3: shopping list ----- */
 function renderShopping(){
-  const { pantry, fresh, total, anyPrice }=buildShoppingList();
+  const { pantry, fresh, total, anyPrice, skipped }=buildShoppingList();
   const buyOrder=['Sunday (before the week)',...DAYS];
   const freshDays=Object.keys(fresh).sort((a,b)=>buyOrder.indexOf(a)-buyOrder.indexOf(b));
   const budget=Number(state.profile?.budget)||0;
@@ -744,6 +856,7 @@ function renderShopping(){
     <div class="card">
       <h2>Your shopping list</h2>
       <p class="sub">Built from ${mealCount()} meals. Repeated items are added up automatically. Ticks are remembered — even if you close the page.</p>
+      ${skipped?`<p class="list-note">🧺 Hiding ${skipped} item${skipped===1?'':'s'} you said ${skipped===1?'is':'are'} already in your cupboard.</p>`:''}
       ${totalBar}
       <div class="btn-row no-print" style="margin-bottom:16px">
         <button class="ghost" id="copyList">📋 Copy list</button>

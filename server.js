@@ -48,11 +48,34 @@ if (!API_KEY) {
   console.log('   Get a free key (no card) at https://aistudio.google.com → Get API key.\n');
 }
 
+/* ---- daily nutrition target (Mifflin–St Jeor → TDEE → goal → protein) ---- */
+function computeTargets(p) {
+  const kg = Number(p.weight), cm = Number(p.height), age = Number(p.age);
+  if (!(kg > 0 && cm > 0 && age > 0)) return null;
+  let bmr;
+  if (p.gender === 'male') bmr = 10 * kg + 6.25 * cm - 5 * age + 5;
+  else if (p.gender === 'female') bmr = 10 * kg + 6.25 * cm - 5 * age - 161;
+  else bmr = 10 * kg + 6.25 * cm - 5 * age - 78;
+  const f = Number(p.frequency) || 0;
+  const mult = f <= 0 ? 1.2 : f <= 2 ? 1.375 : f <= 4 ? 1.55 : f <= 6 ? 1.725 : 1.9;
+  let tdee = bmr * mult;
+  const goal = p.goal || 'maintain';
+  if (goal === 'lose') tdee *= 0.80; else if (goal === 'gain') tdee *= 1.12;
+  return { kcal: Math.round(tdee / 10) * 10, protein: Math.round(kg * (goal === 'maintain' ? 1.6 : 2.0)) };
+}
+
 /* ---- 2. The instructions we give the AI ---- */
 function buildPrompt(profile, mode, avoid = {}) {
   const p = profile || {};
   const city = (p.city && p.city.trim()) ? p.city.trim() : 'Paris, France';
   const people = Math.min(8, Math.max(1, Number(p.people) || 1));
+  const t = computeTargets(p);
+  const targetLine = t
+    ? `\n- DAILY TARGET (per person): about ${t.kcal} kcal and ${t.protein} g protein per day. Portion the 3 meals so their kcal add up to roughly this, and hit the protein.`
+    : '';
+  const leftoverLine = p.leftovers
+    ? `\n- LEFTOVERS: the person reuses some dinners as next-day lunch. Make dinners reheat well and portion them generously.`
+    : '';
   const who = `
 Person's profile:
 - Cooking for: ${people} ${people === 1 ? 'person' : 'people'} — ALL ingredient quantities and prices must be for ${people} ${people === 1 ? 'person' : 'people'}. kcal and protein are PER PERSON.
@@ -66,7 +89,7 @@ Person's profile:
 - Also cannot / will NOT eat (respect strictly): ${p.avoidText && p.avoidText.trim() ? p.avoidText.trim() : 'nothing extra'}
 - Allergies (STRICTLY EXCLUDE): ${(p.allergies || []).join(', ') || 'none'}
 - Weekly grocery budget: ${p.budget ? '€' + p.budget : 'no strict budget'}
-- Prices reflect a typical supermarket in: ${city}`;
+- Prices reflect a typical supermarket in: ${city}${targetLine}${leftoverLine}`;
 
   const portions = `
 PORTION SIZES — make meals genuinely filling for a full-grown adult, enough to actually satisfy for the whole day. Do NOT under-portion. Rough guide per person:
