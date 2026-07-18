@@ -52,8 +52,10 @@ if (!API_KEY) {
 function buildPrompt(profile, mode, avoid = {}) {
   const p = profile || {};
   const city = (p.city && p.city.trim()) ? p.city.trim() : 'Paris, France';
+  const people = Math.min(8, Math.max(1, Number(p.people) || 1));
   const who = `
 Person's profile:
+- Cooking for: ${people} ${people === 1 ? 'person' : 'people'} — ALL ingredient quantities and prices must be for ${people} ${people === 1 ? 'person' : 'people'}. kcal and protein are PER PERSON.
 - Weight: ${p.weight || 'unknown'} kg
 - Gender: ${p.gender || 'unspecified'}
 - Life stage: ${p.lifeStage || 'working'} (student=quick/cheap, working=fast weeknights, parent=family-friendly, flexible=has time)
@@ -90,6 +92,8 @@ Each meal MUST be an object with EXACTLY these fields:
   "difficulty": integer 1-5 (1=very easy, 5=advanced),
   "emoji": "one food emoji",
   "img": "1-2 lowercase photo keywords, e.g. salmon,dinner",
+  "kcal": integer, estimated calories PER PERSON for this meal,
+  "protein": integer, estimated grams of protein PER PERSON for this meal,
   "ingredients": [
     { "name": "Ingredient", "qty": number, "unit": "g|ml|tbsp|can|slices or '' for a count",
       "category": "Produce" | "Meat & Fish" | "Dairy" | "Bakery" | "Frozen" | "Pantry",

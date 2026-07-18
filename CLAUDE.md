@@ -14,6 +14,13 @@ the public internet (Render free tier) — frontend + backend + AI generation al
 > to that repo → Render redeploys automatically.
 > Always show proposed edits before applying them — Lucille prefers to approve each change.
 
+> **Phase 5 (2026-07-18): full redesign after market research.** See **`RESEARCH.md`** for the
+> competitor research (Mealime, Jow, Eat This Much, Samsung Food…), the quality criteria, the
+> exact list of changes (cook mode, kcal/protein, household scaling, persistent shopping-list
+> ticks, favorites, copy/print, new warm design system), and the roadmap. Read it before
+> touching the frontend — it is the design source of truth now. Changes are local, not yet
+> pushed/deployed.
+
 ---
 
 ## 1. The vision
