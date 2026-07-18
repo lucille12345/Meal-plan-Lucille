@@ -186,7 +186,7 @@ const RECIPES = [
 /* ============================================================
    2. STATE
    ============================================================ */
-const state = { screen:'profile', profile:null, week:[], usedFallback:false, selectedDay:0 };
+const state = { screen:'profile', profile:null, week:[], usedFallback:false, selectedDay:0, useAI:false };
 // Where to reach the backend:
 //  - opened as a local file (double-click) → talk to the local Node server on :8787
 //  - served over http(s) (local `node server.js`, or hosted on Render) → same origin, no host needed
@@ -198,7 +198,7 @@ const ALLERGY_OPTIONS = ['Nuts','Dairy','Gluten','Shellfish','Soy'];
 /* ---- Phase 3: persistence (localStorage) ---- */
 const STORAGE_KEY = 'mealPlannerState';
 function saveState(){
-  try { localStorage.setItem(STORAGE_KEY, JSON.stringify({ profile: state.profile, week: state.week })); }
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify({ profile: state.profile, week: state.week, useAI: state.useAI })); }
   catch(e){ console.warn('Could not save progress:', e.message); }
 }
 function loadState(){
@@ -209,6 +209,7 @@ function loadState(){
     if (saved && typeof saved === 'object') {
       state.profile = saved.profile || null;
       state.week = Array.isArray(saved.week) ? saved.week : [];
+      state.useAI = !!saved.useAI;
       if (state.week.length) state.screen = 'review';
     }
   } catch(e){ console.warn('Could not load saved progress:', e.message); }
@@ -419,12 +420,17 @@ function renderProfile(){
       <div class="chips" id="allergies">
         ${ALLERGY_OPTIONS.map(o=>`<div class="chip ${p.allergies.includes(o)?'on':''}" data-v="${o}">${o}</div>`).join('')}
       </div>
+      <label class="ai-toggle" style="display:flex;align-items:center;gap:8px;margin:14px 0;font-weight:normal">
+        <input type="checkbox" id="useAI" ${state.useAI?'checked':''}>
+        Use real AI generation <span class="hint">(personalized, but uses 1 of your ~20 free Gemini requests/day — off by default so testing doesn't burn your quota)</span>
+      </label>
       <button class="primary" id="genBtn">Generate my week →</button>
       ${hasSavedData()?'<button type="button" class="ghost" id="clearBtn" style="margin-top:10px">Clear saved data &amp; start fresh</button>':''}
     </div>`;
   const slider=document.getElementById('cookingLevel');
   slider.oninput=()=>document.getElementById('ckVal').textContent=slider.value;
   app.querySelectorAll('.chip').forEach(c=>c.onclick=()=>c.classList.toggle('on'));
+  document.getElementById('useAI').onchange=(e)=>{ state.useAI=e.target.checked; saveState(); };
   const clearBtn=document.getElementById('clearBtn');
   if(clearBtn) clearBtn.onclick=()=>{ if(confirm("Clear your saved profile and week? This can't be undone.")) clearAllData(); };
   document.getElementById('genBtn').onclick=async()=>{
@@ -443,8 +449,12 @@ function renderProfile(){
       allergies:[...app.querySelectorAll('#allergies .chip.on')].map(c=>c.dataset.v),
     };
     setScreen('loading');
-    try { state.week=await requestWeekAI(state.profile); state.usedFallback=false; }
-    catch(e){ console.warn('Backend unavailable, using local pool:',e.message); state.week=generateWeek(state.profile); state.usedFallback=true; }
+    if(state.useAI){
+      try { state.week=await requestWeekAI(state.profile); state.usedFallback=false; }
+      catch(e){ console.warn('Backend unavailable, using local pool:',e.message); state.week=generateWeek(state.profile); state.usedFallback=true; }
+    } else {
+      state.week=generateWeek(state.profile); state.usedFallback=false;
+    }
     setScreen('review');
   };
 }
@@ -469,6 +479,7 @@ function renderReview(){
   let html=`<div class="card"><h2>Your week</h2>
     <p class="sub">Tap ✕ on anything you don't fancy — it swaps to a new dish. Keep whatever's left.</p>`;
   if(state.usedFallback)html+=`<div class="notice">⚠️ Backend offline — showing built-in meals, not AI (no budget/prices/recipes). Start the backend and regenerate.</div>`;
+  else if(!state.useAI)html+=`<div class="notice" style="background:#eef2f7;border-color:#cbd5e1;color:#475569">ℹ️ Showing built-in meals — AI generation is off. Tick "Use real AI generation" on the profile page for a personalized week.</div>`;
   state.week.forEach((day,di)=>{
     html+=`<div class="day-block"><div class="day-title">${day.day}</div>`;
     day.meals.forEach((meal,mi)=>html+=mealCard(meal,di,mi));
@@ -488,6 +499,7 @@ function renderReview(){
     btn.onclick=async()=>{
       const [di,mi]=btn.dataset.swap.split('-').map(Number);
       const meal=state.week[di].meals[mi];
+      if(!state.useAI){ swapMeal(di,mi); renderReview(); saveState(); return; }
       const avoid=[]; state.week.forEach(d=>d.meals.forEach(m=>{if(m.recipe&&m.type===meal.type)avoid.push(m.recipe.name);}));
       meal.loading=true; renderReview();
       try { meal.recipe=await requestSwapAI(state.profile,meal.type,avoid); }

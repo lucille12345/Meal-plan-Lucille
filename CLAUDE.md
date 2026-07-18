@@ -1,17 +1,17 @@
 # Meal Planner — Project Memory (CLAUDE.md)
 
-_Last updated: 2026-07-17. This file is auto-loaded by Claude Code every session._
+_Last updated: 2026-07-18. This file is auto-loaded by Claude Code every session._
 
-Source of truth for the meal-planner project. Phases 1, 2 (+ extra features) and 3 (saving) are
-built and working on Lucille's Mac. **Phase 4 (go live / hosting): code is ready; deploy to
-Render is still pending** — that's the current task (see §10).
+Source of truth for the meal-planner project. **Phases 1–4 are all DONE.** The app is live on
+the public internet (Render free tier) — frontend + backend + AI generation all verified working.
+**Live URL: https://meal-planner-km6f.onrender.com**
 
-> **How to resume:** the working code now lives in
-> `~/Work/claude/Projects/Meal plan Lucille/` (Lucille reorganised into a `Projects/` folder on
-> 2026-07-16; there's also an unrelated `Projects/Financial planning/` beside it — leave that
-> alone). Files: `meal-planner.html`, `server.js`, `gemini-key.txt`, plus the new deploy files
-> `package.json`, `render.yaml`, `.gitignore`. Read them plus this file, then help finish the
-> Render deploy.
+> **How to resume:** the working code lives in `~/Work/claude/Projects/Meal plan Lucille/`
+> (there's an unrelated `Projects/Financial planning/` beside it — leave that alone). Files:
+> `meal-planner.html`, `server.js`, `gemini-key.txt` (local key, git-ignored), `package.json`,
+> `render.yaml`, `.gitignore`. Hosted on Render, auto-deploys from GitHub repo
+> `github.com/lucille12345/Meal-plan-Lucille` on every push. To ship a change: edit files → push
+> to that repo → Render redeploys automatically.
 > Always show proposed edits before applying them — Lucille prefers to approve each change.
 
 ---
@@ -55,9 +55,11 @@ Gemini free tier. (Claude Code the *tool* is covered by her Pro plan; that's sep
 - **Phase 3 — Saving / persistence.** ✅ DONE: profile + week persist to browser `localStorage`,
   survive a refresh, and there's a "Clear saved data & start fresh" control. Per-browser only —
   no accounts/database yet (that's a later phase if ever needed).
-- **Phase 4 — Go live.** IN PROGRESS. Host the whole app (frontend + backend together) on
-  Render's free tier so it isn't only on Lucille's Mac. Code changes done & tested locally;
-  the actual GitHub push + Render deploy is the remaining step (§10).
+- **Phase 4 — Go live.** ✅ DONE (2026-07-18). Whole app (frontend + backend together) hosted on
+  Render's free tier at https://meal-planner-km6f.onrender.com. Auto-deploys from GitHub repo
+  `lucille12345/Meal-plan-Lucille` on every push. Live AI generation verified end-to-end (real
+  7-day week returned; Gemini key set as a Render env var, never in the repo). See §10 for how it
+  was set up and how to redeploy.
 
 ---
 
@@ -171,27 +173,51 @@ free-text "can't/won't eat", quick dislikes (chips), allergies (chips).
 
 - Saving is per-browser only (`localStorage`) — same profile/week won't follow you to another
   browser or device. Real accounts + a database would be a later phase, not needed yet.
-- Backend local only until the Render deploy is finished → **Phase 4, IN PROGRESS (§10)**.
+- Now hosted on Render (Phase 4 done). Still per-browser saving; still no user accounts/database.
 - Render free tier "cold starts": the service sleeps after ~15 min idle and takes ~30–50 s to
   wake on the next visit. App doesn't break — the first "Generate" after idle just spins longer.
   (Decided 2026-07-17: acceptable for now.)
-- Gemini free tier is ~20 generations/day for the whole app — fine for personal use; would be
-  the first thing to hit if the URL is shared. (Decided 2026-07-17: ship as-is, revisit if shared.)
+- Gemini free tier limits — **confirmed 2026-07-18 directly on Lucille's AI Studio dashboard**
+  (aistudio.google.com → Limite de débit), for the model actually in use, **Gemini 3.5 Flash**:
+  **20 requests/day (RPD)**, 5 requests/minute (RPM), 250K tokens/minute (TPM). The dashboard's
+  own "Limit" line on the RPD chart sits at 20, and usage/errors on it line up exactly with the
+  429s hit during Phase 4 testing on 2026-07-17. (Earlier note flagged a conflicting ~1,500/day
+  figure from third-party blog sites — that number is simply wrong for this model/tier; ignore
+  it. 20/day is the real, confirmed limit.) Google's dashboard also showed a "set up billing to
+  raise your limits" option — not needed, just noting it exists if more headroom is ever wanted
+  without abandoning the free/pay-as-you-go model.
 - Prices are AI estimates — decent but sanity-check against real receipts.
 - Swaps don't yet take a free-text "why" note (backend already supports an avoid-list).
+- **"Use real AI generation" toggle (added 2026-07-18):** checkbox on the profile screen,
+  `state.useAI`, **off by default**, persisted via localStorage same as profile/week. Off →
+  "Generate my week" and every ✕ swap use the local recipe pool instantly, zero network calls,
+  zero quota used (verified: no requests hit `/generate-week` or `/generate-meal` when off). On →
+  original AI behavior, still falls back to local on a real error. Review screen shows a neutral
+  blue "AI generation is off" note when off, vs. the amber "Backend offline" warning only for an
+  actual failure — the two are deliberately not conflated. Considered other ways to raise the
+  20/day ceiling (extra Gemini keys — confirmed doesn't work, limits are per-project; enabling
+  billing — works but costs money, off the table per "zero spend" decision; switching to Groq's
+  free tier, ~14,400 req/day per their own docs — real option, not done, would need a provider
+  rewrite in `server.js` + a new Groq account). This toggle was the free, no-new-account fix.
 
 ---
 
-## 10. Phase 4 deploy — remaining steps (do from the Terminal Claude Code session)
+## 10. Phase 4 deploy — DONE (how it's set up + how to redeploy)
 
-Code is ready & tested locally. Left to do (needs Lucille's own GitHub + Render accounts; Claude
-can't create accounts or push on her behalf):
-1. In `~/Work/claude/Projects/Meal plan Lucille/`: `git init`, commit (the `.gitignore` keeps
-   `gemini-key.txt` out), create a GitHub repo, and push.
-2. On render.com → New → Blueprint → connect that repo → it reads `render.yaml`.
-3. When Render asks for `GEMINI_API_KEY`, paste the key from `gemini-key.txt`.
-4. Render returns a live URL (e.g. `https://meal-planner-xxxx.onrender.com`) = the whole app.
-5. Back in Claude: confirm it's live, then mark Phase 4 DONE here and record the live URL.
+Set up 2026-07-18. How it went live:
+- GitHub repo: `github.com/lucille12345/Meal-plan-Lucille` (private). Published via GitHub Desktop
+  (git + gh CLI weren't the smooth path for a beginner; GitHub Desktop's "Publish repository" was).
+- Render: free "web service" via **Blueprint** (reads `render.yaml`). Connected to the GitHub repo
+  with "all repos" access. Gemini key pasted into Render as the `GEMINI_API_KEY` env var.
+- Live URL: **https://meal-planner-km6f.onrender.com**
 
-Note: the key currently sits in `gemini-key.txt` (git-ignored). On Render it lives only as the
-`GEMINI_API_KEY` env var — never commit the key.
+**To ship a change from now on:** edit files locally → commit & push to the GitHub repo (GitHub
+Desktop: Commit → Push origin) → **Render auto-deploys** within a minute or two. No manual redeploy
+needed. The live URL stays the same.
+
+Key hygiene: the key lives in `gemini-key.txt` locally (git-ignored) and as the `GEMINI_API_KEY`
+env var on Render — never in the repo. If the key is ever rotated, update it in BOTH places.
+
+Gotchas seen during deploy: Render's repo picker showed "An error occurred" once (transient —
+reload/re-auth GitHub fixed it). The repo is named after the folder (`Meal-plan-Lucille`), not
+"meal-planner". First hit after idle = ~40s cold start (normal, not a failure).
