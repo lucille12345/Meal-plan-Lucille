@@ -130,9 +130,28 @@ _Last updated: 2026-07-19. This file is auto-loaded by Claude Code every session
 >   bulk total + a per-buy-day total on every fresh-day header. Prices still per-ingredient from
 >   AI; chips only show when prices exist (AI on).
 > - **Files:** `public/app.js`, `public/app-screens.css`.
-> - **NEXT:** Phase 9 PWA (manifest + service worker + offline shell + install prompt + icons;
->   Lighthouse installable). Then 10 integrations (.ics, push/email, Google OAuth, feedback —
->   several need Lucille's free accounts), 11 Tauri desktop (needs Rust toolchain on her Mac).
+> - Next was Phase 9 (below).
+
+> **BUILD SESSION — Phases 9 & 10a DONE (2026-07-19, Opus). Committed to `v2-rebuild`.**
+> - **Phase 9 PWA (Target A):** `public/manifest.json` (standalone, theme/bg colour, SVG icons
+>   incl. maskable), `public/sw.js` service worker, `public/icons/icon.svg` + `icon-maskable.svg`
+>   (tomato place-setting mark), install wiring in `index.html` (manifest link, apple-touch-icon,
+>   web-app-capable metas, SW registration, `beforeinstallprompt` → "Install Table" button).
+>   **SW strategy: network-first for the app's own html/js/css/json** (so updates always reach
+>   users; offline falls back to the cached shell), cache-first for icons. **Bump `CACHE` in sw.js
+>   on every shell change** or users get stale code. Verified: SW registers + controls page,
+>   manifest valid, shell cached (offline fallback works), installable.
+> - **Phase 10a integrations (§5, zero-setup):** `buildICS()` → "📅 Add to calendar" on the
+>   shopping screen downloads a `.ics` for the **upcoming** Mon–Sun (dinners 19:00 w/ recipe link,
+>   shopping reminders 17:00 per buy-day). `openFeedback()` → "💬 Tell Lucille" modal POSTs to
+>   FormSubmit.co AJAX for lucillemonamie@icloud.com (honeypot; she must click their one-time
+>   confirmation email on first real submit). Verified in-browser (not actually submitted).
+> - **STILL TODO (need Lucille's free accounts / tooling — good handoff point):**
+>   Phase 10b: web-push + Resend email reminders via a Supabase Edge Function on cron; Google
+>   Calendar OAuth Tier 2 (needs a Google Cloud project). Phase 11: Tauri desktop wrapper over
+>   `/public` (needs Rust + Tauri CLI installed on her Mac) → `.dmg`/`.exe` via GitHub Releases.
+>   Also: whole `v2-rebuild` branch is still unmerged/undeployed — merge → `main` only on her word.
+>   And the AI-ON path (Phase 6b course JSON) is still unverified until she tests with AI on.
 
 Source of truth for the meal-planner project. **Phases 1–4 are all DONE.** The app is live on
 the public internet (Render free tier) — frontend + backend + AI generation all verified working.
