@@ -332,6 +332,14 @@ button.ghost.on { background: var(--tomato-wash); border-color: var(--tomato); c
   background: var(--ink); color: #fff; padding: 12px 22px; border-radius: var(--r-pill);
   font-size: var(--fs-sm); z-index: 60; box-shadow: var(--sh-3); animation: rise .25s var(--ease) both;
 }
+/* feedback modal (§5) */
+.fb-overlay { position: fixed; inset: 0; z-index: 80; background: rgba(29,29,31,.4); backdrop-filter: blur(3px); display: grid; place-items: center; padding: 20px; animation: rise .2s var(--ease) both; }
+.fb-card { position: relative; background: var(--surface); border-radius: var(--r-card); box-shadow: var(--sh-3); padding: 26px 24px; max-width: 440px; width: 100%; }
+.fb-card h3 { font-family: var(--font-display); font-size: var(--fs-h3); margin: 0 0 4px; }
+.fb-close { position: absolute; top: 14px; right: 14px; width: 34px; height: 34px; border-radius: 50%; border: 1px solid var(--hairline-2); background: var(--surface); cursor: pointer; font-size: 14px; }
+.fb-card label { margin-top: 14px; }
+.fb-card textarea { min-height: 90px; }
+
 /* PWA install button (Chromium beforeinstallprompt) */
 .install-fab {
   position: fixed; right: 18px; bottom: 18px; z-index: 65;

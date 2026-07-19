@@ -1,6 +1,6 @@
 /* Table — service worker: offline app-shell cache (Phase 9 PWA).
    Bump CACHE when the shell changes so old caches are cleaned up. */
-const CACHE = 'table-shell-v1';
+const CACHE = 'table-shell-v2';
 const SHELL = [
   './',
   './index.html',
@@ -39,7 +39,19 @@ self.addEventListener('fetch', (e) => {
   if (url.origin !== self.location.origin) return;
   if (url.pathname.startsWith('/generate-')) return;
 
-  // Same-origin static assets: cache-first, then fill the cache in the background.
+  // The app's own code (html/js/css/json) is network-first so updates always reach the user;
+  // it falls back to cache only when offline. Other same-origin assets (icons) are cache-first.
+  const isCode = /\.(html|js|css|json)$/.test(url.pathname) || url.pathname === '/';
+  if (isCode) {
+    e.respondWith(
+      fetch(req).then((res) => {
+        const copy = res.clone();
+        caches.open(CACHE).then((c) => c.put(req, copy)).catch(() => {});
+        return res;
+      }).catch(() => caches.match(req).then((hit) => hit || caches.match('./index.html')))
+    );
+    return;
+  }
   e.respondWith(
     caches.match(req).then((hit) =>
       hit || fetch(req).then((res) => {

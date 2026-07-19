@@ -476,6 +476,98 @@ async function requestSwapAI(profile,role,avoidNames){
 function buyDayFor(di){ return di===0?'Sunday (before the week)':DAYS[di-1]; }
 function priceOf(ing){ return typeof ing.price==='number'&&isFinite(ing.price)?ing.price:0; }
 function itemKey(ing){ return ing.name.toLowerCase()+'|'+ing.unit; }
+/* ============================================================
+   4b. Integrations (§5) — .ics calendar export + feedback form
+   (zero-setup, no account needed; push/email/Google OAuth come later)
+   ============================================================ */
+// The upcoming Monday (today if it's already Monday), as a local Date at 00:00 —
+// so "add my week" schedules the plan starting the next Monday, not a past one.
+function weekMonday(){
+  const d=new Date(); const until=(8-d.getDay())%7;
+  return new Date(d.getFullYear(),d.getMonth(),d.getDate()+until);
+}
+function icsStamp(date,h,min){
+  const d=new Date(date.getFullYear(),date.getMonth(),date.getDate(),h,min,0);
+  const p=n=>String(n).padStart(2,'0');
+  return `${d.getFullYear()}${p(d.getMonth()+1)}${p(d.getDate())}T${p(d.getHours())}${p(d.getMinutes())}00`;
+}
+function icsEsc(s){ return String(s||'').replace(/\\/g,'\\\\').replace(/;/g,'\\;').replace(/,/g,'\\,').replace(/\n/g,'\\n'); }
+function buildICS(){
+  const mon=weekMonday();
+  const lines=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Table//Meal Planner//EN','CALSCALE:GREGORIAN'];
+  let uid=0; const stampNow=icsStamp(new Date(),new Date().getHours(),new Date().getMinutes());
+  const ev=(dayOffset,startH,startMin,endH,endMin,summary,desc)=>{
+    const date=new Date(mon.getFullYear(),mon.getMonth(),mon.getDate()+dayOffset);
+    lines.push('BEGIN:VEVENT',`UID:table-${Date.now()}-${uid++}@table.app`,`DTSTAMP:${stampNow}`,
+      `DTSTART:${icsStamp(date,startH,startMin)}`,`DTEND:${icsStamp(date,endH,endMin)}`,
+      `SUMMARY:${icsEsc(summary)}`,`DESCRIPTION:${icsEsc(desc)}`,'END:VEVENT');
+  };
+  // dinner events (19:00) — main dish name + full-course list + real recipe link
+  state.week.forEach((day,di)=>{
+    const dinnerMain=day.meals.find(m=>m.type==='dinner'&&(m.course==='main'||!m.course)&&m.recipe&&!m.rejected);
+    if(!dinnerMain)return;
+    const courses=day.meals.filter(m=>m.type==='dinner'&&m.recipe&&!m.rejected).map(m=>m.recipe.name);
+    const desc=`Tonight's dinner: ${courses.join(', ')}.\nRecipe: ${recipeSearchUrl(dinnerMain.recipe.name)}`;
+    ev(di,19,0,19,45,`🍽 ${dinnerMain.recipe.name}`,desc);
+  });
+  // shopping reminders (17:00) on each buy-day
+  const { fresh }=buildShoppingList();
+  const buyOffset={'Sunday (before the week)':-1};
+  DAYS.forEach((d,i)=>buyOffset[d]=i);
+  Object.keys(fresh).forEach(bd=>{
+    const items=[...fresh[bd].values()].map(i=>i.name).sort();
+    if(!items.length)return;
+    ev(buyOffset[bd]??0,17,0,17,15,'🛒 Buy fresh for tomorrow',`Pick up: ${items.join(', ')}.`);
+  });
+  lines.push('END:VCALENDAR');
+  return lines.join('\r\n');
+}
+function downloadICS(){
+  const blob=new Blob([buildICS()],{type:'text/calendar;charset=utf-8'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a'); a.href=url; a.download='table-week.ics';
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),1000);
+  showToast('📅 Calendar file downloaded — open it to add your week');
+}
+// Feedback → FormSubmit.co AJAX endpoint for Lucille (no account; she confirms once by email).
+const FEEDBACK_ENDPOINT='https://formsubmit.co/ajax/lucillemonamie@icloud.com';
+function openFeedback(){
+  document.querySelectorAll('.fb-overlay').forEach(el=>el.remove());
+  const ov=document.createElement('div'); ov.className='fb-overlay';
+  ov.innerHTML=`<div class="fb-card" role="dialog" aria-modal="true" aria-label="Send feedback">
+    <button class="fb-close" aria-label="Close">✕</button>
+    <h3>💬 A thought? Tell Lucille</h3>
+    <p class="sub">Ideas, bugs, or just hello — it goes straight to her.</p>
+    <label for="fbMsg">Your message</label>
+    <textarea id="fbMsg" placeholder="What's on your mind?"></textarea>
+    <label for="fbEmail">Your email <span class="hint">(optional — only if you'd like a reply)</span></label>
+    <input id="fbEmail" type="email" placeholder="you@email.com">
+    <input type="text" id="fbHoney" tabindex="-1" autocomplete="off" style="position:absolute;left:-9999px" aria-hidden="true">
+    <p class="auth-err" id="fbErr" style="display:none"></p>
+    <button class="primary btn-block" id="fbSend" style="margin-top:14px">Send to Lucille →</button>
+  </div>`;
+  document.body.appendChild(ov);
+  const close=()=>ov.remove();
+  ov.querySelector('.fb-close').onclick=close;
+  ov.onclick=(e)=>{ if(e.target===ov)close(); };
+  ov.querySelector('#fbSend').onclick=async()=>{
+    const msg=ov.querySelector('#fbMsg').value.trim();
+    const email=ov.querySelector('#fbEmail').value.trim();
+    const err=ov.querySelector('#fbErr');
+    if(ov.querySelector('#fbHoney').value){ close(); return; }   // bot honeypot filled → silently drop
+    if(msg.length<2){ err.textContent='Please write a short message first.'; err.style.display='block'; return; }
+    const btn=ov.querySelector('#fbSend'); btn.disabled=true; btn.textContent='Sending…';
+    try{
+      const res=await fetch(FEEDBACK_ENDPOINT,{method:'POST',headers:{'content-type':'application/json',accept:'application/json'},
+        body:JSON.stringify({message:msg,email:email||'(not given)',_subject:'Table feedback 🍽',_template:'table'})});
+      if(!res.ok)throw new Error('status '+res.status);
+      close(); showToast('✓ Sent — thank you! 💛');
+    }catch(e){ btn.disabled=false; btn.textContent='Send to Lucille →';
+      err.textContent='Could not send just now — please try again.'; err.style.display='block'; }
+  };
+}
+
 function buildShoppingList(){
   const pantry=new Map(); const fresh={}; let total=0; let anyPrice=false; let skipped=0;
   state.week.forEach((day,di)=>{
@@ -1401,6 +1493,7 @@ function renderShopping(){
       <div class="btn-row no-print" style="margin-bottom:16px">
         <button class="ghost" id="copyList">📋 Copy list</button>
         <button class="ghost" id="printList">🖨 Print / PDF</button>
+        <button class="ghost" id="icsBtn" title="Dinners + shopping reminders as calendar events">📅 Add to calendar</button>
       </div>
       <div class="list-col">
         <h3>🛒 Buy at the start of the week ${anyPrice?dayChip(pantry):''}</h3>
@@ -1418,10 +1511,14 @@ function renderShopping(){
         <button class="ghost" id="recipesBtn2">📖 Recipes by day</button>
         <button class="primary" id="restart" style="margin-top:0">Start a new week</button>
       </div>
+      <p class="sub no-print" style="text-align:center;margin:18px 0 0">
+        <a role="button" tabindex="0" id="fbLink" style="cursor:pointer;font-weight:600">💬 A thought? Tell Lucille</a></p>
     </div>`;
   bindChecks();
   document.getElementById('copyList').onclick=copyListText;
   document.getElementById('printList').onclick=()=>window.print();
+  document.getElementById('icsBtn').onclick=downloadICS;
+  document.getElementById('fbLink').onclick=openFeedback;
   document.getElementById('backReview').onclick=()=>setScreen('review');
   document.getElementById('recipesBtn2').onclick=()=>{ state.selectedDay=0; setScreen('recipes'); };
   document.getElementById('restart').onclick=()=>{ state.week=[]; state.checked={}; setScreen('profile'); };
