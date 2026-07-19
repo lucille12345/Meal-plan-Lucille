@@ -217,7 +217,10 @@ const MIME = {
 // Serve a file from /public. urlPath '/' maps to index.html.
 // Rejects anything that escapes /public (path-traversal guard).
 function sendStatic(res, urlPath) {
-  const rel = urlPath === '/' ? 'index.html' : decodeURIComponent(urlPath).replace(/^\/+/, '');
+  let decoded;
+  try { decoded = urlPath === '/' ? 'index.html' : decodeURIComponent(urlPath); }
+  catch { res.writeHead(400, { 'content-type': 'text/plain' }); return res.end('Bad request'); }
+  const rel = decoded.replace(/^\/+/, '');
   const filePath = path.join(PUBLIC_DIR, rel);
   if (!filePath.startsWith(PUBLIC_DIR + path.sep) && filePath !== path.join(PUBLIC_DIR, 'index.html')) {
     res.writeHead(403, { 'content-type': 'text/plain' }); return res.end('Forbidden');
@@ -229,6 +232,7 @@ function sendStatic(res, urlPath) {
   });
 }
 const server = http.createServer(async (req, res) => {
+ try {
   if (req.method === 'OPTIONS') return sendJson(res, 204, {});
   if (req.method === 'POST' && req.url === '/generate-week') {
     if (!API_KEY) return sendJson(res, 500, { error: 'No API key configured on the server.' });
@@ -243,6 +247,11 @@ const server = http.createServer(async (req, res) => {
   // Any other GET → serve the app-shell from /public (index.html, styles.css, app.js, assets…).
   if (req.method === 'GET') return sendStatic(res, req.url.split('?')[0]);
   sendJson(res, 404, { error: 'Not found' });
+ } catch (e) {
+  // Never let a single bad request take the whole server down.
+  console.error('Request error:', e && e.message);
+  try { if (!res.headersSent) sendJson(res, 500, { error: 'Server error' }); else res.end(); } catch {}
+ }
 });
 server.listen(PORT, () => {
   console.log(`\n✅ Meal Planner backend running at http://localhost:${PORT}`);
