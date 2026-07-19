@@ -91,6 +91,31 @@ _Last updated: 2026-07-19. This file is auto-loaded by Claude Code every session
 >   structure is Phase 6 (Meals v3)** — the "no doubles" QA item lands there, not here.
 > - **Files touched:** `public/app.js` (wizard + targets), `public/app-screens.css` (wizard styles).
 
+> **BUILD SESSION — Phase 6 DONE (2026-07-19, Opus). Committed to `v2-rebuild`.**
+> Meals v3 (§3, §7), verified in-browser AI OFF. Two commits: 6a (no-repeat + links +
+> images) and 6b (3-course structure + AI prompt v3).
+> - **Hard no-repeat (§3):** `pickMeal` tracks used dish NAMES across the whole week (all
+>   courses); `enforceNoRepeat()` post-validates and swaps any duplicate for an unused eligible
+>   dish; applied to AI weeks too; swap avoids every other dish. **Verified 0 duplicates** for
+>   gain/maintain/lose, with & without leftovers.
+> - **Real recipe links (§3):** `recipeSearchUrl()` → deterministic Google search
+>   ("<dish> recette"), "See full recipe ↗" on each recipe card. Never an AI URL.
+> - **Dish images (§3):** curated `DISH_IMG` Unsplash map + `dishImageUrl()`, keyword-matched,
+>   with an onerror fallback to the emoji tile so nothing breaks. Photo banner on recipe cards.
+> - **3 courses (§3.1):** lunch & dinner are multi-course by goal — Get stronger =
+>   starter+main+dessert, Stay balanced = main+side, Feel light = main+light dessert; breakfast
+>   single. Week is now a flat list of `{type,course,recipe,rejected}` slots. Added **14 starters
+>   + 14 desserts** to the offline pool so a full 3-course week stays unique. Course-aware:
+>   generateWeek, enforceNoRepeat, swapMeal, applyLeftovers (doubles dinner MAIN → one reheated
+>   next-day lunch), review + recipes show "Lunch · Starter" labels, shopping sums all courses.
+> - **AI prompt v3 (server.js §7):** courses object for lunch/dinner w/ per-course kcal, per-meal
+>   kcal targets from mealSplit (±10%), breakfast sweet/savory, unique names, budget/day, cuisines,
+>   no invented URLs. `requestWeekAI` flattens the courses object into slots.
+>   **UNVERIFIED until Lucille runs it with AI ON** (AI off by default; don't burn the 20/day quota).
+> - **NEXT:** Phase 7 Planner v2 (design 04): sidebar Mon–Sun week rail + "Browse & add"
+>   categorized carousels (favorites, past weeks, pool) with ⊕ add + desktop drag-and-drop.
+>   Then 8 per-day pricing, 9 PWA, 10 integrations, 11 Tauri desktop.
+
 Source of truth for the meal-planner project. **Phases 1–4 are all DONE.** The app is live on
 the public internet (Render free tier) — frontend + backend + AI generation all verified working.
 **Live URL: https://meal-planner-km6f.onrender.com**
