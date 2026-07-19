@@ -61,12 +61,28 @@ const DISLIKE_OPTIONS = ['Fish','Beef','Chicken','Pork','Mushrooms','Eggs','Onio
 const ALLERGY_OPTIONS = ['Nuts','Dairy','Gluten','Shellfish','Soy'];
 const PANTRY_OPTIONS = ['Salt','Pepper','Olive oil','Cooking oil','Butter','Flour','Sugar','Rice','Pasta','Onion','Garlic','Soy sauce','Honey','Spices'];
 
-/* ---- persistence (localStorage) ---- */
+/* ---- persistence (localStorage + optional Supabase cloud) ---- */
 const STORAGE_KEY = 'mealPlannerState';
+let cloudUser = null;                       // set once signed in (cloud mode only)
 function saveState(){
   try { localStorage.setItem(STORAGE_KEY, JSON.stringify({ profile: state.profile, week: state.week,
     useAI: state.useAI, favorites: state.favorites, checked: state.checked })); }
   catch(e){ console.warn('Could not save progress:', e.message); }
+  cloudSave();                              // also push to Supabase when signed in (debounced)
+}
+function cloudEnabled(){ return !!(window.Cloud && window.Cloud.enabled && cloudUser); }
+function currentBlob(){ return { profile: state.profile, week: state.week, useAI: state.useAI,
+  favorites: state.favorites, checked: state.checked }; }
+let _cloudTimer = null;
+function cloudSave(){
+  if(!cloudEnabled()) return;
+  clearTimeout(_cloudTimer);
+  _cloudTimer = setTimeout(cloudSaveNow, 800);
+}
+function cloudSaveNow(){
+  if(!cloudEnabled()) return;
+  window.Cloud.saveState(cloudUser.id, currentBlob())
+    .catch(e => console.warn('Cloud save failed (kept locally):', e && e.message));
 }
 function loadState(){
   try {
@@ -304,19 +320,78 @@ function updateSteps(){
 }
 function render(){
   updateSteps();
-  if(state.screen==='profile')renderProfile();
+  // The 1·2·3 step bar is only meaningful inside the planner flow — hide it on sign-in.
+  const stepsEl=document.querySelector('.steps');
+  if(stepsEl)stepsEl.style.display=(state.screen==='signin')?'none':'';
+  if(state.screen==='signin')renderSignIn();
+  else if(state.screen==='profile')renderProfile();
   else if(state.screen==='loading')renderLoading();
   else if(state.screen==='review')renderReview();
   else if(state.screen==='recipes')renderRecipes();
   else if(state.screen==='shopping')renderShopping();
   window.scrollTo(0,0);
-  saveState();
+  if(state.screen!=='signin')saveState();   // don't persist while signed out
 }
 function renderLoading(){
   app.innerHTML=`<div class="card" style="text-align:center;padding:48px 20px">
     <div style="font-size:44px">🍳</div><h2>Cooking up your week…</h2>
     <p class="sub">The AI is planning meals, portions, recipes and prices around your profile. Takes several seconds.</p>
     <div class="spinner"></div></div>`;
+}
+
+/* ----- Sign-in / sign-up (magic link + Google) — cloud mode only ----- */
+function renderSignIn(){
+  const cloudOn = !!(window.Cloud && window.Cloud.enabled);
+  app.innerHTML=`
+    <div class="card auth-card">
+      <h2>Welcome to Table</h2>
+      <p class="sub">Free forever. No card. Your data stays yours.</p>
+      <div id="auth-form">
+        <button class="btn-google" id="googleBtn" type="button"><span class="g" aria-hidden="true"></span> Continue with Google</button>
+        <div class="divider">or with email</div>
+        <label for="authEmail">Email</label>
+        <input type="email" id="authEmail" placeholder="you@email.com" autocomplete="email">
+        <button class="primary btn-block" id="magicBtn" type="button">Email me a magic link →</button>
+        <ul class="promise">
+          <li><span class="tick">✓</span> <span><b>Free forever</b> — no card, no trial clock</span></li>
+          <li><span class="tick">✓</span> <span><b>No passwords</b> — we email you a one-tap link</span></li>
+          <li><span class="tick">✓</span> <span><b>Your data stays yours</b> — export or delete anytime</span></li>
+        </ul>
+        <p class="auth-err" id="authErr" style="display:none"></p>
+      </div>
+      <div id="auth-sent" style="display:none">
+        <div class="confirm">
+          <div class="env" aria-hidden="true">📬</div>
+          <h3>Check your email</h3>
+          <p class="sub">We sent a magic link to <span id="sentEmail" class="mailto"></span>. Tap it and you're in — no password needed.</p>
+          <button class="ghost" id="diffEmail" type="button">Use a different email</button>
+        </div>
+      </div>
+    </div>`;
+  const err=document.getElementById('authErr');
+  const showErr=(m)=>{ err.textContent=m; err.style.display='block'; };
+  const notConnected='Sign-in isn’t connected yet — add your Supabase details in config.js.';
+  document.getElementById('magicBtn').onclick=async()=>{
+    const email=document.getElementById('authEmail').value.trim();
+    if(!/.+@.+\..+/.test(email)){ showErr('Please enter a valid email address.'); return; }
+    if(!cloudOn){ showErr(notConnected); return; }
+    try{
+      const { error }=await window.Cloud.signInWithEmail(email);
+      if(error)throw error;
+      document.getElementById('sentEmail').textContent=email;
+      document.getElementById('auth-form').style.display='none';
+      document.getElementById('auth-sent').style.display='block';
+    }catch(e){ showErr('Could not send the link: '+((e&&e.message)||'unknown error')); }
+  };
+  document.getElementById('googleBtn').onclick=async()=>{
+    if(!cloudOn){ showErr(notConnected); return; }
+    try{ const { error }=await window.Cloud.signInWithGoogle(); if(error)throw error; }
+    catch(e){ showErr('Google sign-in failed: '+((e&&e.message)||'unknown error')); }
+  };
+  document.getElementById('diffEmail').onclick=()=>{
+    document.getElementById('auth-sent').style.display='none';
+    document.getElementById('auth-form').style.display='block';
+  };
 }
 
 /* ----- Screen 1: questionnaire ----- */
@@ -395,6 +470,7 @@ function renderProfile(){
       ${state.favorites.length?`<p class="sub" style="margin:0 0 4px">♥ ${state.favorites.length} favorite ${state.favorites.length===1?'meal':'meals'} saved — they'll show up in your weeks.</p>`:''}
       <button class="primary" id="genBtn">Generate my week →</button>
       ${hasSavedData()?'<button type="button" class="ghost" id="clearBtn" style="margin-top:10px;margin-left:10px">Clear saved data &amp; start fresh</button>':''}
+      ${cloudEnabled()?'<button type="button" class="ghost" id="signOutBtn" style="margin-top:10px;margin-left:10px">Sign out</button>':''}
     </div>`;
   const slider=document.getElementById('cookingLevel');
   slider.oninput=()=>document.getElementById('ckVal').textContent=slider.value;
@@ -402,6 +478,8 @@ function renderProfile(){
   document.getElementById('useAI').onchange=(e)=>{ state.useAI=e.target.checked; saveState(); };
   const clearBtn=document.getElementById('clearBtn');
   if(clearBtn) clearBtn.onclick=()=>{ if(confirm("Clear your saved profile, week and favorites? This can't be undone.")) clearAllData(); };
+  const signOutBtn=document.getElementById('signOutBtn');
+  if(signOutBtn) signOutBtn.onclick=async()=>{ try{ await window.Cloud.signOut(); }catch(e){ console.warn('Sign out failed:', e&&e.message); } };
   document.getElementById('genBtn').onclick=async()=>{
     state.profile={
       weight:document.getElementById('weight').value,
@@ -723,5 +801,50 @@ function renderCategories(items){
 }
 function formatQty(qty,unit){ const q=Math.round(qty*100)/100; return unit?`${q} ${unit}`:`${q}`; }
 
-loadState();
-render();
+/* ============================================================
+   6. BOOT — local-only by default; cloud (Supabase) when configured
+   ============================================================ */
+function applyBlob(s){
+  state.profile = s.profile || null;
+  state.week = Array.isArray(s.week) ? s.week : [];
+  state.useAI = !!s.useAI;
+  state.favorites = Array.isArray(s.favorites) ? s.favorites : [];
+  state.checked = (s.checked && typeof s.checked==='object') ? s.checked : {};
+  state.screen = state.week.length ? 'review' : 'profile';
+}
+async function afterSignIn(session){
+  cloudUser = session.user;
+  let cloudState = null;
+  try { cloudState = await window.Cloud.loadState(cloudUser.id); }
+  catch(e){ console.warn('Cloud load failed:', e && e.message); }
+  if(cloudState){
+    applyBlob(cloudState);                    // returning user: use their cloud data
+  } else {
+    loadState();                              // first login: migrate this browser's v1 data up
+    if(state.profile || state.week.length || state.favorites.length) cloudSaveNow();
+    else state.screen = 'profile';
+  }
+  render();
+}
+function startBoot(){
+  if(!(window.Cloud && window.Cloud.enabled)){
+    loadState(); render(); return;            // LOCAL-ONLY mode (no accounts) — original behavior
+  }
+  // CLOUD mode: gate everything behind a session
+  window.Cloud.onAuthChange((session)=>{
+    if(session){ afterSignIn(session); }
+    else { cloudUser=null; state.screen='signin'; render(); }
+  });
+  window.Cloud.getSession()
+    .then(session=>{ if(session){ afterSignIn(session); } else { state.screen='signin'; render(); } })
+    .catch(e=>{ console.warn('Session check failed, local fallback:', e && e.message); loadState(); render(); });
+}
+function boot(){
+  if(window.Cloud){ startBoot(); return; }
+  let started=false;
+  const go=()=>{ if(started)return; started=true; startBoot(); };
+  window.addEventListener('cloud-ready', go, { once:true });
+  // Safety net: if cloud.js never loads (offline/CDN blocked), fall back to local mode.
+  setTimeout(()=>{ if(started)return; if(window.Cloud){ go(); } else { started=true; loadState(); render(); } }, 4000);
+}
+boot();
