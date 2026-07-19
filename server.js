@@ -198,18 +198,38 @@ function readBody(req) {
     req.on('end', () => { try { resolve(JSON.parse(data || '{}')); } catch { resolve({}); } });
   });
 }
-function sendHtml(res) {
-  const htmlPath = path.join(__dirname, 'meal-planner.html');
-  fs.readFile(htmlPath, (err, buf) => {
-    if (err) { res.writeHead(404, { 'content-type': 'text/plain' }); return res.end('meal-planner.html not found'); }
-    res.writeHead(200, { 'content-type': 'text/html; charset=utf-8' });
+/* ---- static file serving for the /public app-shell ---- */
+const PUBLIC_DIR = path.join(__dirname, 'public');
+const MIME = {
+  '.html': 'text/html; charset=utf-8',
+  '.js':   'text/javascript; charset=utf-8',
+  '.css':  'text/css; charset=utf-8',
+  '.json': 'application/json; charset=utf-8',
+  '.svg':  'image/svg+xml',
+  '.png':  'image/png',
+  '.jpg':  'image/jpeg',
+  '.jpeg': 'image/jpeg',
+  '.webp': 'image/webp',
+  '.ico':  'image/x-icon',
+  '.woff': 'font/woff',
+  '.woff2': 'font/woff2',
+};
+// Serve a file from /public. urlPath '/' maps to index.html.
+// Rejects anything that escapes /public (path-traversal guard).
+function sendStatic(res, urlPath) {
+  const rel = urlPath === '/' ? 'index.html' : decodeURIComponent(urlPath).replace(/^\/+/, '');
+  const filePath = path.join(PUBLIC_DIR, rel);
+  if (!filePath.startsWith(PUBLIC_DIR + path.sep) && filePath !== path.join(PUBLIC_DIR, 'index.html')) {
+    res.writeHead(403, { 'content-type': 'text/plain' }); return res.end('Forbidden');
+  }
+  fs.readFile(filePath, (err, buf) => {
+    if (err) { res.writeHead(404, { 'content-type': 'text/plain' }); return res.end('Not found'); }
+    res.writeHead(200, { 'content-type': MIME[path.extname(filePath).toLowerCase()] || 'application/octet-stream' });
     res.end(buf);
   });
 }
 const server = http.createServer(async (req, res) => {
   if (req.method === 'OPTIONS') return sendJson(res, 204, {});
-  // Serve the app itself so the whole thing lives at one URL (frontend + backend together).
-  if (req.method === 'GET' && (req.url === '/' || req.url === '/meal-planner.html')) return sendHtml(res);
   if (req.method === 'POST' && req.url === '/generate-week') {
     if (!API_KEY) return sendJson(res, 500, { error: 'No API key configured on the server.' });
     try { const profile = await readBody(req); return sendJson(res, 200, await callAI(buildPrompt(profile, 'week'))); }
@@ -220,6 +240,8 @@ const server = http.createServer(async (req, res) => {
     try { const { profile, type, avoidNames } = await readBody(req); return sendJson(res, 200, await callAI(buildPrompt(profile, 'meal', { type, names: avoidNames }))); }
     catch (e) { console.error(e.message); return sendJson(res, 500, { error: e.message }); }
   }
+  // Any other GET → serve the app-shell from /public (index.html, styles.css, app.js, assets…).
+  if (req.method === 'GET') return sendStatic(res, req.url.split('?')[0]);
   sendJson(res, 404, { error: 'Not found' });
 });
 server.listen(PORT, () => {
