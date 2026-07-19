@@ -26,9 +26,13 @@ _Last updated: 2026-07-19. This file is auto-loaded by Claude Code every session
 > app-shell), then phase 2 lifts `design/tokens.css` + markup 1:1 into the real screens. The
 > current single-file app stays live on Render until the rebuilt app is ready to deploy.
 
-> **BUILD SESSION — Phases 1 & 2 DONE, Phase 3 SCAFFOLDED (2026-07-19, Opus).** All work is
-> on branch **`v2-rebuild`** (NOT `main`) and **not deployed** — the live Render site is untouched.
+> **BUILD SESSION — Phases 1–4 DONE (2026-07-19, Opus).** All work is on branch
+> **`v2-rebuild`** (NOT `main`) and **not deployed** — the live Render site is untouched.
 > Product renamed to **"Table"** (header + title). Removed v1 `meal-planner.html` + the brief zip.
+> **Supabase is LIVE + verified** — Lucille created the project, filled `public/config.js`
+> (real URL + publishable key, committed — publishable key is public-safe by design), ran
+> `supabase/schema.sql`. Magic-link sign-in + cloud sync confirmed working end-to-end
+> (favorite survived sign-out→sign-in). Phase 4 landing page built + verified.
 > - **Phase 1 (restructure):** `meal-planner.html` split verbatim into `public/index.html`,
 >   `public/styles.css`, `public/app.js`. `server.js` now serves `/public` statically (pure
 >   Node, content-type map + path-traversal guard); `/generate-week` + `/generate-meal`
@@ -49,9 +53,13 @@ _Last updated: 2026-07-19. This file is auto-loaded by Claude Code every session
 >   round-trip, Google OAuth, RLS, cloud sync/migration — test together once config.js is filled
 >   + schema.sql is run. Phase-3 sync stores the whole app blob in `profiles.state` (simple/robust);
 >   `weeks`/`favorites`/`photos` tables exist for later phases to normalize into.
+> - **Phase 4 (landing) DONE:** full-bleed marketing page (`renderLanding()` in app.js,
+>   styles in app-screens.css) — glass nav, hero, how-it-works, planner preview, quote band,
+>   stat band, FAQ, footer, parallax doodads. Signed-out visitors land here → CTAs → sign-in.
+>   Shell split: app screens in `#app-shell` (narrow), landing in `#landing-root` (full width).
 > - **To view locally:** `node server.js` → open `http://localhost:8787/`.
-> - **NOT yet done (later phases):** photo recipe cards + dish→image mapping (phase 6), landing
->   page (4), questionnaire v2 (5), Woolworths planner rail+carousels (7), per-day pricing (8),
+> - **NEXT (in order):** questionnaire v2 (5), meals v3 = 3 courses + no-repeat + real links +
+>   photo/image mapping (6), Woolworths planner rail+carousels+DnD (7), per-day pricing (8),
 >   PWA (9), integrations incl. Google OAuth (10), Tauri desktop (11).
 >   Merge `v2-rebuild` → `main` + deploy only on Lucille's word.
 
