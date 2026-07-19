@@ -332,6 +332,16 @@ button.ghost.on { background: var(--tomato-wash); border-color: var(--tomato); c
   background: var(--ink); color: #fff; padding: 12px 22px; border-radius: var(--r-pill);
   font-size: var(--fs-sm); z-index: 60; box-shadow: var(--sh-3); animation: rise .25s var(--ease) both;
 }
+/* PWA install button (Chromium beforeinstallprompt) */
+.install-fab {
+  position: fixed; right: 18px; bottom: 18px; z-index: 65;
+  background: var(--tomato); color: #fff; border: 1px solid transparent;
+  padding: 12px 20px; border-radius: var(--r-pill); font-size: var(--fs-sm); font-weight: 600;
+  font-family: var(--font-ui); cursor: pointer; box-shadow: 0 6px 20px rgba(224,83,47,.34);
+  animation: rise .3s var(--ease) both;
+}
+.install-fab:hover { filter: brightness(1.05); transform: translateY(-2px); }
+@media print { .install-fab { display: none !important; } }
 
 /* ---- sign-in / sign-up (design 02) ---- */
 .auth-card { max-width: 440px; margin: 24px auto; }
