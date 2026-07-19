@@ -865,6 +865,22 @@ function renderSignIn(){
   };
 }
 
+// Generate a fresh week from the CURRENT profile (no questionnaire). Shared by the wizard
+// finish and the "re-plan" button, so a new week never re-asks the questionnaire.
+async function planWeek(){
+  state.checked={};
+  setScreen('loading');
+  if(state.useAI){
+    try { state.week=enforceNoRepeat(await requestWeekAI(state.profile),state.profile); state.usedFallback=false; }
+    catch(e){ console.warn('Backend unavailable, using local pool:',e.message); state.week=generateWeek(state.profile); state.usedFallback=true; }
+  } else {
+    state.week=generateWeek(state.profile); state.usedFallback=false;
+  }
+  if(state.profile.leftovers) applyLeftovers(state.week);
+  state.plannerMode='plan';
+  setScreen('review');
+}
+
 /* ----- Screen 1: questionnaire v2 — friendly 8-step onboarding (§6) ----- */
 const Q_STEPS = 8;   // Welcome · You · Rhythm · Goal · Tastes · Kitchen · Numbers · Connect
 function renderProfile(){
@@ -1028,6 +1044,7 @@ function renderProfile(){
 
     <div class="q-foot">
       <button type="button" class="q-back" id="q-back" style="visibility:hidden">← Back</button>
+      ${state.week.length?'<button type="button" class="btn btn-secondary" id="q-save">Save changes</button>':''}
       <button type="button" class="btn btn-primary" id="q-next">Continue</button>
     </div>
   </div>`;
@@ -1044,7 +1061,7 @@ function renderProfile(){
     dots.forEach((dt,idx)=>{ dt.className=idx<cur?'done':(idx===cur?'on':''); });
     document.getElementById('q-count').textContent=`Step ${cur+1} of ${Q_STEPS}`;
     backBtn.style.visibility=cur===0?'hidden':'visible';
-    nextBtn.textContent=cur===Q_STEPS-1?'Plan my first week 🎉':'Continue';
+    nextBtn.textContent=cur===Q_STEPS-1?(state.week.length?'Save & re-plan week 🔄':'Plan my first week 🎉'):'Continue';
     if(cur===6) refreshNumbers();          // recompute target when the Numbers step opens
     window.scrollTo(0,0);
   }
@@ -1126,20 +1143,13 @@ function renderProfile(){
   if(signOutBtn) signOutBtn.onclick=async()=>{ try{ await window.Cloud.signOut(); }catch(e){ console.warn('Sign out failed:', e&&e.message); } };
 
   backBtn.onclick=()=>{ persist(); showStep(cur-1); };
+  // Edit mode ("Save changes"): keep the current week, just save the tweaked profile and go back.
+  const saveBtn=document.getElementById('q-save');
+  if(saveBtn) saveBtn.onclick=()=>{ persist(); showToast('✓ Saved'); setScreen('review'); };
   nextBtn.onclick=async()=>{
     persist();
     if(cur<Q_STEPS-1){ showStep(cur+1); return; }
-    // --- finish: generate the week ---
-    state.checked={};   // fresh week, fresh list
-    setScreen('loading');
-    if(state.useAI){
-      try { state.week=enforceNoRepeat(await requestWeekAI(state.profile),state.profile); state.usedFallback=false; }
-      catch(e){ console.warn('Backend unavailable, using local pool:',e.message); state.week=generateWeek(state.profile); state.usedFallback=true; }
-    } else {
-      state.week=generateWeek(state.profile); state.usedFallback=false;
-    }
-    if(state.profile.leftovers) applyLeftovers(state.week);
-    setScreen('review');
+    await planWeek();   // finish (first week) OR "Save & re-plan" for an existing profile
   };
 
   showStep(0);
@@ -1306,7 +1316,7 @@ function renderReview(){
     <div class="status-bar">
       <span class="count">${mode==='browse'?'Drag or ⊕ to add · ♥ favorite':'✕ swap · ♥ favorite'}</span>
       <div class="btn-row">
-        <button class="ghost" id="backBtn">← Edit profile</button>
+        <button class="ghost" id="backBtn">⚙️ Edit my answers</button>
         <button class="ghost" id="recipesBtn">📖 Recipes by day</button>
         <button class="primary" id="listBtn" style="margin-top:0">Shopping list →</button>
       </div>
@@ -1509,7 +1519,7 @@ function renderShopping(){
       <div class="btn-row no-print">
         <button class="ghost" id="backReview">← Back to meals</button>
         <button class="ghost" id="recipesBtn2">📖 Recipes by day</button>
-        <button class="primary" id="restart" style="margin-top:0">Start a new week</button>
+        <button class="primary" id="restart" style="margin-top:0">🔄 Re-plan this week</button>
       </div>
       <p class="sub no-print" style="text-align:center;margin:18px 0 0">
         <a role="button" tabindex="0" id="fbLink" style="cursor:pointer;font-weight:600">💬 A thought? Tell Lucille</a></p>
@@ -1521,7 +1531,7 @@ function renderShopping(){
   document.getElementById('fbLink').onclick=openFeedback;
   document.getElementById('backReview').onclick=()=>setScreen('review');
   document.getElementById('recipesBtn2').onclick=()=>{ state.selectedDay=0; setScreen('recipes'); };
-  document.getElementById('restart').onclick=()=>{ state.week=[]; state.checked={}; setScreen('profile'); };
+  document.getElementById('restart').onclick=()=>{ if(state.profile) planWeek(); else setScreen('profile'); };
 }
 function itemRow(i){
   const key=itemKey(i);
