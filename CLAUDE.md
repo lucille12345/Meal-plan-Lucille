@@ -26,6 +26,24 @@ _Last updated: 2026-07-19. This file is auto-loaded by Claude Code every session
 > app-shell), then phase 2 lifts `design/tokens.css` + markup 1:1 into the real screens. The
 > current single-file app stays live on Render until the rebuilt app is ready to deploy.
 
+> **BUILD SESSION — Phases 1 & 2 DONE (2026-07-19, Opus).** All work is on branch
+> **`v2-rebuild`** (NOT `main`) and **not deployed** — the live Render site is untouched.
+> - **Phase 1 (restructure):** `meal-planner.html` split verbatim into `public/index.html`,
+>   `public/styles.css`, `public/app.js`. `server.js` now serves `/public` statically (pure
+>   Node, content-type map + path-traversal guard); `/generate-week` + `/generate-meal`
+>   unchanged. Old `meal-planner.html` KEPT as a rollback (not deleted).
+> - **Phase 2 (design lift):** `public/styles.css` = `design/tokens.css` verbatim (design
+>   source of truth); new `public/app-screens.css` re-tints every app screen to the Table
+>   tokens; `index.html` links both. Cook mode uses the `.cook-dark` warm-dark scope.
+> - **Verified in-browser, AI OFF:** questionnaire, week/review, recipes-by-day, shopping,
+>   cook mode + read-aloud, target banner, leftovers, pantry hiding, favorites, persistence —
+>   all intact. Zero console errors. Checked at 375px + 1280px.
+> - **To view locally:** `node server.js` → open `http://localhost:8787/`.
+> - **NOT yet done (later phases, need Lucille):** photo recipe cards + dish→image mapping
+>   (phase 6), landing page (4), Supabase auth/DB (3), questionnaire v2 (5), Woolworths
+>   planner rail+carousels (7), per-day pricing (8), PWA (9), integrations (10), Tauri (11).
+>   Merge `v2-rebuild` → `main` + deploy only on Lucille's word.
+
 Source of truth for the meal-planner project. **Phases 1–4 are all DONE.** The app is live on
 the public internet (Render free tier) — frontend + backend + AI generation all verified working.
 **Live URL: https://meal-planner-km6f.onrender.com**
