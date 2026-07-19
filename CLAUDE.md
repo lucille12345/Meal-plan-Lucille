@@ -112,9 +112,27 @@ _Last updated: 2026-07-19. This file is auto-loaded by Claude Code every session
 >   kcal targets from mealSplit (±10%), breakfast sweet/savory, unique names, budget/day, cuisines,
 >   no invented URLs. `requestWeekAI` flattens the courses object into slots.
 >   **UNVERIFIED until Lucille runs it with AI ON** (AI off by default; don't burn the 20/day quota).
-> - **NEXT:** Phase 7 Planner v2 (design 04): sidebar Mon–Sun week rail + "Browse & add"
->   categorized carousels (favorites, past weeks, pool) with ⊕ add + desktop drag-and-drop.
->   Then 8 per-day pricing, 9 PWA, 10 integrations, 11 Tauri desktop.
+> - **Then 9 PWA, 10 integrations, 11 Tauri desktop.**
+
+> **BUILD SESSION — Phases 7 & 8 DONE (2026-07-19, Opus). Committed to `v2-rebuild`.**
+> Verified in-browser AI OFF.
+> - **Phase 7 Planner v2 (design 04):** the week screen (`renderReview`) is now a two-mode
+>   planner. Sticky **Mon–Sun rail** (each day = B/L/D photo thumbnails + day kcal; empty slot =
+>   ＋). **Mode toggle:** "Plan for me" (generated week, swap/fav as before) and "Browse & add"
+>   (5 recipe carousels: favorites, quick & easy, breakfasts, lunch mains, dinner mains — token
+>   `.recipe-card` markup, ⊕ add + ♥ fav, photos w/ emoji fallback). **Add a dish two ways:** tap
+>   ⊕ → day-picker popover, or **drag a card onto a rail day** (HTML5 DnD). Dish lands at its
+>   natural meal main; persists immediately. Rail+main stack under 780px. `state.plannerMode`.
+>   Deferred sources (need later phases): "past AI weeks" (weeks-table normalization) and "your
+>   photo" dishes (photo upload).
+> - **Phase 8 Shopping v2 (§4):** total reframed **per day** — big "€X / day" (week avg), week
+>   total secondary, budget pill vs `budgetPerDay`. Each section shows a € chip: the buy-at-start
+>   bulk total + a per-buy-day total on every fresh-day header. Prices still per-ingredient from
+>   AI; chips only show when prices exist (AI on).
+> - **Files:** `public/app.js`, `public/app-screens.css`.
+> - **NEXT:** Phase 9 PWA (manifest + service worker + offline shell + install prompt + icons;
+>   Lighthouse installable). Then 10 integrations (.ics, push/email, Google OAuth, feedback —
+>   several need Lucille's free accounts), 11 Tauri desktop (needs Rust toolchain on her Mac).
 
 Source of truth for the meal-planner project. **Phases 1–4 are all DONE.** The app is live on
 the public internet (Render free tier) — frontend + backend + AI generation all verified working.
