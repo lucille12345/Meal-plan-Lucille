@@ -318,7 +318,21 @@ function updateSteps(){
     if(mine===here)el.classList.add('active'); else if(mine<here)el.classList.add('done');
   });
 }
+const shellEl=document.getElementById('app-shell');
+const landingRoot=document.getElementById('landing-root');
 function render(){
+  // Landing is a full-bleed marketing page rendered outside the narrow app shell.
+  if(state.screen==='landing'){
+    shellEl.style.display='none';
+    landingRoot.style.display='';
+    renderLanding();
+    window.scrollTo(0,0);
+    return;
+  }
+  shellEl.style.display='';
+  landingRoot.style.display='none';
+  landingRoot.innerHTML='';
+  removeLandingParallax();
   updateSteps();
   // The 1·2·3 step bar is only meaningful inside the planner flow — hide it on sign-in.
   const stepsEl=document.querySelector('.steps');
@@ -339,11 +353,178 @@ function renderLoading(){
     <div class="spinner"></div></div>`;
 }
 
+/* ----- Landing (public marketing; signed-out visitors) ----- */
+let _landingScroll=null;
+function removeLandingParallax(){ if(_landingScroll){ window.removeEventListener('scroll',_landingScroll); _landingScroll=null; } }
+function renderLanding(){
+  landingRoot.innerHTML=`
+  <div class="doodad" data-speed="0.25" style="top:520px;left:2%">🍅</div>
+  <div class="doodad" data-speed="0.5" style="top:900px;right:3%;font-size:56px">🍋</div>
+  <div class="doodad" data-speed="0.35" style="top:1500px;left:3%;font-size:52px">🌿</div>
+  <div class="doodad" data-speed="0.6" style="top:2100px;right:2%">🫒</div>
+  <div class="doodad" data-speed="0.4" style="top:2700px;left:2%;font-size:50px">🧄</div>
+  <div class="doodad" data-speed="0.55" style="top:3300px;right:3%;font-size:54px">🌶</div>
+
+  <nav class="glass-nav">
+    <div class="wrap nav-inner">
+      <div class="logo"><span class="mark" aria-hidden="true">🍽</span> Table</div>
+      <div class="nav-links">
+        <a class="txt hide-sm" href="#how">How it works</a>
+        <a class="txt hide-sm" href="#preview">Recipes</a>
+        <a class="txt" data-signin>Log in</a>
+        <a class="btn btn-primary btn-sm" data-signin>Start free</a>
+      </div>
+    </div>
+  </nav>
+
+  <header class="hero">
+    <div class="wrap hero-grid">
+      <div>
+        <h1>Your week,<br><em>deliciously</em> planned.</h1>
+        <p class="sub">Tell us how you like to eat. Get a full week of real dinners — and a shopping list that actually adds up.</p>
+        <div class="hero-cta">
+          <a class="btn btn-primary btn-lg" data-signin>Plan my week</a>
+          <span class="note">Free forever · no card</span>
+        </div>
+      </div>
+      <div class="hero-photos">
+        <div class="big"><img src="https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=900&q=75" alt="A table laid with fresh dishes"></div>
+        <div class="float a"><img src="https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=400&q=70" alt="Salmon bowl"></div>
+        <div class="float b"><img src="https://images.unsplash.com/photo-1484723091739-30a097e8f929?auto=format&fit=crop&w=400&q=70" alt="Breakfast"></div>
+      </div>
+    </div>
+  </header>
+
+  <section class="sec" id="how">
+    <div class="wrap">
+      <div class="sec-kicker">How it works</div>
+      <h2>Three steps to dinner, sorted.</h2>
+      <div class="lsteps">
+        <div class="lstep">
+          <div class="thumb"><img src="https://images.unsplash.com/photo-1466637574441-749b8f19452f?auto=format&fit=crop&w=600&q=70" alt="Fresh ingredients"></div>
+          <div class="n">01</div><h3>Tell us your taste</h3>
+          <p>A friendly two-minute questionnaire — how you like to eat, your budget, your kitchen.</p>
+        </div>
+        <div class="lstep">
+          <div class="thumb"><img src="https://images.unsplash.com/photo-1498837167922-ddd27525d352?auto=format&fit=crop&w=600&q=70" alt="A spread of dishes"></div>
+          <div class="n">02</div><h3>Get your week</h3>
+          <p>A balanced week of real recipes appears — three courses a day, no repeats, portioned for you.</p>
+        </div>
+        <div class="lstep">
+          <div class="thumb"><img src="https://images.unsplash.com/photo-1553909489-cd47e0907980?auto=format&fit=crop&w=600&q=70" alt="Shopping"></div>
+          <div class="n">03</div><h3>Shop &amp; cook</h3>
+          <p>One tidy list with prices per day. Cook mode reads each step aloud. Bon appétit.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec" id="preview" style="background:var(--surface-2)">
+    <div class="wrap">
+      <div class="sec-kicker">The planner</div>
+      <h2>Your whole week, on one calm screen.</h2>
+      <div class="preview-wrap">
+        <div class="pv-top"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="u">Your week · 2,430 kcal/day</span></div>
+        <div class="pv-body">
+          <aside class="pv-side">
+            <div class="day on"><span class="dn">Mon</span><span class="thumbs"><span style="background-image:url('https://images.unsplash.com/photo-1484723091739-30a097e8f929?auto=format&fit=crop&w=80&q=60')"></span><span style="background-image:url('https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=80&q=60')"></span><span style="background-image:url('https://images.unsplash.com/photo-1467003909585-2f8a72700288?auto=format&fit=crop&w=80&q=60')"></span></span></div>
+            <div class="day"><span class="dn">Tue</span><span class="thumbs"><span style="background-image:url('https://images.unsplash.com/photo-1518779578993-ec3579fee39f?auto=format&fit=crop&w=80&q=60')"></span><span style="background-image:url('https://images.unsplash.com/photo-1473093295043-cdd812d0e601?auto=format&fit=crop&w=80&q=60')"></span><span class="empty"></span></span></div>
+            <div class="day"><span class="dn">Wed</span><span class="thumbs"><span style="background-image:url('https://images.unsplash.com/photo-1490645935967-10de6ba17061?auto=format&fit=crop&w=80&q=60')"></span><span class="empty"></span><span class="empty"></span></span></div>
+            <div class="day"><span class="dn">Thu</span><span class="thumbs"><span class="empty"></span><span class="empty"></span><span class="empty"></span></span></div>
+            <div class="day"><span class="dn">Fri</span><span class="thumbs"><span style="background-image:url('https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?auto=format&fit=crop&w=80&q=60')"></span><span class="empty"></span><span class="empty"></span></span></div>
+          </aside>
+          <div class="pv-main">
+            <div class="pv-summary"><b>Your week, ready 🎯</b><span class="badge badge-basil">2,430 kcal/day</span></div>
+            <div class="pv-cat">Budget-friendly dinners</div>
+            <div class="pv-cards">
+              <div class="pv-card"><div class="im"><img src="https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&w=300&q=65" alt=""><span class="add">＋</span></div><div class="t">Rainbow veg bowl</div></div>
+              <div class="pv-card"><div class="im"><img src="https://images.unsplash.com/photo-1547592180-85f173990554?auto=format&fit=crop&w=300&q=65" alt=""><span class="add">＋</span></div><div class="t">Halloumi grain bowl</div></div>
+              <div class="pv-card"><div class="im"><img src="https://images.unsplash.com/photo-1476124369491-e7addf5db371?auto=format&fit=crop&w=300&q=65" alt=""><span class="add">＋</span></div><div class="t">Lemon pea risotto</div></div>
+              <div class="pv-card"><div class="im"><img src="https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?auto=format&fit=crop&w=300&q=65" alt=""><span class="add">＋</span></div><div class="t">Crunchy kale salad</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec">
+    <div class="wrap">
+      <div class="quote-band">
+        <div class="qmark" aria-hidden="true">”</div>
+        <div class="portrait"><img src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=300&q=70" alt="A happy home cook"></div>
+        <blockquote>
+          <p>I used to stare into the fridge at 7pm. Now my week just… arrives. We eat better, we waste less, and Sunday planning is gone.</p>
+          <cite>— Camille, home cook &amp; mum of two</cite>
+        </blockquote>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec" style="padding-top:24px">
+    <div class="wrap">
+      <div class="sec-kicker">Why people stay</div>
+      <h2>Small numbers, big weeknights.</h2>
+      <div class="stats">
+        <div class="stat"><div class="num">~2 h</div><div class="lab">saved on planning every week</div></div>
+        <div class="stat hl"><div class="num">−23%</div><div class="lab">less spent at the grocery store</div></div>
+        <div class="stat"><div class="num">0 €</div><div class="lab">forever — no card, no catch</div></div>
+        <div class="stat"><div class="num">3×</div><div class="lab">courses a day, never repeated</div></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec" style="background:var(--surface-2)">
+    <div class="wrap">
+      <div class="center"><div class="sec-kicker">Good questions</div><h2 style="margin:10px auto 0">Everything you might ask.</h2></div>
+      <div class="faq">
+        <details open><summary>Is it really free? <span class="plus" aria-hidden="true">＋</span></summary><p>Yes — free forever, no card required. We built Table to be genuinely useful, not to upsell you.</p></details>
+        <details><summary>Do I need to cook every night? <span class="plus" aria-hidden="true">＋</span></summary><p>Not at all. Turn on "cook once, eat twice" and Table plans leftovers for you, doubling the right dinners so nothing goes to waste.</p></details>
+        <details><summary>Can I swap meals I don't like? <span class="plus" aria-hidden="true">＋</span></summary><p>Tap ✕ on any dish to swap it instantly, or browse categories and add your own favorites to any day.</p></details>
+        <details><summary>Where do the recipes link to? <span class="plus" aria-hidden="true">＋</span></summary><p>Every dish links to a real recipe search — no dead links, no fabricated pages. What you see is what you can cook.</p></details>
+        <details><summary>Does my data stay mine? <span class="plus" aria-hidden="true">＋</span></summary><p>Always. Your profile and plans are yours; we never sell your data. You can export or delete everything anytime.</p></details>
+      </div>
+    </div>
+  </section>
+
+  <footer class="fat">
+    <div class="wrap">
+      <div class="cta-final">
+        <h2 class="display" style="color:#fff;font-size:var(--fs-h1);margin:0 auto 20px;max-width:20ch">Hungry yet? Plan this week in two minutes.</h2>
+        <a class="btn btn-primary btn-lg" data-signin>Start free</a>
+      </div>
+      <div class="foot-grid">
+        <div>
+          <div class="logo"><span class="mark" aria-hidden="true">🍽</span> Table</div>
+          <p style="color:#C9C1B4;font-size:var(--fs-sm);margin-top:12px;max-width:34ch">Dinner, sorted. A calm little app for eating well all week — made with love in France.</p>
+        </div>
+        <div><h4>Product</h4><a href="#how">How it works</a><a href="#preview">The planner</a><a data-signin>Sign up</a></div>
+        <div><h4>Company</h4><a data-signin>Get started</a><a data-signin>Our promise</a></div>
+        <div><h4>Legal</h4><a data-signin>Privacy</a><a data-signin>Terms</a></div>
+      </div>
+      <div class="baseline"><span>© 2026 Table · Bon appétit.</span><span>Free forever · Made in France 🇫🇷</span></div>
+    </div>
+  </footer>`;
+  landingRoot.querySelectorAll('[data-signin]').forEach(el=>{ el.onclick=(e)=>{ e.preventDefault(); setScreen('signin'); }; });
+  // subtle parallax on the margin doodads (respects reduced-motion)
+  removeLandingParallax();
+  if(!matchMedia('(prefers-reduced-motion: reduce)').matches){
+    const dd=[...landingRoot.querySelectorAll('.doodad')];
+    let ticking=false;
+    _landingScroll=()=>{ if(ticking)return; ticking=true; requestAnimationFrame(()=>{
+      const y=window.scrollY;
+      dd.forEach(d=>{ const s=parseFloat(d.dataset.speed); d.style.transform=`translateY(${-y*s*0.3}px) rotate(${y*s*0.02}deg)`; });
+      ticking=false; }); };
+    window.addEventListener('scroll',_landingScroll,{passive:true});
+  }
+}
+
 /* ----- Sign-in / sign-up (magic link + Google) — cloud mode only ----- */
 function renderSignIn(){
   const cloudOn = !!(window.Cloud && window.Cloud.enabled);
   app.innerHTML=`
     <div class="card auth-card">
+      <a class="top-back" id="backHome" role="button" tabindex="0">← Back home</a>
       <h2>Welcome to Table</h2>
       <p class="sub">Free forever. No card. Your data stays yours.</p>
       <div id="auth-form">
@@ -368,6 +549,8 @@ function renderSignIn(){
         </div>
       </div>
     </div>`;
+  const backHome=document.getElementById('backHome');
+  if(backHome) backHome.onclick=()=>setScreen('landing');
   const err=document.getElementById('authErr');
   const showErr=(m)=>{ err.textContent=m; err.style.display='block'; };
   const notConnected='Sign-in isn’t connected yet — add your Supabase details in config.js.';
@@ -830,13 +1013,13 @@ function startBoot(){
   if(!(window.Cloud && window.Cloud.enabled)){
     loadState(); render(); return;            // LOCAL-ONLY mode (no accounts) — original behavior
   }
-  // CLOUD mode: gate everything behind a session
+  // CLOUD mode: gate everything behind a session. Signed-out → public landing.
   window.Cloud.onAuthChange((session)=>{
     if(session){ afterSignIn(session); }
-    else { cloudUser=null; state.screen='signin'; render(); }
+    else { cloudUser=null; if(state.screen!=='signin')state.screen='landing'; render(); }
   });
   window.Cloud.getSession()
-    .then(session=>{ if(session){ afterSignIn(session); } else { state.screen='signin'; render(); } })
+    .then(session=>{ if(session){ afterSignIn(session); } else { state.screen='landing'; render(); } })
     .catch(e=>{ console.warn('Session check failed, local fallback:', e && e.message); loadState(); render(); });
 }
 function boot(){

@@ -13,6 +13,6 @@
    See SUPABASE-SETUP.md in the project root for the full step-by-step.
    ============================================================================ */
 window.SUPABASE_CONFIG = {
-  url: '',
-  anonKey: ''
+  url: 'https://ckhqnqoazgmqxzzzacfl.supabase.co',
+  anonKey: 'sb_publishable_w1c32KekCPF8iPgLlx5SFA_KQizdIX1'
 };

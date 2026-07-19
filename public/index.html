@@ -12,7 +12,11 @@
 <link rel="stylesheet" href="app-screens.css">
 </head>
 <body>
-<div class="wrap">
+<!-- full-bleed marketing landing renders here (signed-out visitors) -->
+<div id="landing-root" style="display:none"></div>
+
+<!-- the app itself (narrow, gated) -->
+<div class="app-shell" id="app-shell">
   <header class="app">
     <h1><span class="mark" aria-hidden="true">🍽</span> Table</h1>
     <p>A week of meals made for you — with recipes, prices and one shopping list.</p>
