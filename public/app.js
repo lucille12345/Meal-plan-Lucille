@@ -254,12 +254,17 @@ function eligibleRecipes(type,profile){
   const strict=base.filter(r=>r.difficulty<=maxDiff&&r.time<=maxTime);
   return strict.length?strict:base;
 }
-function pickMeal(type,profile,usedIds){
+// usedNames (lowercased dish names) enforces the hard "no dish twice a week" rule (§3) across ALL types.
+function pickMeal(type,profile,usedIds,usedNames){
   const pool=eligibleRecipes(type,profile);
-  const fresh=pool.filter(r=>!usedIds.has(r.id));
-  const choices=fresh.length?fresh:pool;
+  const nameFree=r=>!usedNames||!usedNames.has(r.name.toLowerCase());
+  // prefer recipes that are both unused-this-type AND name-unique across the whole week
+  let choices=pool.filter(r=>!usedIds.has(r.id)&&nameFree(r));
+  if(!choices.length)choices=pool.filter(nameFree);      // relax the per-type constraint first
+  if(!choices.length)choices=pool.filter(r=>!usedIds.has(r.id));
+  if(!choices.length)choices=pool;
   if(!choices.length)return null;
-  // favorites get first pick when available and unused
+  // favorites get first pick when available
   const favFresh=choices.filter(r=>String(r.id).startsWith('fav'));
   const from=(favFresh.length&&Math.random()<0.5)?favFresh:choices;
   return from[Math.floor(Math.random()*from.length)];
@@ -272,23 +277,77 @@ function scaleRecipe(r,n){
 function generateWeek(profile){
   const n=Math.max(1,Number(profile.people)||1);
   const week=[]; const used={breakfast:new Set(),lunch:new Set(),dinner:new Set()};
+  const usedNames=new Set();
   for(const day of DAYS){
     const meals=[];
     for(const type of ['breakfast','lunch','dinner']){
-      const r=pickMeal(type,profile,used[type]);
-      if(r)used[type].add(r.id);
+      const r=pickMeal(type,profile,used[type],usedNames);
+      if(r){ used[type].add(r.id); usedNames.add(r.name.toLowerCase()); }
       meals.push({type,recipe:scaleRecipe(r,n),rejected:false});
     }
     week.push({day,meals});
   }
+  return enforceNoRepeat(week,profile);
+}
+/* ---- post-validate: replace any duplicate dish name with an unused eligible one (§3 "no doubles") ---- */
+function enforceNoRepeat(week,profile){
+  const n=Math.max(1,Number(profile.people)||1);
+  const seen=new Set();
+  week.forEach(day=>day.meals.forEach(meal=>{
+    if(!meal.recipe) return;
+    const nm=meal.recipe.name.toLowerCase();
+    if(!seen.has(nm)){ seen.add(nm); return; }
+    // collision → try to find an eligible recipe whose name isn't used yet
+    const pool=eligibleRecipes(meal.type,profile);
+    const fresh=pool.filter(r=>!seen.has(r.name.toLowerCase()));
+    if(fresh.length){
+      const r=fresh[Math.floor(Math.random()*fresh.length)];
+      meal.recipe=scaleRecipe(r,n); seen.add(r.name.toLowerCase());
+    } else { seen.add(nm); }   // pool exhausted (tiny offline set) — leave it; AI weeks won't hit this
+  }));
   return week;
 }
 function swapMeal(di,mi){
   const meal=state.week[di].meals[mi];
-  const used=new Set();
-  state.week.forEach(d=>d.meals.forEach(m=>{if(m.recipe&&m.type===meal.type)used.add(m.recipe.id);}));
-  const r=pickMeal(meal.type,state.profile,used);
+  const usedIds=new Set(), usedNames=new Set();
+  state.week.forEach(d=>d.meals.forEach(m=>{
+    if(!m.recipe) return;
+    if(m.type===meal.type) usedIds.add(m.recipe.id);
+    if(m!==meal) usedNames.add(m.recipe.name.toLowerCase());   // avoid every OTHER dish in the week
+  }));
+  const r=pickMeal(meal.type,state.profile,usedIds,usedNames);
   if(r)meal.recipe=scaleRecipe(r,peopleCount());
+}
+
+/* ============================================================
+   3a. Recipe links + dish images (§3.3, §3.4)
+   ============================================================ */
+// Real, never-hallucinated recipe link: a Google search for the dish (always resolves).
+function recipeSearchUrl(name){ return 'https://www.google.com/search?q='+encodeURIComponent((name||'')+' recette'); }
+
+// Curated Unsplash CDN photos (verified-loading IDs), keyed by the pool's img keyword or a
+// keyword found in the dish name. Unmatched dishes fall back to the emoji-gradient tile via onerror.
+const DISH_IMG = {
+  'yogurt':'1488477181946-6428a0291777','berries':'1488477181946-6428a0291777','smoothie':'1490645935967-10de6ba17061',
+  'oatmeal':'1517673400267-0251440c45dc','muesli':'1517673400267-0251440c45dc','bagel':'1585445490387-f47934b73b54',
+  'avocado':'1541519227354-08fa5d50c44d','toast':'1541519227354-08fa5d50c44d','omelette':'1510693206972-df098062cb71','egg':'1510693206972-df098062cb71',
+  'quinoa':'1512621776951-a57141f2eefd','bowl':'1512621776951-a57141f2eefd','salad':'1540189549336-e6e99c3679fe',
+  'lentil':'1547592166-23ac45744acd','soup':'1547592166-23ac45744acd','tuna':'1467003909585-2f8a72700288','fish':'1467003909585-2f8a72700288',
+  'falafel':'1547592180-85f173990554','wrap':'1626700051175-6818013e1d4f','burrito':'1626700051175-6818013e1d4f',
+  'pasta':'1473093295043-cdd812d0e601','spaghetti':'1473093295043-cdd812d0e601','caprese':'1608897013039-887f21d8c804',
+  'chicken':'1604908176997-125f25cc6f3d','rice':'1516684732162-798a0062be99',
+  'salmon':'1519708227418-c8fd9a32b7a2','beef':'1600891964092-4316c288032e','stir':'1603133872878-684f208fb84b',
+  'chili':'1455619452474-d2be8b1e70cd','curry':'1631292784640-2b24be784d5d','pizza':'1513104890138-7c749659a591',
+  'shrimp':'1633504581786-316c8002b1b9','taco':'1565299624946-b28f40a0ae38','bolognese':'1473093295043-cdd812d0e601',
+};
+function dishImageUrl(recipe){
+  if(!recipe) return null;
+  const keyify=k=>k&&DISH_IMG[k.toLowerCase()];
+  // 1) exact img keyword(s) on the pool recipe  2) any keyword found in the dish name
+  let id=null;
+  (recipe.img||'').split(',').forEach(k=>{ id=id||keyify(k.trim()); });
+  if(!id){ const nm=(recipe.name||'').toLowerCase(); for(const k in DISH_IMG){ if(nm.includes(k)){ id=DISH_IMG[k]; break; } } }
+  return id?`https://images.unsplash.com/photo-${id}?auto=format&fit=crop&w=600&q=70`:null;
 }
 
 /* ============================================================
@@ -888,7 +947,7 @@ function renderProfile(){
     state.checked={};   // fresh week, fresh list
     setScreen('loading');
     if(state.useAI){
-      try { state.week=await requestWeekAI(state.profile); state.usedFallback=false; }
+      try { state.week=enforceNoRepeat(await requestWeekAI(state.profile),state.profile); state.usedFallback=false; }
       catch(e){ console.warn('Backend unavailable, using local pool:',e.message); state.week=generateWeek(state.profile); state.usedFallback=true; }
     } else {
       state.week=generateWeek(state.profile); state.usedFallback=false;
@@ -1012,7 +1071,9 @@ function renderRecipes(){
             <div class="badges"><span class="badge leftover">♻️ Leftover</span>${nutriBadges(r)}</div>
           </div>`;
         }
+        const imgUrl=dishImageUrl(r);
         return `<div class="recipe">
+          ${imgUrl?`<div class="recipe-photo"><img src="${imgUrl}" alt="" loading="lazy" onerror="this.closest('.recipe-photo').remove()"></div>`:''}
           <div class="rtype">${m.type}</div>
           <div class="rname">${r.emoji||''} ${r.name}</div>
           <div class="rdesc">${r.desc||''}</div>
@@ -1028,6 +1089,7 @@ function renderRecipes(){
           </div>
           <div class="recipe-actions">
             ${(r.steps&&r.steps.length)?`<button class="cook-btn" data-cook="${idx}">▶ Cook</button>`:''}
+            <a class="recipe-link" href="${recipeSearchUrl(r.name)}" target="_blank" rel="noopener noreferrer">See full recipe ↗</a>
             <button class="ghost fav-inline ${isFavorite(r.name)?'on':''}" data-favr="${idx}" style="padding:9px 14px">${isFavorite(r.name)?'♥ Saved':'♡ Save as favorite'}</button>
           </div>
         </div>`;

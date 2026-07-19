@@ -233,6 +233,10 @@ button.ghost.on { background: var(--tomato-wash); border-color: var(--tomato); c
 .day-tab:hover { border-color: var(--tomato); }
 .day-tab.on { background: var(--tomato); color: #fff; border-color: var(--tomato); }
 .recipe { border: 1px solid var(--hairline); border-radius: var(--r-card); padding: 20px; margin-bottom: 14px; background: var(--surface); box-shadow: var(--sh-1); }
+.recipe-photo { margin: -20px -20px 14px; height: 190px; overflow: hidden; background: var(--surface-2); border-bottom: 1px solid var(--hairline); }
+.recipe-photo img { width: 100%; height: 100%; object-fit: cover; }
+.recipe-link { display: inline-flex; align-items: center; padding: 11px 16px; border-radius: var(--r-pill); background: var(--surface); border: 1px solid var(--hairline-2); color: var(--tomato-deep); font-size: var(--fs-sm); font-weight: 600; cursor: pointer; transition: all var(--dur) var(--ease); }
+.recipe-link:hover { border-color: var(--tomato); color: var(--tomato); transform: translateY(-2px); box-shadow: var(--sh-2); }
 .recipe .rtype { font-size: var(--fs-xs); text-transform: uppercase; letter-spacing: .07em; color: var(--tomato-deep); font-weight: 700; }
 .recipe .rname { font-size: var(--fs-h3); font-weight: 700; margin: 2px 0; font-family: var(--font-display); }
 .recipe .rdesc { color: var(--muted); font-size: var(--fs-sm); margin-bottom: 10px; }
