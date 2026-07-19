@@ -152,6 +152,56 @@ button.ghost.on { background: var(--tomato-wash); border-color: var(--tomato); c
 .q-foot .q-back:hover { color: var(--ink); }
 .q-foot .btn { flex: 1; }
 
+/* ============================================================================
+   Planner v2 (design 04) — week rail + Plan-for-me / Browse-and-add modes
+   ============================================================================ */
+.planner-head { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-bottom: 16px; }
+.planner-head h2 { margin: 0; }
+.mode-toggle { display: inline-flex; background: var(--surface-2); border-radius: var(--r-pill); padding: 4px; }
+.mode-toggle button { border: 0; background: transparent; padding: 8px 16px; border-radius: var(--r-pill); font-weight: 600; font-size: var(--fs-sm); color: var(--muted); cursor: pointer; font-family: var(--font-ui); transition: all var(--dur) var(--ease); }
+.mode-toggle button.on { background: var(--surface); color: var(--ink); box-shadow: var(--sh-1); }
+
+.planner { display: grid; grid-template-columns: 264px 1fr; gap: 22px; align-items: start; }
+@media (max-width: 780px) { .planner { grid-template-columns: 1fr; } }
+
+/* week rail */
+.rail { position: sticky; top: 12px; align-self: start; }
+.rail h2 { font-size: var(--fs-h3); margin: 0 0 2px; }
+.rail .sub { font-size: var(--fs-xs); color: var(--muted); margin: 0 0 14px; }
+@media (max-width: 780px) { .rail { position: static; } }
+.day-row { border: 1px solid var(--hairline); border-radius: 14px; padding: 12px; margin-bottom: 10px; background: var(--surface); box-shadow: var(--sh-1); transition: border-color var(--dur) var(--ease), box-shadow var(--dur) var(--ease), background var(--dur) var(--ease); }
+.day-row.drop { border-color: var(--tomato); border-style: dashed; background: var(--tomato-wash); box-shadow: var(--sh-2); }
+.day-row .dh { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+.day-row .dh b { font-size: var(--fs-sm); }
+.day-row .dh .kcal { font-size: var(--fs-xs); color: var(--muted); font-variant-numeric: tabular-nums; }
+.slots { display: flex; gap: 7px; }
+.slot { flex: 1; aspect-ratio: 1; border-radius: 10px; overflow: hidden; position: relative; }
+.slot img, .slot .emoji-fill { width: 100%; height: 100%; object-fit: cover; }
+.slot .emoji-fill { display: grid; place-items: center; font-size: 22px; background: linear-gradient(135deg, var(--honey-wash), var(--blush)); }
+.slot.empty { border: 1.5px dashed var(--hairline-2); display: grid; place-items: center; color: var(--faint); font-size: 18px; background: var(--surface-2); cursor: pointer; }
+.slot.empty:hover { border-color: var(--tomato); color: var(--tomato); }
+.slot .lab { position: absolute; left: 4px; bottom: 3px; font-size: 8.5px; font-weight: 700; color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,.6); text-transform: uppercase; letter-spacing: .04em; }
+
+.planner-main { min-width: 0; }
+
+/* browse carousels */
+.drag-hint { font-size: var(--fs-xs); color: var(--faint); margin: 0 0 8px; }
+.cat-block { margin-bottom: 22px; }
+.cat-head { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 10px; }
+.cat-head h3 { font-size: var(--fs-h3); font-family: var(--font-display); margin: 0; }
+.planner-main .carousel { padding: 4px 2px 12px; }
+.planner-main .recipe-card { width: 210px; }
+.recipe-card.dragging { opacity: .5; }
+.recipe-card .photo .emoji-fill.big { width: 100%; height: 100%; display: grid; place-items: center; font-size: 52px; background: linear-gradient(135deg, var(--honey-wash), var(--blush)); }
+.recipe-card[draggable] { cursor: grab; }
+.recipe-card[draggable]:active { cursor: grabbing; }
+
+/* ⊕ add day picker popover */
+.day-picker { position: absolute; z-index: 70; background: var(--surface); border: 1px solid var(--hairline-2); border-radius: var(--r-card); box-shadow: var(--sh-3); padding: 8px; min-width: 180px; animation: rise .18s var(--ease) both; }
+.day-picker .dp-head { font-size: var(--fs-xs); color: var(--muted); padding: 6px 10px 8px; font-weight: 600; }
+.day-picker button { display: block; width: 100%; text-align: left; border: 0; background: transparent; padding: 9px 10px; border-radius: var(--r-sm); font-size: var(--fs-sm); font-weight: 600; color: var(--ink); cursor: pointer; font-family: var(--font-ui); }
+.day-picker button:hover { background: var(--tomato-wash); color: var(--tomato-deep); }
+
 /* ---- review: day blocks + meal rows ---- */
 .day-block { margin-bottom: var(--s-6); }
 .day-head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; margin: 0 0 10px; flex-wrap: wrap; }

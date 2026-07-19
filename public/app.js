@@ -120,7 +120,7 @@ const COURSE_LABEL = { starter:'Starter', main:'Main', dessert:'Dessert', single
    2. STATE
    ============================================================ */
 const state = { screen:'profile', profile:null, week:[], usedFallback:false, selectedDay:0,
-  useAI:false, favorites:[], checked:{} };
+  useAI:false, favorites:[], checked:{}, plannerMode:'plan' };
 // Where to reach the backend:
 //  - opened as a local file (double-click) → talk to the local Node server on :8787
 //  - served over http(s) (local `node server.js`, or hosted on Render) → same origin, no host needed
@@ -1090,20 +1090,89 @@ function dayKcal(day){
   day.meals.forEach(m=>{ if(!m.rejected&&m.recipe&&typeof m.recipe.kcal==='number'){ sum+=m.recipe.kcal; any=true; } });
   return any?sum:null;
 }
-function renderReview(){
-  const nm=(state.profile?.name||'').trim();
-  let html=`<div class="card"><h2>${nm?nm+"'s week":'Your week'}</h2>
-    <p class="sub">Tap ✕ on anything you don't fancy — it swaps to a new dish. Tap ♥ to keep a meal in your favorites forever.</p>`;
+/* ---- planner v2 (design 04): week rail + "Plan for me" / "Browse & add" modes ---- */
+function showToast(msg){
+  const t=document.createElement('div'); t.className='copied-toast'; t.textContent=msg;
+  document.body.appendChild(t); setTimeout(()=>t.remove(),2000);
+}
+// a small square thumbnail for the rail (photo, else emoji tile)
+function railSlot(day,mealType){
+  const slot=day.meals.find(m=>m.type===mealType&&(m.course==='main'||m.course==='single'||!m.course));
+  const lab={breakfast:'B',lunch:'L',dinner:'D'}[mealType];
+  if(!slot||!slot.recipe) return `<div class="slot empty" data-add-day="${DAYS.indexOf(day.day)}" title="Add ${mealType}">＋</div>`;
+  const img=dishImageUrl(slot.recipe);
+  const inner=img?`<img src="${img}" alt="" loading="lazy" onerror="this.replaceWith(Object.assign(document.createElement('div'),{className:'emoji-fill',textContent:'${slot.recipe.emoji||'🍽️'}'}))">`
+    :`<div class="emoji-fill">${slot.recipe.emoji||'🍽️'}</div>`;
+  return `<div class="slot" title="${slot.recipe.name}">${inner}<span class="lab">${lab}</span></div>`;
+}
+function railHtml(){
+  let rows='';
+  state.week.forEach((day,di)=>{
+    const kc=dayKcal(day);
+    rows+=`<div class="day-row" data-drop-day="${di}">
+      <div class="dh"><b>${day.day}</b><span class="kcal">${kc?kc.toLocaleString('en-US')+' kcal':'—'}</span></div>
+      <div class="slots">${railSlot(day,'breakfast')}${railSlot(day,'lunch')}${railSlot(day,'dinner')}</div>
+    </div>`;
+  });
+  return `<aside class="rail"><h2>This week</h2><div class="sub">Drag a dish onto a day, or tap ＋</div>${rows}</aside>`;
+}
+// browse card (recipe-card token markup) — draggable, with ⊕ add + ♥ fav
+function browseCard(r){
+  const img=dishImageUrl(r);
+  const photo=img?`<img src="${img}" alt="" loading="lazy" onerror="this.replaceWith(Object.assign(document.createElement('div'),{className:'emoji-fill big',textContent:'${r.emoji||'🍽️'}'}))">`
+    :`<div class="emoji-fill big">${r.emoji||'🍽️'}</div>`;
+  const kc=typeof r.kcal==='number'?`<span class="badge badge-tomato">${r.kcal} kcal</span>`:'';
+  const pr=typeof r.protein==='number'?`<span class="badge badge-basil">${r.protein} g</span>`:'';
+  return `<article class="recipe-card" draggable="true" data-rid="${r.id}">
+    <div class="photo">${photo}
+      <button class="icon-btn fav ${isFavorite(r.name)?'on':''}" data-bfav="${r.id}" title="Save as favorite">${isFavorite(r.name)?'♥':'♡'}</button>
+      <button class="icon-btn add" data-badd="${r.id}" title="Add to a day">＋</button></div>
+    <div class="body"><span class="cat">${r.type}</span><h3 class="title">${r.name}</h3>
+      <div class="meta"><span class="badge">⏱ ${r.time} min</span>${kc||pr}</div></div>
+  </article>`;
+}
+function carousel(title,list){
+  if(!list.length) return '';
+  return `<div class="cat-block"><div class="cat-head"><h3>${title}</h3></div>
+    <div class="carousel">${list.map(browseCard).join('')}</div></div>`;
+}
+function findBrowseRecipe(id){
+  return [...RECIPES,...STARTERS,...DESSERTS,...state.favorites].find(r=>String(r.id)===String(id));
+}
+// place a browsed dish onto a day at its natural meal (breakfast/lunch/dinner main)
+function addDishToDay(recipe,di){
+  const day=state.week[di]; if(!day) return;
+  const mealType=(recipe.type==='breakfast'||recipe.type==='lunch'||recipe.type==='dinner')?recipe.type:'dinner';
+  let slot=day.meals.find(m=>m.type===mealType&&(m.course==='main'||m.course==='single'||!m.course));
+  const scaled=scaleRecipe({...recipe},peopleCount());
+  if(slot){ slot.recipe=scaled; slot.rejected=false; }
+  else { day.meals.push({type:mealType,course:'main',recipe:scaled,rejected:false}); }
+  saveState(); showToast(`✓ ${recipe.name} → ${day.day}`); renderReview();
+}
+function openDayPicker(recipe,anchor){
+  document.querySelectorAll('.day-picker').forEach(el=>el.remove());
+  const menu=document.createElement('div'); menu.className='day-picker';
+  menu.innerHTML=`<div class="dp-head">Add “${recipe.name}” to…</div>`+
+    state.week.map((d,di)=>`<button data-pick="${di}">${d.day}</button>`).join('');
+  document.body.appendChild(menu);
+  const r=anchor.getBoundingClientRect();
+  menu.style.top=(window.scrollY+r.bottom+6)+'px';
+  menu.style.left=Math.min(window.scrollX+r.left, window.scrollX+window.innerWidth-menu.offsetWidth-12)+'px';
+  menu.querySelectorAll('[data-pick]').forEach(b=>b.onclick=()=>{ addDishToDay(recipe,Number(b.dataset.pick)); menu.remove(); });
+  const close=(e)=>{ if(!menu.contains(e.target)){ menu.remove(); document.removeEventListener('click',close); } };
+  setTimeout(()=>document.addEventListener('click',close),0);
+}
+function planBodyHtml(){
   const tgt=computeTargets(state.profile);
+  let html='';
   if(tgt){
     const per=computeMealTargets(state.profile);
     const perLine=per?` <span class="hint">· roughly ${per.breakfast} / ${per.lunch} / ${per.dinner} kcal across breakfast, lunch & dinner</span>`:'';
-    html+=`<div class="target-banner">
-    <div class="tgt-ico">🎯</div>
-    <div><div class="tgt-main">Your daily target: ~${tgt.kcal} kcal · ${tgt.protein} g protein <span class="hint">per person</span></div>
-    <div class="tgt-sub">Estimated from your height, weight, age, activity and goal (Mifflin–St Jeor). The 3 meals are portioned toward this.${perLine}</div></div></div>`;
+    html+=`<div class="target-banner"><div class="tgt-ico">🎯</div>
+      <div><div class="tgt-main">Your daily target: ~${tgt.kcal} kcal · ${tgt.protein} g protein <span class="hint">per person</span></div>
+      <div class="tgt-sub">Estimated from your height, weight, age, activity and goal (Mifflin–St Jeor).${perLine}</div></div></div>`;
   }
-  if(state.usedFallback)html+=`<div class="notice">⚠️ Backend offline — showing built-in meals, not AI (no budget/prices). Start the backend and regenerate.</div>`;
+  if(state.usedFallback)html+=`<div class="notice">⚠️ Backend offline — showing built-in meals, not AI (no budget/prices).</div>`;
   else if(!state.useAI)html+=`<div class="notice info">ℹ️ Showing built-in meals — AI generation is off. Tick "Use real AI generation" on the profile page for a personalized week.</div>`;
   state.week.forEach((day,di)=>{
     const kc=dayKcal(day);
@@ -1112,16 +1181,47 @@ function renderReview(){
     day.meals.forEach((meal,mi)=>html+=mealCard(meal,di,mi));
     html+=`</div>`;
   });
-  html+=`</div>
+  return html;
+}
+function browseBodyHtml(){
+  const favs=state.favorites.slice().reverse();
+  const quick=[...RECIPES].filter(r=>['breakfast','lunch','dinner'].includes(r.type)&&r.time<=12);
+  const bfast=RECIPES.filter(r=>r.type==='breakfast');
+  const lunches=RECIPES.filter(r=>r.type==='lunch');
+  const dinners=RECIPES.filter(r=>r.type==='dinner');
+  return `<p class="drag-hint">↔ Drag a card onto a day in the week, or tap ⊕ to choose a day.</p>
+    ${carousel('From your favorites ♥',favs)}
+    ${carousel('Quick & easy',quick)}
+    ${carousel('Breakfasts',bfast)}
+    ${carousel('Lunch mains',lunches)}
+    ${carousel('Dinner mains',dinners)}`;
+}
+function renderReview(){
+  const nm=(state.profile?.name||'').trim();
+  const mode=state.plannerMode;
+  app.innerHTML=`
+    <div class="planner-head">
+      <h2>${nm?nm+"'s week":'Your week'}</h2>
+      <div class="mode-toggle">
+        <button data-mode="plan" class="${mode==='plan'?'on':''}">✨ Plan for me</button>
+        <button data-mode="browse" class="${mode==='browse'?'on':''}">🧺 Browse &amp; add</button>
+      </div>
+    </div>
+    <div class="planner">
+      ${railHtml()}
+      <main class="planner-main">${mode==='browse'?browseBodyHtml():planBodyHtml()}</main>
+    </div>
     <div class="status-bar">
-      <span class="count">✕ swap · ♥ favorite</span>
+      <span class="count">${mode==='browse'?'Drag or ⊕ to add · ♥ favorite':'✕ swap · ♥ favorite'}</span>
       <div class="btn-row">
         <button class="ghost" id="backBtn">← Edit profile</button>
         <button class="ghost" id="recipesBtn">📖 Recipes by day</button>
         <button class="primary" id="listBtn" style="margin-top:0">Shopping list →</button>
       </div>
     </div>`;
-  app.innerHTML=html;
+  // mode toggle
+  app.querySelectorAll('[data-mode]').forEach(b=>b.onclick=()=>{ state.plannerMode=b.dataset.mode; renderReview(); });
+  // plan-mode swap / fav
   app.querySelectorAll('[data-swap]').forEach(btn=>{
     btn.onclick=async()=>{
       const [di,mi]=btn.dataset.swap.split('-').map(Number);
@@ -1136,12 +1236,27 @@ function renderReview(){
     };
   });
   app.querySelectorAll('[data-fav]').forEach(btn=>{
-    btn.onclick=()=>{
-      const [di,mi]=btn.dataset.fav.split('-').map(Number);
-      const r=state.week[di].meals[mi].recipe;
-      if(r){ toggleFavorite(r); renderReview(); }
-    };
+    btn.onclick=()=>{ const [di,mi]=btn.dataset.fav.split('-').map(Number);
+      const r=state.week[di].meals[mi].recipe; if(r){ toggleFavorite(r); renderReview(); } };
   });
+  // browse-mode add / fav
+  app.querySelectorAll('[data-badd]').forEach(b=>b.onclick=(e)=>{ e.stopPropagation();
+    const r=findBrowseRecipe(b.dataset.badd); if(r)openDayPicker(r,b); });
+  app.querySelectorAll('[data-bfav]').forEach(b=>b.onclick=(e)=>{ e.stopPropagation();
+    const r=findBrowseRecipe(b.dataset.bfav); if(r){ toggleFavorite(r); renderReview(); } });
+  // drag & drop: cards → rail days
+  app.querySelectorAll('.recipe-card[draggable]').forEach(card=>{
+    card.addEventListener('dragstart',e=>{ e.dataTransfer.setData('text/plain',card.dataset.rid); e.dataTransfer.effectAllowed='copy'; card.classList.add('dragging'); });
+    card.addEventListener('dragend',()=>card.classList.remove('dragging'));
+  });
+  app.querySelectorAll('.day-row[data-drop-day]').forEach(row=>{
+    row.addEventListener('dragover',e=>{ e.preventDefault(); e.dataTransfer.dropEffect='copy'; row.classList.add('drop'); });
+    row.addEventListener('dragleave',()=>row.classList.remove('drop'));
+    row.addEventListener('drop',e=>{ e.preventDefault(); row.classList.remove('drop');
+      const r=findBrowseRecipe(e.dataTransfer.getData('text/plain')); if(r)addDishToDay(r,Number(row.dataset.dropDay)); });
+  });
+  // empty rail slots: tap ＋ to add via day already known
+  app.querySelectorAll('.slot.empty[data-add-day]').forEach(s=>s.onclick=()=>{ state.plannerMode='browse'; renderReview(); });
   document.getElementById('backBtn').onclick=()=>setScreen('profile');
   document.getElementById('recipesBtn').onclick=()=>{ state.selectedDay=0; setScreen('recipes'); };
   document.getElementById('listBtn').onclick=()=>setScreen('shopping');
