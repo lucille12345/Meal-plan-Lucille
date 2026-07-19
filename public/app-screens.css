@@ -1,0 +1,258 @@
+/* ============================================================================
+   Table — App screen layouts (Phase 2)
+   Structural styles for the app screens (questionnaire, week, recipes,
+   shopping, cook mode), built on the design tokens in styles.css.
+   styles.css (design/tokens.css) is the source of truth for colors, type,
+   radii, shadows and the reusable component classes (.btn .chip .card .badge…).
+   This file only styles the app-specific structures those mockups imply.
+   ============================================================================ */
+
+/* local extras not in the token palette */
+:root { --reject: #B23B3B; --reject-wash: #F6E3E3; }
+
+/* ---- page shell ---- */
+.wrap { max-width: 960px; padding: 28px 20px 96px; }
+
+header.app { text-align: center; margin-bottom: 6px; }
+header.app h1 { font-size: var(--fs-h1); font-weight: 700; letter-spacing: -0.02em; margin: 0 0 6px; }
+header.app h1 .accent { color: var(--tomato); }
+header.app p { margin: 0; color: var(--muted); font-size: var(--fs-sm); }
+
+/* ---- 3-step progress indicator ---- */
+.steps { display: flex; justify-content: center; gap: var(--s-2); margin: 22px 0 30px; flex-wrap: wrap; }
+.step {
+  font-size: var(--fs-xs); font-weight: 600; color: var(--muted);
+  padding: 6px 14px; border-radius: var(--r-pill);
+  background: var(--surface-2); border: 1px solid var(--hairline);
+  transition: all var(--dur) var(--ease);
+}
+.step.active { background: var(--tomato); color: #fff; border-color: transparent; box-shadow: 0 3px 10px rgba(224,83,47,.28); }
+.step.done { background: var(--basil-wash); color: var(--basil-deep); border-color: transparent; }
+
+/* ---- generic headings/help text inside cards ---- */
+.card { padding: var(--s-6); margin-bottom: var(--s-4); animation: rise .35s var(--ease) both; }
+@keyframes rise { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+h2 { font-size: var(--fs-h2); margin: 0 0 4px; font-weight: 700; }
+.sub { color: var(--muted); font-size: var(--fs-sm); margin: 0 0 18px; }
+.hint { font-weight: 400; color: var(--faint); font-size: var(--fs-xs); font-style: italic; }
+
+/* ---- forms ---- */
+label { display: block; font-size: var(--fs-sm); font-weight: 600; margin: 14px 0 6px; color: var(--ink); }
+input[type=number], input[type=text], select, textarea {
+  width: 100%; padding: 13px 15px; font-family: var(--font-ui); font-size: var(--fs-body);
+  color: var(--ink); background: var(--surface);
+  border: 1px solid var(--hairline-2); border-radius: var(--r-input);
+  transition: border-color var(--dur) var(--ease), box-shadow var(--dur) var(--ease);
+}
+input::placeholder, textarea::placeholder { color: var(--faint); }
+input:focus, select:focus, textarea:focus {
+  outline: none; border-color: var(--tomato); box-shadow: 0 0 0 3px var(--tomato-wash);
+}
+textarea { min-height: 60px; resize: vertical; }
+.row { display: flex; gap: var(--s-4); flex-wrap: wrap; }
+.row > div { flex: 1; min-width: 160px; }
+input[type=range] {
+  -webkit-appearance: none; appearance: none; width: 100%; height: 6px;
+  border-radius: var(--r-pill); background: var(--hairline-2); outline: none; margin: 10px 0;
+}
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none; width: 26px; height: 26px; border-radius: 50%;
+  background: var(--tomato); border: 3px solid #fff; box-shadow: var(--sh-1); cursor: pointer;
+}
+input[type=range]::-moz-range-thumb {
+  width: 22px; height: 22px; border-radius: 50%;
+  background: var(--tomato); border: 3px solid #fff; cursor: pointer;
+}
+.range-val { font-weight: 700; color: var(--tomato-deep); font-family: var(--font-display); }
+
+/* ---- chips (selected state used by the app markup) ---- */
+.chips { display: flex; flex-wrap: wrap; gap: var(--s-2); margin-top: 6px; }
+.chip.on {
+  background: var(--tomato-wash); border-color: var(--tomato); color: var(--tomato-deep); font-weight: 600;
+}
+
+/* ---- buttons (app markup uses .primary / .ghost / .cook-btn) ---- */
+button.primary {
+  background: var(--tomato); color: #fff; border: 1px solid transparent;
+  padding: 13px 24px; border-radius: var(--r-pill); font-size: var(--fs-body); font-weight: 600;
+  font-family: var(--font-ui); cursor: pointer; margin-top: 20px;
+  box-shadow: 0 4px 14px rgba(224,83,47,.28);
+  transition: transform var(--dur) var(--ease), box-shadow var(--dur) var(--ease), filter var(--dur) var(--ease);
+}
+button.primary:hover { transform: translateY(-2px); filter: brightness(1.04); box-shadow: 0 8px 22px rgba(224,83,47,.34); }
+button.primary:active { transform: translateY(0); }
+button.ghost {
+  background: var(--surface); border: 1px solid var(--hairline-2); color: var(--ink);
+  padding: 12px 20px; border-radius: var(--r-pill); font-size: var(--fs-sm); font-weight: 600;
+  font-family: var(--font-ui); cursor: pointer;
+  transition: transform var(--dur) var(--ease), box-shadow var(--dur) var(--ease), background var(--dur) var(--ease);
+}
+button.ghost:hover { transform: translateY(-2px); box-shadow: var(--sh-2); }
+button.ghost.on { background: var(--tomato-wash); border-color: var(--tomato); color: var(--tomato-deep); }
+
+/* ---- review: day blocks + meal rows ---- */
+.day-block { margin-bottom: var(--s-6); }
+.day-head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; margin: 0 0 10px; flex-wrap: wrap; }
+.day-title { font-size: var(--fs-h3); font-weight: 700; margin: 0; color: var(--ink); font-family: var(--font-display); }
+.day-kcal { font-size: var(--fs-xs); color: var(--muted); }
+
+.meal {
+  display: flex; align-items: stretch; border: 1px solid var(--hairline); border-radius: var(--r-card);
+  overflow: hidden; margin-bottom: 10px; background: var(--surface); box-shadow: var(--sh-1);
+  transition: transform var(--dur) var(--ease), box-shadow var(--dur) var(--ease);
+}
+.meal:hover { box-shadow: var(--sh-2); transform: translateY(-2px); }
+.meal.rejected { opacity: .45; }
+.thumb { width: 96px; min-width: 96px; display: flex; align-items: center; justify-content: center; font-size: 38px; }
+.thumb.breakfast { background: linear-gradient(135deg, var(--honey-wash), #ffdf9e); }
+.thumb.lunch     { background: linear-gradient(135deg, var(--basil-wash), #bfe0c6); }
+.thumb.dinner    { background: linear-gradient(135deg, var(--blush), #f6b894); }
+.meal .body { flex: 1; padding: 14px 16px; display: flex; justify-content: space-between; gap: 10px; }
+.meal .type { font-size: var(--fs-xs); text-transform: uppercase; letter-spacing: .07em; color: var(--tomato-deep); font-weight: 700; }
+.meal .name { font-weight: 600; font-size: var(--fs-lg); font-family: var(--font-display); line-height: 1.15; }
+.meal .desc { font-size: var(--fs-sm); color: var(--muted); }
+.badges { margin-top: 8px; display: flex; gap: 6px; flex-wrap: wrap; }
+
+/* ---- badges (app variants layered on the token .badge) ---- */
+.badge.diff { background: var(--surface-2); color: var(--muted); }
+.badge.kcal { background: var(--tomato-wash); color: var(--tomato-deep); }
+.badge.leftover { background: var(--basil-wash); color: var(--basil-deep); }
+.badge.batch { background: var(--honey-wash); color: var(--honey-deep); }
+
+.side-btns { display: flex; flex-direction: column; gap: 6px; flex-shrink: 0; align-items: flex-end; }
+.swap-btn, .fav-btn {
+  border: 1px solid var(--hairline-2); background: var(--surface); border-radius: var(--r-pill);
+  width: 38px; height: 38px; cursor: pointer; font-size: 15px; line-height: 1;
+  transition: all var(--dur) var(--ease);
+}
+.swap-btn:hover { background: var(--reject); color: #fff; border-color: var(--reject); transform: translateY(-2px); }
+.fav-btn { color: var(--faint); }
+.fav-btn:hover { border-color: #e05c7a; color: #e05c7a; }
+.fav-btn.on { color: #e05c7a; border-color: #f2c4cf; background: #fdf0f3; }
+
+/* ---- sticky action bar ---- */
+.status-bar {
+  position: sticky; bottom: 12px; background: var(--surface); border: 1px solid var(--hairline);
+  border-radius: var(--r-card); padding: 14px 18px; display: flex; justify-content: space-between;
+  align-items: center; gap: 12px; margin-top: 10px; flex-wrap: wrap; box-shadow: var(--sh-2);
+}
+.status-bar .count { font-size: var(--fs-sm); color: var(--muted); }
+.btn-row { display: flex; gap: var(--s-2); flex-wrap: wrap; }
+
+/* ---- shopping list ---- */
+.cat { font-size: var(--fs-xs); text-transform: uppercase; letter-spacing: .06em; color: var(--tomato-deep); margin: 16px 0 6px; font-weight: 700; }
+.item { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px dashed var(--hairline); }
+.item input { width: 18px; height: 18px; accent-color: var(--basil); flex: none; }
+.item .nm { flex: 1; }
+.item.checked .nm { text-decoration: line-through; color: var(--faint); }
+.item .qty { color: var(--muted); font-size: var(--fs-sm); }
+.item .pr { color: var(--ink); font-size: var(--fs-sm); font-variant-numeric: tabular-nums; min-width: 56px; text-align: right; }
+.list-col { margin-bottom: var(--s-6); }
+.list-col h3 { margin: 0 0 4px; font-size: var(--fs-h3); font-family: var(--font-display); }
+.list-col .when { font-size: var(--fs-sm); color: var(--muted); margin: 0 0 6px; }
+.buyday { border: 1px solid var(--hairline); border-radius: var(--r-input); padding: 12px 16px; margin-bottom: 10px; background: var(--surface); }
+.buyday .head { font-weight: 700; font-size: var(--fs-sm); margin-bottom: 4px; }
+
+.total-bar {
+  border: 1px solid var(--hairline); border-radius: var(--r-card); padding: 16px 18px; margin-bottom: 6px;
+  background: var(--surface); display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap;
+}
+.total-bar .big { font-size: 26px; font-weight: 700; font-family: var(--font-display); }
+.pill { font-size: var(--fs-sm); padding: 4px 12px; border-radius: var(--r-pill); font-weight: 700; }
+.pill.under { background: var(--basil-wash); color: var(--basil-deep); }
+.pill.over  { background: var(--reject-wash); color: var(--reject); }
+
+/* ---- recipes by day ---- */
+.day-tabs { display: flex; gap: var(--s-2); flex-wrap: wrap; margin-bottom: 16px; }
+.day-tab {
+  padding: 9px 15px; border-radius: var(--r-pill); border: 1px solid var(--hairline-2); background: var(--surface);
+  cursor: pointer; font-size: var(--fs-sm); font-weight: 600; transition: all var(--dur) var(--ease);
+}
+.day-tab:hover { border-color: var(--tomato); }
+.day-tab.on { background: var(--tomato); color: #fff; border-color: var(--tomato); }
+.recipe { border: 1px solid var(--hairline); border-radius: var(--r-card); padding: 20px; margin-bottom: 14px; background: var(--surface); box-shadow: var(--sh-1); }
+.recipe .rtype { font-size: var(--fs-xs); text-transform: uppercase; letter-spacing: .07em; color: var(--tomato-deep); font-weight: 700; }
+.recipe .rname { font-size: var(--fs-h3); font-weight: 700; margin: 2px 0; font-family: var(--font-display); }
+.recipe .rdesc { color: var(--muted); font-size: var(--fs-sm); margin-bottom: 10px; }
+.ing-head { font-size: var(--fs-xs); text-transform: uppercase; letter-spacing: .06em; color: var(--basil-deep); font-weight: 700; margin: 12px 0 6px; }
+.ing-list { list-style: none; padding: 0; margin: 0 0 6px; }
+.ing-list li { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px dashed var(--hairline); font-size: var(--fs-sm); }
+.ing-list .iq { color: var(--muted); }
+.step-list { margin: 0 0 4px 18px; padding: 0; }
+.step-list li { padding: 5px 0; font-size: var(--fs-sm); }
+.recipe-actions { display: flex; gap: var(--s-2); margin-top: 12px; flex-wrap: wrap; align-items: center; }
+.cook-btn {
+  background: var(--basil); color: #fff; border: 1px solid transparent; padding: 11px 20px; border-radius: var(--r-pill);
+  font-size: var(--fs-sm); font-weight: 600; font-family: var(--font-ui); cursor: pointer;
+  transition: transform var(--dur) var(--ease), filter var(--dur) var(--ease);
+}
+.cook-btn:hover { filter: brightness(1.06); transform: translateY(-2px); }
+
+/* ---- target banner ---- */
+.target-banner {
+  background: linear-gradient(135deg, var(--honey-wash), var(--blush)); border: 1px solid #f2d3ba;
+  border-radius: var(--r-card); padding: 16px 18px; margin-bottom: 18px; display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+}
+.target-banner .tgt-ico { font-size: 26px; }
+.target-banner .tgt-main { font-weight: 700; font-family: var(--font-display); font-size: var(--fs-lg); color: var(--ink); }
+.target-banner .tgt-sub { font-size: var(--fs-xs); color: var(--muted); }
+
+/* ---- notices / spinners / toast ---- */
+.notice {
+  background: var(--honey-wash); border: 1px solid #f0d9a8; color: var(--honey-deep); font-size: var(--fs-sm);
+  padding: 11px 15px; border-radius: var(--r-input); margin-bottom: 14px;
+}
+.notice.info { background: var(--basil-wash); border-color: #cfe4d6; color: var(--basil-deep); }
+.spinner { width: 36px; height: 36px; margin: 22px auto 0; border: 4px solid var(--hairline); border-top-color: var(--tomato); border-radius: 50%; animation: spin .8s linear infinite; }
+.mini-spin { width: 18px; height: 18px; border: 3px solid var(--hairline); border-top-color: var(--tomato); border-radius: 50%; animation: spin .8s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.hidden { display: none; }
+.list-note { font-size: var(--fs-sm); color: var(--muted); margin: 2px 0 12px; }
+.copied-toast {
+  position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+  background: var(--ink); color: #fff; padding: 12px 22px; border-radius: var(--r-pill);
+  font-size: var(--fs-sm); z-index: 60; box-shadow: var(--sh-3); animation: rise .25s var(--ease) both;
+}
+
+/* ---- cook mode (full-screen, warm-dark via the .cook-dark token scope) ---- */
+.cook-overlay {
+  position: fixed; inset: 0; z-index: 50; display: flex; flex-direction: column;
+  padding: 24px 20px; overflow: auto; animation: rise .25s var(--ease) both;
+}
+.cook-inner { max-width: 640px; margin: 0 auto; width: 100%; flex: 1; display: flex; flex-direction: column; }
+.cook-top { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+.cook-title { font-family: var(--font-display); font-size: var(--fs-h3); font-weight: 700; }
+.cook-close { border: 1px solid var(--hairline-2); background: var(--surface); color: var(--ink); border-radius: var(--r-pill); width: 40px; height: 40px; font-size: 17px; cursor: pointer; }
+.cook-progress { display: flex; gap: 6px; margin: 18px 0; }
+.cook-dot { flex: 1; height: 5px; border-radius: var(--r-pill); background: var(--hairline-2); }
+.cook-dot.done { background: var(--basil); }
+.cook-dot.now { background: var(--tomato); }
+.cook-step-label { font-size: var(--fs-xs); font-weight: 700; color: var(--tomato); text-transform: uppercase; letter-spacing: .07em; }
+.cook-step-text { font-size: 26px; line-height: 1.45; font-weight: 500; margin: 10px 0 24px; flex: 1; font-family: var(--font-display); }
+.cook-ing { background: var(--surface); border: 1px solid var(--hairline-2); border-radius: var(--r-input); padding: 12px 16px; margin-bottom: 18px; font-size: var(--fs-sm); }
+.cook-ing summary { cursor: pointer; font-weight: 600; }
+.cook-speak {
+  background: var(--surface); border: 1px solid var(--hairline-2); color: var(--ink); border-radius: var(--r-pill);
+  padding: 9px 16px; font-size: var(--fs-sm); font-weight: 600; font-family: var(--font-ui); cursor: pointer;
+  margin-bottom: 18px; align-self: flex-start;
+}
+.cook-speak:hover { border-color: var(--tomato); color: var(--tomato); }
+.cook-nav { display: flex; gap: 10px; }
+.cook-nav button { flex: 1; padding: 15px; border-radius: var(--r-pill); font-size: var(--fs-body); font-weight: 600; font-family: var(--font-ui); cursor: pointer; }
+.cook-prev { background: var(--surface); border: 1px solid var(--hairline-2); color: var(--ink); }
+.cook-next { background: var(--tomato); border: 1px solid transparent; color: #fff; }
+.cook-next:hover { filter: brightness(1.04); }
+
+/* ---- print ---- */
+@media print {
+  body { background: #fff; }
+  .steps, .status-bar, header.app p, .btn-row, .no-print, button { display: none !important; }
+  .card { border: none; box-shadow: none; padding: 0; }
+}
+
+/* ---- small screens ---- */
+@media (max-width: 560px) {
+  header.app h1 { font-size: 28px; }
+  .thumb { width: 76px; min-width: 76px; font-size: 30px; }
+  .cook-step-text { font-size: 21px; }
+}

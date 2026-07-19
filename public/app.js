@@ -586,7 +586,7 @@ function stopSpeaking(){ try{ if('speechSynthesis' in window)speechSynthesis.can
 function openCookMode(recipe){
   let step=0;
   const overlay=document.createElement('div');
-  overlay.className='cook-overlay';
+  overlay.className='cook-overlay cook-dark';
   overlay.setAttribute('role','dialog');
   overlay.setAttribute('aria-modal','true');
   overlay.setAttribute('aria-label','Cooking '+recipe.name);
