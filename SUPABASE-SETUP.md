@@ -18,21 +18,26 @@ Do the steps in order. Anything you paste, keep this file open beside you.
 3. Click **Create new project** and wait ~2 minutes while it sets up.
 
 ## 2. Copy your two connection values into the app
-1. In your project, click the **gear icon → Project Settings → API** (or the **Connect**
-   button at the top).
-2. Copy these two:
-   - **Project URL** — looks like `https://abcdefgh.supabase.co`
-   - **anon public** key — a long string starting with `eyJ...`
-     *(This key is safe to put in the app — it only works together with the security rules
-     from step 3. The **password** from step 1 is the secret one, never this.)*
-3. Open **`public/config.js`** in the project and paste them in:
-   ```js
-   window.SUPABASE_CONFIG = {
-     url: 'https://abcdefgh.supabase.co',
-     anonKey: 'eyJ...your-anon-key...'
-   };
-   ```
-   Save the file.
+Easiest: click the green **Connect** button at the **top of the dashboard** (next to your
+project name) → **App Frameworks** tab → it shows both values below, each with a copy button.
+
+Or find them manually:
+- **Project URL** — it's just your **Project ID** (Settings → General) wrapped like this:
+  `https://YOUR-PROJECT-ID.supabase.co`
+- **Publishable key** — Settings → **API Keys** → the key starting with **`sb_publishable_...`**
+  *(If you only see a "Legacy API keys" tab, use the one labelled **`anon` `public`**, starts
+  with `eyJ...`.)* This public key is safe in the app — the security rules from step 3 are what
+  actually protect your data. **Never** use a key labelled `secret` or `service_role`.
+
+Then open **`public/config.js`** and paste them in:
+```js
+window.SUPABASE_CONFIG = {
+  url: 'https://YOUR-PROJECT-ID.supabase.co',
+  anonKey: 'sb_publishable_...'          // the Publishable key (or a legacy anon eyJ... key)
+};
+```
+Save the file. *(The field is named `anonKey` for historical reasons — the `sb_publishable_`
+key goes there just fine.)*
 
 ## 3. Create the database tables (one paste)
 1. In Supabase, open the **SQL Editor** (left sidebar) → **New query**.
