@@ -47,6 +47,75 @@ const RECIPES = [
     {name:'Beef mince',qty:150,unit:'g',category:'Meat & Fish',buyDayBefore:true},{name:'Chopped tomatoes',qty:1,unit:'can',category:'Pantry',buyDayBefore:false},{name:'Pasta',qty:100,unit:'g',category:'Pantry',buyDayBefore:false},{name:'Onion',qty:1,unit:'',category:'Produce',buyDayBefore:false}],steps:['Brown mince with chopped onion.','Add tomatoes, simmer 20 min.','Serve over cooked spaghetti.']},
 ];
 
+/* Starters (light) & desserts — courses for lunch/dinner (§3). Kept lighter than mains. */
+const STARTERS = [
+  {id:'s1',type:'starter',name:'Green side salad',desc:'Leaves, cucumber, vinaigrette',time:5,difficulty:1,emoji:'🥗',img:'salad',tags:['vegetarian','vegan'],kcal:120,protein:3,ingredients:[
+    {name:'Salad greens',qty:60,unit:'g',category:'Produce',buyDayBefore:true},{name:'Cucumber',qty:0.5,unit:'',category:'Produce',buyDayBefore:false},{name:'Olive oil',qty:1,unit:'tbsp',category:'Pantry',buyDayBefore:false}],steps:['Toss greens and sliced cucumber.','Dress with olive oil, salt and a splash of vinegar.']},
+  {id:'s2',type:'starter',name:'Tomato bruschetta',desc:'Toast, tomato, basil',time:8,difficulty:1,emoji:'🍅',img:'bruschetta,tomato',tags:['vegetarian'],kcal:180,protein:5,ingredients:[
+    {name:'Baguette',qty:2,unit:'slices',category:'Bakery',buyDayBefore:true},{name:'Tomato',qty:1,unit:'',category:'Produce',buyDayBefore:false},{name:'Fresh basil',qty:1,unit:'handful',category:'Produce',buyDayBefore:true}],steps:['Toast the bread.','Top with diced tomato, basil and olive oil.']},
+  {id:'s3',type:'starter',name:'Carrot & ginger soup',desc:'Carrot, onion, ginger',time:20,difficulty:2,emoji:'🥕',img:'soup,carrot',tags:['vegetarian','vegan'],kcal:150,protein:4,ingredients:[
+    {name:'Carrot',qty:3,unit:'',category:'Produce',buyDayBefore:false},{name:'Onion',qty:1,unit:'',category:'Produce',buyDayBefore:false},{name:'Ginger',qty:1,unit:'tsp',category:'Produce',buyDayBefore:false}],steps:['Soften onion and carrot.','Add water and ginger, simmer 15 min.','Blend until smooth.']},
+  {id:'s4',type:'starter',name:'Melon & feta',desc:'Melon, feta, mint',time:6,difficulty:1,emoji:'🍈',img:'melon',tags:['vegetarian'],kcal:160,protein:6,ingredients:[
+    {name:'Melon',qty:0.25,unit:'',category:'Produce',buyDayBefore:false},{name:'Feta',qty:30,unit:'g',category:'Dairy',buyDayBefore:false}],steps:['Cube the melon.','Crumble feta over and scatter mint.']},
+  {id:'s5',type:'starter',name:'Hummus & veg sticks',desc:'Hummus, carrot, pepper',time:5,difficulty:1,emoji:'🥕',img:'hummus',tags:['vegetarian','vegan'],kcal:190,protein:6,ingredients:[
+    {name:'Hummus',qty:60,unit:'g',category:'Dairy',buyDayBefore:false},{name:'Carrot',qty:1,unit:'',category:'Produce',buyDayBefore:false},{name:'Bell pepper',qty:0.5,unit:'',category:'Produce',buyDayBefore:false}],steps:['Cut veg into sticks.','Serve with a bowl of hummus.']},
+  {id:'s6',type:'starter',name:'Minestrone cup',desc:'Beans, veg, tomato',time:20,difficulty:2,emoji:'🍲',img:'minestrone,soup',tags:['vegetarian','vegan'],kcal:170,protein:7,ingredients:[
+    {name:'Mixed veg',qty:100,unit:'g',category:'Produce',buyDayBefore:false},{name:'Cannellini beans',qty:0.5,unit:'can',category:'Pantry',buyDayBefore:false},{name:'Chopped tomatoes',qty:0.5,unit:'can',category:'Pantry',buyDayBefore:false}],steps:['Simmer veg, beans and tomato 15 min.','Season and serve small.']},
+  {id:'s7',type:'starter',name:'Caprese bites',desc:'Mozzarella, tomato, basil',time:6,difficulty:1,emoji:'🍅',img:'caprese',tags:['vegetarian'],kcal:200,protein:9,ingredients:[
+    {name:'Mozzarella',qty:40,unit:'g',category:'Dairy',buyDayBefore:false},{name:'Tomato',qty:1,unit:'',category:'Produce',buyDayBefore:false},{name:'Fresh basil',qty:1,unit:'handful',category:'Produce',buyDayBefore:true}],steps:['Slice tomato and mozzarella.','Layer with basil, drizzle olive oil.']},
+  {id:'s8',type:'starter',name:'Zucchini soup',desc:'Zucchini, onion, stock',time:20,difficulty:2,emoji:'🥣',img:'soup',tags:['vegetarian','vegan'],kcal:130,protein:4,ingredients:[
+    {name:'Zucchini',qty:2,unit:'',category:'Produce',buyDayBefore:false},{name:'Onion',qty:1,unit:'',category:'Produce',buyDayBefore:false}],steps:['Soften onion and zucchini.','Add water, simmer 15 min, blend.']},
+  {id:'s9',type:'starter',name:'Gazpacho',desc:'Tomato, cucumber, pepper',time:12,difficulty:1,emoji:'🍅',img:'gazpacho,soup',tags:['vegetarian','vegan'],kcal:110,protein:3,ingredients:[
+    {name:'Tomato',qty:3,unit:'',category:'Produce',buyDayBefore:false},{name:'Cucumber',qty:0.5,unit:'',category:'Produce',buyDayBefore:false},{name:'Bell pepper',qty:0.5,unit:'',category:'Produce',buyDayBefore:false}],steps:['Blend the vegetables with olive oil and a splash of vinegar.','Chill and serve cold.']},
+  {id:'s10',type:'starter',name:'Pea & mint soup',desc:'Peas, onion, mint',time:18,difficulty:2,emoji:'🥣',img:'soup,pea',tags:['vegetarian'],kcal:150,protein:8,ingredients:[
+    {name:'Peas',qty:150,unit:'g',category:'Frozen',buyDayBefore:false},{name:'Onion',qty:1,unit:'',category:'Produce',buyDayBefore:false},{name:'Fresh mint',qty:1,unit:'handful',category:'Produce',buyDayBefore:true}],steps:['Soften onion, add peas and water.','Simmer 8 min, blend with mint.']},
+  {id:'s11',type:'starter',name:'Garlic bread',desc:'Baguette, garlic, butter',time:10,difficulty:1,emoji:'🧄',img:'garlic,bread',tags:['vegetarian'],kcal:210,protein:5,ingredients:[
+    {name:'Baguette',qty:3,unit:'slices',category:'Bakery',buyDayBefore:true},{name:'Garlic',qty:1,unit:'clove',category:'Produce',buyDayBefore:false},{name:'Butter',qty:15,unit:'g',category:'Dairy',buyDayBefore:false}],steps:['Mix soft butter with crushed garlic.','Spread on bread and toast until golden.']},
+  {id:'s12',type:'starter',name:'Roasted beet salad',desc:'Beetroot, leaves, feta',time:15,difficulty:1,emoji:'🥗',img:'beet,salad',tags:['vegetarian'],kcal:180,protein:6,ingredients:[
+    {name:'Cooked beetroot',qty:120,unit:'g',category:'Produce',buyDayBefore:false},{name:'Salad greens',qty:50,unit:'g',category:'Produce',buyDayBefore:true},{name:'Feta',qty:25,unit:'g',category:'Dairy',buyDayBefore:false}],steps:['Slice beetroot over the greens.','Crumble feta and dress with olive oil.']},
+  {id:'s13',type:'starter',name:'Stuffed tomatoes',desc:'Tomato, rice, herbs',time:22,difficulty:2,emoji:'🍅',img:'stuffed,tomato',tags:['vegetarian','vegan'],kcal:190,protein:5,ingredients:[
+    {name:'Tomato',qty:2,unit:'',category:'Produce',buyDayBefore:false},{name:'Rice',qty:40,unit:'g',category:'Pantry',buyDayBefore:false}],steps:['Hollow the tomatoes, fill with cooked herby rice.','Bake 15 min.']},
+  {id:'s14',type:'starter',name:'Corn on the cob',desc:'Corn, butter, salt',time:12,difficulty:1,emoji:'🌽',img:'corn',tags:['vegetarian'],kcal:170,protein:5,ingredients:[
+    {name:'Corn cob',qty:1,unit:'',category:'Produce',buyDayBefore:false},{name:'Butter',qty:10,unit:'g',category:'Dairy',buyDayBefore:false}],steps:['Boil the corn 8 min.','Brush with butter and season.']},
+];
+const DESSERTS = [
+  {id:'x1',type:'dessert',name:'Fresh fruit salad',desc:'Seasonal fruit, mint',time:6,difficulty:1,emoji:'🍓',img:'fruit,salad',tags:['vegetarian','vegan'],kcal:120,protein:2,ingredients:[
+    {name:'Mixed fruit',qty:200,unit:'g',category:'Produce',buyDayBefore:true}],steps:['Chop the fruit.','Toss with a little mint and lemon.']},
+  {id:'x2',type:'dessert',name:'Yogurt & honey',desc:'Greek yogurt, honey',time:3,difficulty:1,emoji:'🍯',img:'yogurt',tags:['vegetarian'],kcal:170,protein:10,ingredients:[
+    {name:'Greek yogurt',qty:150,unit:'g',category:'Dairy',buyDayBefore:false},{name:'Honey',qty:1,unit:'tbsp',category:'Pantry',buyDayBefore:false}],steps:['Spoon yogurt into a bowl.','Drizzle with honey.']},
+  {id:'x3',type:'dessert',name:'Dark chocolate & clementine',desc:'Chocolate square, clementine',time:2,difficulty:1,emoji:'🍫',img:'chocolate',tags:['vegetarian'],kcal:150,protein:2,ingredients:[
+    {name:'Dark chocolate',qty:20,unit:'g',category:'Pantry',buyDayBefore:false},{name:'Clementine',qty:1,unit:'',category:'Produce',buyDayBefore:false}],steps:['Enjoy the chocolate with a peeled clementine.']},
+  {id:'x4',type:'dessert',name:'Baked cinnamon apple',desc:'Apple, cinnamon, oats',time:20,difficulty:1,emoji:'🍎',img:'baked,apple',tags:['vegetarian','vegan'],kcal:160,protein:2,ingredients:[
+    {name:'Apple',qty:1,unit:'',category:'Produce',buyDayBefore:false},{name:'Oats',qty:20,unit:'g',category:'Pantry',buyDayBefore:false}],steps:['Core the apple, fill with oats and cinnamon.','Bake 18 min at 180°C.']},
+  {id:'x5',type:'dessert',name:'Berries & cream',desc:'Berries, whipped cream',time:4,difficulty:1,emoji:'🫐',img:'berries',tags:['vegetarian'],kcal:180,protein:3,ingredients:[
+    {name:'Mixed berries',qty:120,unit:'g',category:'Produce',buyDayBefore:true},{name:'Cream',qty:40,unit:'ml',category:'Dairy',buyDayBefore:false}],steps:['Spoon berries into a glass.','Top with a little whipped cream.']},
+  {id:'x6',type:'dessert',name:'Lemon sorbet',desc:'Lemon sorbet, mint',time:2,difficulty:1,emoji:'🍋',img:'sorbet,lemon',tags:['vegetarian','vegan'],kcal:130,protein:0,ingredients:[
+    {name:'Lemon sorbet',qty:2,unit:'scoops',category:'Frozen',buyDayBefore:false}],steps:['Scoop sorbet into a bowl.','Garnish with mint.']},
+  {id:'x7',type:'dessert',name:'Poached pear',desc:'Pear, honey, spice',time:18,difficulty:2,emoji:'🍐',img:'pear',tags:['vegetarian','vegan'],kcal:150,protein:1,ingredients:[
+    {name:'Pear',qty:1,unit:'',category:'Produce',buyDayBefore:false},{name:'Honey',qty:1,unit:'tbsp',category:'Pantry',buyDayBefore:false}],steps:['Simmer the pear in water with honey and spice 15 min.','Serve warm.']},
+  {id:'x8',type:'dessert',name:'Cheese & grapes',desc:'Cheese, grapes, cracker',time:3,difficulty:1,emoji:'🧀',img:'cheese',tags:['vegetarian'],kcal:210,protein:8,ingredients:[
+    {name:'Cheese',qty:30,unit:'g',category:'Dairy',buyDayBefore:false},{name:'Grapes',qty:80,unit:'g',category:'Produce',buyDayBefore:true},{name:'Crackers',qty:2,unit:'',category:'Bakery',buyDayBefore:false}],steps:['Plate cheese with grapes and a couple of crackers.']},
+  {id:'x9',type:'dessert',name:'Rice pudding',desc:'Rice, milk, cinnamon',time:22,difficulty:2,emoji:'🍚',img:'rice,pudding',tags:['vegetarian'],kcal:220,protein:7,ingredients:[
+    {name:'Rice',qty:40,unit:'g',category:'Pantry',buyDayBefore:false},{name:'Milk',qty:200,unit:'ml',category:'Dairy',buyDayBefore:false}],steps:['Simmer rice in milk 18 min, stirring.','Sweeten and dust with cinnamon.']},
+  {id:'x10',type:'dessert',name:'Grilled peach & honey',desc:'Peach, honey',time:8,difficulty:1,emoji:'🍑',img:'peach',tags:['vegetarian','vegan'],kcal:130,protein:1,ingredients:[
+    {name:'Peach',qty:1,unit:'',category:'Produce',buyDayBefore:false},{name:'Honey',qty:1,unit:'tbsp',category:'Pantry',buyDayBefore:false}],steps:['Halve the peach, grill cut-side down 3 min.','Drizzle with honey.']},
+  {id:'x11',type:'dessert',name:'Orange & cinnamon',desc:'Orange, cinnamon',time:4,difficulty:1,emoji:'🍊',img:'orange',tags:['vegetarian','vegan'],kcal:90,protein:2,ingredients:[
+    {name:'Orange',qty:1,unit:'',category:'Produce',buyDayBefore:false}],steps:['Slice the orange onto a plate.','Dust lightly with cinnamon.']},
+  {id:'x12',type:'dessert',name:'Vanilla yogurt & granola',desc:'Yogurt, granola',time:3,difficulty:1,emoji:'🥣',img:'yogurt,granola',tags:['vegetarian'],kcal:200,protein:9,ingredients:[
+    {name:'Vanilla yogurt',qty:150,unit:'g',category:'Dairy',buyDayBefore:false},{name:'Granola',qty:30,unit:'g',category:'Pantry',buyDayBefore:false}],steps:['Spoon yogurt into a glass.','Top with a little granola.']},
+  {id:'x13',type:'dessert',name:'Mango sorbet',desc:'Mango sorbet',time:2,difficulty:1,emoji:'🥭',img:'sorbet,mango',tags:['vegetarian','vegan'],kcal:140,protein:0,ingredients:[
+    {name:'Mango sorbet',qty:2,unit:'scoops',category:'Frozen',buyDayBefore:false}],steps:['Scoop sorbet into a bowl and serve.']},
+  {id:'x14',type:'dessert',name:'Chocolate mousse',desc:'Chocolate, egg',time:15,difficulty:3,emoji:'🍫',img:'chocolate,mousse',tags:['vegetarian'],kcal:230,protein:6,ingredients:[
+    {name:'Dark chocolate',qty:40,unit:'g',category:'Pantry',buyDayBefore:false},{name:'Eggs',qty:1,unit:'',category:'Dairy',buyDayBefore:false}],steps:['Melt chocolate, fold into whisked egg white.','Chill 1 hour before serving.']},
+];
+// Which courses a lunch/dinner gets, driven by goal & appetite (§3.1). 'main' is always present.
+function coursesForGoal(goal){
+  if(goal==='gain') return ['starter','main','dessert'];   // Get stronger → all three
+  if(goal==='lose') return ['main','dessert'];             // Feel light → main + light/fruit dessert
+  return ['starter','main'];                               // Stay balanced → main + one side
+}
+const COURSE_LABEL = { starter:'Starter', main:'Main', dessert:'Dessert', single:'' };
+
 /* ============================================================
    2. STATE
    ============================================================ */
@@ -192,19 +261,22 @@ function applyLeftovers(week){
   for(const di of [1,3,5]){
     if(di>=week.length)continue;
     const prevDay=week[di-1];
-    const dinner=prevDay.meals.find(m=>m.type==='dinner');
-    const lunch=week[di].meals.find(m=>m.type==='lunch');
-    if(!dinner||!dinner.recipe||!lunch)continue;
-    const d=dinner.recipe;
-    // cook double at dinner so half becomes tomorrow's lunch (buy 2× ingredients)
+    const dinnerMain=prevDay.meals.find(m=>m.type==='dinner'&&m.course==='main');
+    if(!dinnerMain||!dinnerMain.recipe)continue;
+    const d=dinnerMain.recipe;
+    // cook double at last night's dinner main so half becomes today's lunch (buy 2× ingredients)
     d.ingredients=(d.ingredients||[]).map(i=>({...i, qty:i.qty*2,
       ...(typeof i.price==='number'?{price:i.price*2}:{})}));
     d.batchNote=true;
-    lunch.recipe={ ...d, id:'lo'+(nextId++), type:'lunch', name:'Leftover '+d.name,
+    const leftover={ type:'lunch', course:'main', rejected:false, recipe:{
+      ...d, id:'lo'+(nextId++), type:'lunch', name:'Leftover '+d.name,
       desc:'From '+prevDay.day+' night — just reheat', isLeftover:true, batchNote:false,
       ingredients:(d.ingredients||[]).map(i=>({...i})),   // kept for display only; not bought again
-      steps:['Reheat the leftovers from '+prevDay.day+' until piping hot.'] };
-    lunch.rejected=false;
+      steps:['Reheat the leftovers from '+prevDay.day+' until piping hot.'] }};
+    // a reheated lunch is one dish — drop that day's lunch starter/dessert
+    week[di].meals=week[di].meals.filter(m=>m.type!=='lunch');
+    const dIdx=week[di].meals.findIndex(m=>m.type==='dinner');
+    if(dIdx===-1) week[di].meals.push(leftover); else week[di].meals.splice(dIdx,0,leftover);
   }
 }
 
@@ -245,10 +317,10 @@ function passesDietFilters(recipe, profile){
   if(allergies.includes('nuts')&&recipe.ingredients.some(i=>/peanut|almond|\bnut/.test(i.name.toLowerCase())))return false;
   return true;
 }
-function eligibleRecipes(type,profile){
-  // favorites of this meal type join the pool (they've earned it)
-  const pool=[...RECIPES, ...state.favorites.filter(f=>f.type===type)];
-  const base=pool.filter(r=>r.type===type&&passesDietFilters(r,profile));
+// `role` is breakfast|lunch|dinner|starter|dessert. Starters/desserts have their own pools.
+function eligibleRecipes(role,profile){
+  const pool=[...RECIPES, ...STARTERS, ...DESSERTS, ...state.favorites.filter(f=>f.type===role)];
+  const base=pool.filter(r=>r.type===role&&passesDietFilters(r,profile));
   const maxDiff=maxDifficultyFor(profile.cookingLevel);
   const maxTime=Number(profile.timePerMeal)>0 ? Number(profile.timePerMeal) : maxTimeFor(profile.lifeStage);
   const strict=base.filter(r=>r.difficulty<=maxDiff&&r.time<=maxTime);
@@ -276,15 +348,21 @@ function scaleRecipe(r,n){
 }
 function generateWeek(profile){
   const n=Math.max(1,Number(profile.people)||1);
-  const week=[]; const used={breakfast:new Set(),lunch:new Set(),dinner:new Set()};
+  const week=[];
+  const used={breakfast:new Set(),lunch:new Set(),dinner:new Set(),starter:new Set(),dessert:new Set()};
   const usedNames=new Set();
+  const courses=coursesForGoal(profile.goal);
+  const addSlot=(meals,mealType,course)=>{
+    // starters/desserts pick from their own pool; 'main' picks from the meal-type pool
+    const role=course==='main'?mealType:course;
+    const r=pickMeal(role,profile,used[role],usedNames);
+    if(r){ used[role].add(r.id); usedNames.add(r.name.toLowerCase()); }
+    meals.push({type:mealType,course,recipe:scaleRecipe(r,n),rejected:false});
+  };
   for(const day of DAYS){
     const meals=[];
-    for(const type of ['breakfast','lunch','dinner']){
-      const r=pickMeal(type,profile,used[type],usedNames);
-      if(r){ used[type].add(r.id); usedNames.add(r.name.toLowerCase()); }
-      meals.push({type,recipe:scaleRecipe(r,n),rejected:false});
-    }
+    addSlot(meals,'breakfast','main');              // breakfast stays single
+    for(const mealType of ['lunch','dinner']) for(const course of courses) addSlot(meals,mealType,course);
     week.push({day,meals});
   }
   return enforceNoRepeat(week,profile);
@@ -297,8 +375,9 @@ function enforceNoRepeat(week,profile){
     if(!meal.recipe) return;
     const nm=meal.recipe.name.toLowerCase();
     if(!seen.has(nm)){ seen.add(nm); return; }
-    // collision → try to find an eligible recipe whose name isn't used yet
-    const pool=eligibleRecipes(meal.type,profile);
+    // collision → try to find an eligible recipe (same course role) whose name isn't used yet
+    const role=meal.course==='main'?meal.type:(meal.course||meal.type);
+    const pool=eligibleRecipes(role,profile);
     const fresh=pool.filter(r=>!seen.has(r.name.toLowerCase()));
     if(fresh.length){
       const r=fresh[Math.floor(Math.random()*fresh.length)];
@@ -309,13 +388,15 @@ function enforceNoRepeat(week,profile){
 }
 function swapMeal(di,mi){
   const meal=state.week[di].meals[mi];
+  const role=meal.course==='main'?meal.type:(meal.course||meal.type);
   const usedIds=new Set(), usedNames=new Set();
   state.week.forEach(d=>d.meals.forEach(m=>{
     if(!m.recipe) return;
-    if(m.type===meal.type) usedIds.add(m.recipe.id);
+    const mRole=m.course==='main'?m.type:(m.course||m.type);
+    if(mRole===role) usedIds.add(m.recipe.id);
     if(m!==meal) usedNames.add(m.recipe.name.toLowerCase());   // avoid every OTHER dish in the week
   }));
-  const r=pickMeal(meal.type,state.profile,usedIds,usedNames);
+  const r=pickMeal(role,state.profile,usedIds,usedNames);
   if(r)meal.recipe=scaleRecipe(r,peopleCount());
 }
 
@@ -361,19 +442,32 @@ function normalizeRecipe(r){
     protein:(typeof r.protein==='number'?Math.round(r.protein):undefined),
     ingredients:(r.ingredients||[]).map(i=>({...i})), steps:r.steps||[] };
 }
+function aiSlot(mealType,course,r){ return {type:mealType,course,recipe:normalizeRecipe({...r,type:mealType}),rejected:false}; }
 async function requestWeekAI(profile){
   const res=await fetch(BACKEND_URL+'/generate-week',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(profile)});
   if(!res.ok)throw new Error('backend '+res.status);
   const data=await res.json();
   if(!data.week)throw new Error('bad response');
-  return data.week.map(day=>({day:day.day,meals:day.meals.map(r=>({type:r.type,recipe:normalizeRecipe(r),rejected:false}))}));
+  // AI shape v3: breakfast is a recipe; lunch/dinner carry a `courses` object. Flatten to slots.
+  return data.week.map(day=>{
+    const meals=[];
+    (day.meals||[]).forEach(m=>{
+      const mealType=m.type||'dinner';
+      if(m.courses && typeof m.courses==='object'){
+        ['starter','main','dessert'].forEach(c=>{ if(m.courses[c]) meals.push(aiSlot(mealType,c,m.courses[c])); });
+      } else {
+        meals.push(aiSlot(mealType,'main',m));   // breakfast, or a flat meal (back-compat)
+      }
+    });
+    return {day:day.day,meals};
+  });
 }
-async function requestSwapAI(profile,type,avoidNames){
-  const res=await fetch(BACKEND_URL+'/generate-meal',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({profile,type,avoidNames})});
+async function requestSwapAI(profile,role,avoidNames){
+  const res=await fetch(BACKEND_URL+'/generate-meal',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({profile,type:role,avoidNames})});
   if(!res.ok)throw new Error('backend '+res.status);
   const data=await res.json();
   if(!data.meal)throw new Error('bad response');
-  return normalizeRecipe(data.meal);
+  return normalizeRecipe({...data.meal,type:role});
 }
 
 /* ============================================================
@@ -966,18 +1060,23 @@ function nutriBadges(r){
   if(typeof r.protein==='number') out+=`<span class="badge kcal">💪 ${r.protein} g protein</span>`;
   return out;
 }
+// "Lunch · Starter" when the slot is a side course; just "Lunch" for a main/breakfast.
+function mealTypeLabel(meal){
+  const c=meal.course; const cl=(c&&c!=='main'&&c!=='single')?' · '+COURSE_LABEL[c]:'';
+  return meal.type+cl;
+}
 function mealCard(meal,di,mi){
   if(meal.loading)return `<div class="meal"><div class="thumb ${meal.type}"><div class="mini-spin"></div></div>
-    <div class="body"><div><div class="type">${meal.type}</div><div class="name" style="color:var(--muted)">finding a new dish…</div></div></div></div>`;
+    <div class="body"><div><div class="type">${mealTypeLabel(meal)}</div><div class="name" style="color:var(--muted)">finding a new dish…</div></div></div></div>`;
   const r=meal.recipe;
-  if(!r)return `<div class="meal"><div class="body"><div><div class="type">${meal.type}</div><div class="name">— no option —</div></div></div></div>`;
+  if(!r)return `<div class="meal"><div class="body"><div><div class="type">${mealTypeLabel(meal)}</div><div class="name">— no option —</div></div></div></div>`;
   const diffLabel=['','Very easy','Easy','Medium','Involved','Advanced'][r.difficulty]||'';
   const extra=(r.isLeftover?'<span class="badge leftover">♻️ Leftover — just reheat</span>':'')
     +(r.batchNote?'<span class="badge batch">🍲 Cook double → tomorrow\'s lunch</span>':'');
   return `<div class="meal ${meal.rejected?'rejected':''}">
     <div class="thumb ${meal.type}">${r.isLeftover?'♻️':(r.emoji||'🍽️')}</div>
     <div class="body"><div>
-      <div class="type">${meal.type}</div><div class="name">${r.name}</div><div class="desc">${r.desc}</div>
+      <div class="type">${mealTypeLabel(meal)}</div><div class="name">${r.name}</div><div class="desc">${r.desc}</div>
       <div class="badges"><span class="badge">⏱ ${r.time} min</span><span class="badge diff">${diffLabel}</span>${nutriBadges(r)}${extra}</div>
     </div>
     <div class="side-btns">
@@ -1028,9 +1127,10 @@ function renderReview(){
       const [di,mi]=btn.dataset.swap.split('-').map(Number);
       const meal=state.week[di].meals[mi];
       if(!state.useAI){ swapMeal(di,mi); renderReview(); saveState(); return; }
-      const avoid=[]; state.week.forEach(d=>d.meals.forEach(m=>{if(m.recipe&&m.type===meal.type)avoid.push(m.recipe.name);}));
+      const role=meal.course==='main'?meal.type:(meal.course||meal.type);
+      const avoid=[]; state.week.forEach(d=>d.meals.forEach(m=>{if(m.recipe)avoid.push(m.recipe.name);}));
       meal.loading=true; renderReview();
-      try { meal.recipe=await requestSwapAI(state.profile,meal.type,avoid); }
+      try { meal.recipe=await requestSwapAI(state.profile,role,avoid); }
       catch(e){ console.warn('Swap failed, local:',e.message); swapMeal(di,mi); }
       meal.loading=false; renderReview(); saveState();
     };
@@ -1065,7 +1165,7 @@ function renderRecipes(){
         const r=m.recipe;
         if(r.isLeftover){
           return `<div class="recipe">
-            <div class="rtype">${m.type}</div>
+            <div class="rtype">${mealTypeLabel(m)}</div>
             <div class="rname">♻️ ${r.name}</div>
             <p class="list-note">${r.desc||''}. You already bought and cooked this — nothing extra to shop for. Just reheat until piping hot.</p>
             <div class="badges"><span class="badge leftover">♻️ Leftover</span>${nutriBadges(r)}</div>
@@ -1074,7 +1174,7 @@ function renderRecipes(){
         const imgUrl=dishImageUrl(r);
         return `<div class="recipe">
           ${imgUrl?`<div class="recipe-photo"><img src="${imgUrl}" alt="" loading="lazy" onerror="this.closest('.recipe-photo').remove()"></div>`:''}
-          <div class="rtype">${m.type}</div>
+          <div class="rtype">${mealTypeLabel(m)}</div>
           <div class="rname">${r.emoji||''} ${r.name}</div>
           <div class="rdesc">${r.desc||''}</div>
           <div class="ing-head">🧾 Ingredients ${peopleCount()>1?`<span class="hint">(for ${peopleCount()} people)</span>`:''}${r.batchNote?' <span class="hint">— double batch, half becomes tomorrow\'s lunch</span>':''}</div>
@@ -1174,7 +1274,7 @@ function renderShopping(){
   app.innerHTML=`
     <div class="card">
       <h2>Your shopping list</h2>
-      <p class="sub">Built from ${mealCount()} meals. Repeated items are added up automatically. Ticks are remembered — even if you close the page.</p>
+      <p class="sub">Built from ${mealCount()} dishes across the week. Repeated items are added up automatically. Ticks are remembered — even if you close the page.</p>
       ${skipped?`<p class="list-note">🧺 Hiding ${skipped} item${skipped===1?'':'s'} you said ${skipped===1?'is':'are'} already in your cupboard.</p>`:''}
       ${totalBar}
       <div class="btn-row no-print" style="margin-bottom:16px">
