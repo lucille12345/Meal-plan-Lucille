@@ -1,6 +1,30 @@
 # Meal Planner — Project Memory (CLAUDE.md)
 
-_Last updated: 2026-07-18. This file is auto-loaded by Claude Code every session._
+_Last updated: 2026-07-19. This file is auto-loaded by Claude Code every session._
+
+> **DESIGN SESSION — DONE (2026-07-19).** The `DESIGN-BRIEF.md` "Table" design session is
+> complete. A new **`design/`** folder now exists in the repo with every deliverable from the
+> brief §0, all self-contained (link `tokens.css`; system/Google fonts + Unsplash CDN images
+> only; no build step). Contents:
+> - `design/tokens.css` — **the visual source of truth.** All colors, Fraunces/Inter type,
+>   radii, warm shadows, spacing, motion as CSS variables, PLUS every reusable component class
+>   (`.btn .chip .card .recipe-card .badge .input .stepper .slider .toggle .toast .skeleton
+>   .carousel .dots`). Cook-mode's warm-dark palette is the `.cook-dark` scope at the bottom.
+> - `design/components.html` — every component in every state.
+> - `design/01-landing.html` … `09-profile.html` — the nine screens (landing, sign-up,
+>   onboarding, planner (Woolworths rail + carousels), recipe, cook-mode, shopping, features
+>   drawer, profile). Static; light demo JS only.
+> - `design/index.html` — navigation index of all deliverables · `design/README.md` — rationale
+>   + exact "how Opus should lift this" instructions.
+> Direction realised: "Apple's restraint, Mob's appetite" — warm paper `#FDFBF7`, tomato/basil/
+> honey accents (no blue near food), big Fraunces display. Checked at 375px + 1280px, AA
+> contrast (deep accent variants for small text), `:focus-visible` + reduced-motion honored.
+>
+> **NEXT STEP → the Opus build session.** Nothing in the live app (`meal-planner.html`,
+> `server.js`) was changed by the design session — those get rewritten during the build.
+> Opus now starts at **`OPUS-BUILD-BRIEF.md` phase 1** (restructure to a `/public` multi-file
+> app-shell), then phase 2 lifts `design/tokens.css` + markup 1:1 into the real screens. The
+> current single-file app stays live on Render until the rebuilt app is ready to deploy.
 
 Source of truth for the meal-planner project. **Phases 1–4 are all DONE.** The app is live on
 the public internet (Render free tier) — frontend + backend + AI generation all verified working.
@@ -63,6 +87,7 @@ the public internet (Render free tier) — frontend + backend + AI generation al
 >   lifting the design 1:1. Includes the Supabase/Google/Resend/FormSubmit setup steps
 >   Lucille must do (all free) and the "no doubles" QA checklist.
 > Run the design session FIRST; Opus starts at its phase 1 only once `design/` exists.
+> (Design session is now DONE — see the status block at the very top; Opus is cleared for phase 1.)
 >
 > **Packaging decided 2026-07-19:** ship BOTH an installable **PWA** (phone + web) AND a
 > free **desktop download** (`.dmg`/`.exe` via **Tauri**, Electron fallback) from ONE web

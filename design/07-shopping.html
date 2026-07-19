@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Table — Shopping list</title>
+<link rel="stylesheet" href="tokens.css">
+<style>
+  .app-bar { position: sticky; top: 0; z-index: 40; background: rgba(253,251,247,.82); backdrop-filter: saturate(180%) blur(18px); border-bottom: 1px solid var(--hairline); }
+  .app-bar-inner { display: flex; align-items: center; gap: 20px; padding: 12px 24px; max-width: 900px; margin: 0 auto; }
+  .app-logo { font-family: var(--font-display); font-weight: 700; font-size: 19px; display: flex; gap: 8px; align-items: center; }
+  .app-logo .mark { width: 27px; height: 27px; border-radius: 8px; background: var(--tomato); color: #fff; display: grid; place-items: center; font-size: 14px; }
+  .app-nav { display: flex; gap: 4px; margin-left: 6px; }
+  .app-nav a { padding: 8px 14px; border-radius: var(--r-pill); font-size: var(--fs-sm); font-weight: 600; color: var(--muted); }
+  .app-nav a.on { background: var(--surface); color: var(--ink); box-shadow: var(--sh-1); }
+  .app-right { margin-left: auto; }
+  @media (max-width: 600px) { .app-nav { display: none; } }
+
+  .shop { max-width: 900px; margin: 0 auto; padding: 26px 24px 80px; }
+  .shop-head { display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; flex-wrap: wrap; margin-bottom: 6px; }
+  .shop-head h1 { font-size: var(--fs-h1); }
+  .totals { text-align: right; }
+  .totals .wk { font-family: var(--font-display); font-weight: 700; font-size: 34px; color: var(--tomato-deep); line-height: 1; }
+  .totals .lab { font-size: var(--fs-xs); color: var(--muted); }
+  .tools { display: flex; gap: 10px; flex-wrap: wrap; margin: 18px 0 8px; }
+  .pantry-whisper { font-size: var(--fs-sm); color: var(--faint); font-style: italic; margin: 14px 0 0; display: flex; gap: 7px; align-items: center; }
+
+  .tabs { display: inline-flex; background: var(--surface-2); border-radius: var(--r-pill); padding: 4px; margin: 24px 0 20px; }
+  .tabs button { border: 0; background: transparent; padding: 9px 18px; border-radius: var(--r-pill); font-weight: 600; font-size: var(--fs-sm); color: var(--muted); cursor: pointer; }
+  .tabs button.on { background: var(--surface); color: var(--ink); box-shadow: var(--sh-1); }
+
+  .sec-title { display: flex; align-items: center; gap: 10px; margin: 26px 0 12px; }
+  .sec-title h2 { font-size: var(--fs-h3); }
+  .sec-title .day-total { margin-left: auto; }
+
+  .list { background: var(--surface); border: 1px solid var(--hairline); border-radius: var(--r-card); overflow: hidden; box-shadow: var(--sh-1); }
+  .item { display: flex; align-items: center; gap: 14px; padding: 14px 18px; border-bottom: 1px solid var(--hairline); cursor: pointer; }
+  .item:last-child { border: 0; }
+  .box { width: 24px; height: 24px; border-radius: 8px; border: 2px solid var(--hairline-2); flex: none; display: grid; place-items: center; color: #fff; font-size: 14px; transition: all var(--dur) var(--ease); }
+  .item.done .box { background: var(--basil); border-color: var(--basil); }
+  .item .nm { flex: 1; }
+  .item.done .nm { text-decoration: line-through; color: var(--faint); }
+  .item .q { color: var(--muted); font-size: var(--fs-sm); font-variant-numeric: tabular-nums; }
+  .item .price { font-weight: 600; font-variant-numeric: tabular-nums; min-width: 52px; text-align: right; }
+  .item.done .price { color: var(--faint); }
+  .cat-label { padding: 12px 18px 4px; font-size: var(--fs-xs); text-transform: uppercase; letter-spacing: .08em; color: var(--faint); font-weight: 700; }
+</style>
+</head>
+<body>
+  <header class="app-bar">
+    <div class="app-bar-inner">
+      <div class="app-logo"><span class="mark">🍽</span> Table</div>
+      <nav class="app-nav">
+        <a href="04-planner.html">Planner</a>
+        <a class="on" href="07-shopping.html">Shopping</a>
+        <a href="09-profile.html">Profile</a>
+      </nav>
+      <div class="app-right"><button class="icon-btn" aria-label="Features" onclick="location.href='08-features-drawer.html'">☰</button></div>
+    </div>
+  </header>
+
+  <main class="shop">
+    <div class="shop-head">
+      <div>
+        <h1>Shopping list</h1>
+        <p class="muted" style="font-size:var(--fs-sm)">Mon 20 – Sun 26 July · for 2</p>
+      </div>
+      <div class="totals"><div class="wk">€84.20</div><div class="lab">week total</div></div>
+    </div>
+
+    <div class="tools">
+      <button class="btn btn-secondary btn-sm">📋 Copy</button>
+      <button class="btn btn-secondary btn-sm">🖨 Print</button>
+      <button class="btn btn-primary btn-sm">🔔 Remind me</button>
+    </div>
+    <p class="pantry-whisper">🫙 Hiding 4 pantry items you already have — salt, olive oil, rice, garlic.</p>
+
+    <div class="tabs">
+      <button class="on">🛒 Buy at the start</button>
+      <button>🌿 Fresh by day</button>
+    </div>
+
+    <!-- BUY AT START -->
+    <div class="sec-title"><h2>Buy at the start</h2><span class="badge day-total">14 items · €38.60</span></div>
+    <div class="list">
+      <div class="cat-label">Cupboard &amp; grains</div>
+      <div class="item done" onclick="this.classList.toggle('done')"><span class="box">✓</span><span class="nm">Brown rice / farro</span><span class="q">500 g</span><span class="price">€2.10</span></div>
+      <div class="item" onclick="this.classList.toggle('done')"><span class="box"></span><span class="nm">White miso paste</span><span class="q">1 jar</span><span class="price">€4.90</span></div>
+      <div class="item" onclick="this.classList.toggle('done')"><span class="box"></span><span class="nm">Sesame seeds</span><span class="q">1 pack</span><span class="price">€1.80</span></div>
+      <div class="item done" onclick="this.classList.toggle('done')"><span class="box">✓</span><span class="nm">Rice vinegar</span><span class="q">1 bottle</span><span class="price">€2.40</span></div>
+      <div class="cat-label">Freezer &amp; long-life</div>
+      <div class="item" onclick="this.classList.toggle('done')"><span class="box"></span><span class="nm">Edamame (frozen)</span><span class="q">400 g</span><span class="price">€3.20</span></div>
+      <div class="item" onclick="this.classList.toggle('done')"><span class="box"></span><span class="nm">Halloumi</span><span class="q">2 × 225 g</span><span class="price">€5.60</span></div>
+    </div>
+
+    <!-- FRESH BY DAY -->
+    <div class="sec-title" style="margin-top:34px"><h2>Fresh by day</h2></div>
+
+    <div class="sec-title" style="margin-top:8px"><h3 style="font-size:var(--fs-lg)">Sunday — for Mon</h3><span class="badge badge-tomato day-total">€16.40</span></div>
+    <div class="list">
+      <div class="item" onclick="this.classList.toggle('done')"><span class="box"></span><span class="nm">Salmon fillets</span><span class="q">2 × 140 g</span><span class="price">€9.80</span></div>
+      <div class="item" onclick="this.classList.toggle('done')"><span class="box"></span><span class="nm">Cucumber</span><span class="q">1</span><span class="price">€0.90</span></div>
+      <div class="item done" onclick="this.classList.toggle('done')"><span class="box">✓</span><span class="nm">Spring onions</span><span class="q">1 bunch</span><span class="price">€1.20</span></div>
+      <div class="item" onclick="this.classList.toggle('done')"><span class="box"></span><span class="nm">Mixed leaves</span><span class="q">120 g</span><span class="price">€2.30</span></div>
+    </div>
+
+    <div class="sec-title" style="margin-top:22px"><h3 style="font-size:var(--fs-lg)">Tuesday — for Wed</h3><span class="badge badge-tomato day-total">€9.20</span></div>
+    <div class="list">
+      <div class="item" onclick="this.classList.toggle('done')"><span class="box"></span><span class="nm">Cherry tomatoes</span><span class="q">250 g</span><span class="price">€2.10</span></div>
+      <div class="item" onclick="this.classList.toggle('done')"><span class="box"></span><span class="nm">Fresh basil</span><span class="q">1 pot</span><span class="price">€1.60</span></div>
+      <div class="item" onclick="this.classList.toggle('done')"><span class="box"></span><span class="nm">Peas (frozen ok)</span><span class="q">300 g</span><span class="price">€1.90</span></div>
+      <div class="item" onclick="this.classList.toggle('done')"><span class="box"></span><span class="nm">Lemon</span><span class="q">2</span><span class="price">€0.80</span></div>
+      <div class="item" onclick="this.classList.toggle('done')"><span class="box"></span><span class="nm">Parmesan</span><span class="q">80 g</span><span class="price">€2.80</span></div>
+    </div>
+  </main>
+</body>
+</html>

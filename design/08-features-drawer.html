@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Table — Features &amp; settings</title>
+<link rel="stylesheet" href="tokens.css">
+<style>
+  /* dimmed backdrop suggesting the app behind */
+  .backdrop { position: fixed; inset: 0; background: var(--paper); overflow: hidden; }
+  .backdrop .blurapp { position: absolute; inset: 0; filter: blur(3px) brightness(.98); opacity: .5; padding: 60px 40px; }
+  .backdrop .blurapp h1 { font-size: 40px; }
+  .backdrop .blurapp .row { display: flex; gap: 16px; margin-top: 20px; }
+  .backdrop .blurapp .ph { width: 200px; height: 220px; border-radius: 16px; background: var(--surface-2); }
+  .scrim { position: fixed; inset: 0; background: rgba(29,20,10,.42); z-index: 50; }
+
+  /* drawer: right slide-over on desktop, bottom sheet on mobile */
+  .drawer { position: fixed; z-index: 60; background: var(--paper); display: flex; flex-direction: column;
+    top: 0; right: 0; bottom: 0; width: 420px; box-shadow: -20px 0 60px rgba(40,25,10,.18); }
+  @media (max-width: 560px) {
+    .drawer { top: auto; left: 0; width: auto; border-radius: 22px 22px 0 0; max-height: 88vh; box-shadow: 0 -20px 60px rgba(40,25,10,.2); }
+  }
+  .dr-head { padding: 22px 24px 16px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--hairline); }
+  .dr-head h2 { font-size: var(--fs-h3); }
+  .dr-body { overflow-y: auto; padding: 20px 24px 34px; display: flex; flex-direction: column; gap: 26px; }
+
+  .grp-label { font-size: var(--fs-xs); text-transform: uppercase; letter-spacing: .1em; color: var(--faint); font-weight: 700; margin-bottom: 12px; }
+  .fcard { background: var(--surface); border: 1px solid var(--hairline); border-radius: var(--r-card); padding: 18px; display: flex; gap: 14px; align-items: flex-start; box-shadow: var(--sh-1); margin-bottom: 12px; }
+  .fcard:last-child { margin-bottom: 0; }
+  .fcard .ic { width: 44px; height: 44px; border-radius: 12px; display: grid; place-items: center; font-size: 22px; flex: none; }
+  .ic.cal { background: var(--basil-wash); } .ic.bell { background: var(--honey-wash); }
+  .ic.mail { background: var(--blush); } .ic.chat { background: var(--tomato-wash); } .ic.lang { background: var(--surface-2); }
+  .fcard .fb { flex: 1; min-width: 0; }
+  .fcard .fb .top { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+  .fcard .fb b { font-size: var(--fs-body); }
+  .fcard .fb p { color: var(--muted); font-size: var(--fs-sm); margin-top: 2px; }
+  .fcard .fb .actions { margin-top: 12px; display: flex; gap: 8px; align-items: center; }
+
+  .disabled-note { font-size: var(--fs-xs); color: var(--faint); font-style: italic; margin-top: 8px; }
+  .feedback textarea { margin-top: 12px; }
+  .settings-list { background: var(--surface); border: 1px solid var(--hairline); border-radius: var(--r-card); overflow: hidden; box-shadow: var(--sh-1); }
+  .setting { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 15px 18px; border-bottom: 1px solid var(--hairline); }
+  .setting:last-child { border: 0; }
+  .setting .s-nm { font-weight: 500; }
+  .setting .s-sub { font-size: var(--fs-xs); color: var(--muted); }
+</style>
+</head>
+<body>
+  <div class="backdrop">
+    <div class="blurapp">
+      <h1 class="display">Your week</h1>
+      <div class="row"><div class="ph"></div><div class="ph"></div><div class="ph"></div></div>
+    </div>
+  </div>
+  <div class="scrim" onclick="location.href='04-planner.html'"></div>
+
+  <aside class="drawer" role="dialog" aria-label="Features and settings">
+    <div class="dr-head">
+      <h2>Features &amp; settings</h2>
+      <button class="icon-btn" aria-label="Close" onclick="location.href='04-planner.html'">✕</button>
+    </div>
+    <div class="dr-body">
+
+      <!-- CONNECT -->
+      <section>
+        <div class="grp-label">Connect</div>
+        <div class="fcard">
+          <div class="ic cal">📅</div>
+          <div class="fb">
+            <div class="top"><b>Google Calendar</b><span class="badge badge-basil">Connected ✓</span></div>
+            <p>Your dinners &amp; shopping reminders in your calendar. Also exports an .ics anytime.</p>
+            <div class="actions"><button class="btn btn-secondary btn-sm">Export .ics</button><button class="btn btn-ghost btn-sm">Disconnect</button></div>
+          </div>
+        </div>
+        <div class="fcard">
+          <div class="ic bell">🔔</div>
+          <div class="fb">
+            <div class="top"><b>Reminders</b><button class="toggle" role="switch" aria-checked="true"></button></div>
+            <p>A push on shopping days — "tonight, buy for tomorrow."</p>
+            <p class="disabled-note">📱 SMS coming later — it needs a paid service. Push &amp; email are free.</p>
+          </div>
+        </div>
+        <div class="fcard">
+          <div class="ic mail">✉️</div>
+          <div class="fb">
+            <div class="top"><b>Email digest</b><button class="toggle" role="switch" aria-checked="false"></button></div>
+            <p>Your week &amp; list, emailed each Sunday morning.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- TALK TO LUCILLE -->
+      <section class="feedback">
+        <div class="grp-label">Talk to us</div>
+        <div class="fcard" style="flex-direction:column;gap:0">
+          <div style="display:flex;gap:14px;align-items:flex-start;width:100%">
+            <div class="ic chat">💬</div>
+            <div class="fb"><b>Write to Lucille</b><p>A thought, a bug, a dish you'd love? It goes straight to her inbox.</p></div>
+          </div>
+          <textarea class="input" rows="3" placeholder="Tell Lucille anything…" style="margin-top:14px"></textarea>
+          <div style="display:flex;gap:8px;margin-top:10px;width:100%">
+            <input class="input" placeholder="Your email (optional)" style="flex:1">
+            <button class="btn btn-primary btn-sm">Send</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- SETTINGS -->
+      <section>
+        <div class="grp-label">Settings</div>
+        <div class="settings-list">
+          <div class="setting"><div><div class="s-nm">Language</div><div class="s-sub">Français coming soon</div></div><span class="badge">🇬🇧 EN</span></div>
+          <div class="setting"><div><div class="s-nm">Servings default</div><div class="s-sub">Household size</div></div><div class="stepper"><button aria-label="less">−</button><span class="val">2</span><button aria-label="more">＋</button></div></div>
+          <div class="setting"><div><div class="s-nm">Currency &amp; city</div><div class="s-sub">Local prices</div></div><span class="badge">€ · Paris</span></div>
+          <div class="setting"><div><div class="s-nm">Use real AI generation</div><div class="s-sub">Off = instant offline pool</div></div><button class="toggle" role="switch" aria-checked="false"></button></div>
+        </div>
+      </section>
+
+      <button class="btn btn-secondary btn-block">Sign out</button>
+    </div>
+  </aside>
+</body>
+</html>

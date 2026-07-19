@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Table — Design deliverables</title>
+<link rel="stylesheet" href="tokens.css">
+<style>
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 56px 24px 80px; }
+  .kicker { font-size: var(--fs-xs); letter-spacing: .16em; text-transform: uppercase; color: var(--tomato-deep); font-weight: 700; }
+  h1 { font-size: var(--fs-h1); margin: 8px 0 6px; }
+  .lede { color: var(--muted); max-width: 60ch; margin-bottom: 36px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px,1fr)); gap: 18px; }
+  a.tile { display: flex; flex-direction: column; gap: 4px; padding: 22px; border-radius: var(--r-card); border: 1px solid var(--hairline); background: var(--surface); box-shadow: var(--sh-1); color: var(--ink); transition: transform var(--dur) var(--ease), box-shadow var(--dur) var(--ease); }
+  a.tile:hover { transform: translateY(-3px); box-shadow: var(--sh-3); color: var(--ink); }
+  a.tile .n { font-family: ui-monospace, Menlo, monospace; font-size: var(--fs-xs); color: var(--tomato-deep); font-weight: 700; }
+  a.tile .t { font-family: var(--font-display); font-weight: 600; font-size: var(--fs-lg); }
+  a.tile .d { color: var(--muted); font-size: var(--fs-sm); }
+  .sys { margin-bottom: 30px; display: flex; gap: 14px; flex-wrap: wrap; }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="kicker">Table · Meal Planner v2</div>
+    <h1>Design deliverables</h1>
+    <p class="lede">"Apple's restraint, Mob's appetite." Nine screens, a full token system, and a component gallery — all self-contained and ready for Opus to lift 1:1.</p>
+    <div class="sys">
+      <a class="btn btn-secondary btn-sm" href="tokens.css">tokens.css →</a>
+      <a class="btn btn-secondary btn-sm" href="components.html">components.html →</a>
+      <a class="btn btn-secondary btn-sm" href="README.md">README →</a>
+    </div>
+    <div class="grid">
+      <a class="tile" href="01-landing.html"><span class="n">01</span><span class="t">Landing</span><span class="d">Hero, how-it-works, planner preview, quote &amp; stat bands, FAQ, footer.</span></a>
+      <a class="tile" href="02-signup.html"><span class="n">02</span><span class="t">Sign up / Log in</span><span class="d">Magic-link + Google, plus "check your email" state.</span></a>
+      <a class="tile" href="03-onboarding.html"><span class="n">03</span><span class="t">Onboarding</span><span class="d">Stepped flow — every input type + the connect step.</span></a>
+      <a class="tile" href="04-planner.html"><span class="n">04</span><span class="t">Planner</span><span class="d">Week rail + categorized recipe carousels (the heart).</span></a>
+      <a class="tile" href="05-recipe.html"><span class="n">05</span><span class="t">Recipe detail</span><span class="d">Photo hero, badges, ingredients, method, photo slot.</span></a>
+      <a class="tile" href="06-cook-mode.html"><span class="n">06</span><span class="t">Cook mode</span><span class="d">Warm-dark, one huge step, read-aloud, ingredients drawer.</span></a>
+      <a class="tile" href="07-shopping.html"><span class="n">07</span><span class="t">Shopping list</span><span class="d">Buy-at-start / fresh-by-day, per-day prices, ticks.</span></a>
+      <a class="tile" href="08-features-drawer.html"><span class="n">08</span><span class="t">Features drawer</span><span class="d">Connect, reminders, feedback to Lucille, settings.</span></a>
+      <a class="tile" href="09-profile.html"><span class="n">09</span><span class="t">Profile</span><span class="d">Targets, favorites, my photos, account, danger zone.</span></a>
+    </div>
+  </div>
+</body>
+</html>

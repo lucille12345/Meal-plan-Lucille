@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Table — Sign up</title>
+<link rel="stylesheet" href="tokens.css">
+<style>
+  body { min-height: 100vh; display: grid; grid-template-columns: 1fr 1fr; }
+  @media (max-width: 860px) { body { grid-template-columns: 1fr; } .aside { display: none; } }
+  .aside { position: relative; overflow: hidden; }
+  .aside img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  .aside .veil { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(20,12,4,.15), rgba(20,12,4,.62)); }
+  .aside .copy { position: absolute; left: 44px; right: 44px; bottom: 48px; color: #fff; z-index: 1; }
+  .aside .copy .logo { color: #fff; font-family: var(--font-display); font-weight: 700; font-size: 22px; display: flex; gap: 9px; align-items: center; margin-bottom: auto; }
+  .aside .logo-top { position: absolute; top: 40px; left: 44px; z-index: 1; color: #fff; font-family: var(--font-display); font-weight: 700; font-size: 22px; display: flex; gap: 9px; align-items: center; }
+  .aside .logo-top .mark { width: 30px; height: 30px; border-radius: 9px; background: var(--tomato); display: grid; place-items: center; font-size: 16px; }
+  .aside .copy h2 { color: #fff; font-size: var(--fs-h2); max-width: 16ch; }
+  .aside .copy p { color: rgba(255,255,255,.85); margin-top: 12px; max-width: 34ch; }
+
+  .panel { display: flex; align-items: center; justify-content: center; padding: 40px 28px; }
+  .form-card { width: 100%; max-width: 400px; }
+  .form-card .top-back { font-size: var(--fs-sm); color: var(--muted); font-weight: 600; margin-bottom: 34px; display: inline-flex; gap: 6px; }
+  .form-card h1 { font-size: var(--fs-h1); }
+  .form-card .lede { color: var(--muted); margin: 10px 0 30px; }
+  .btn-google { display:flex; width:100%; gap:10px; }
+  .btn-google .g { width: 20px; height: 20px; border-radius: 50%; background: conic-gradient(from -45deg,#EA4335 0 25%,#FBBC05 0 50%,#34A853 0 75%,#4285F4 0); }
+  .divider { display: flex; align-items: center; gap: 14px; color: var(--faint); font-size: var(--fs-xs); margin: 22px 0; }
+  .divider::before, .divider::after { content: ""; height: 1px; background: var(--hairline); flex: 1; }
+  .promise { display: flex; flex-direction: column; gap: 10px; margin-top: 26px; }
+  .promise li { display: flex; gap: 10px; align-items: center; font-size: var(--fs-sm); color: var(--muted); list-style: none; }
+  .promise li b { color: var(--ink); font-weight: 600; }
+  .promise .tick { color: var(--basil-deep); font-size: 15px; }
+  .fine { font-size: var(--fs-xs); color: var(--faint); margin-top: 26px; text-align: center; }
+  .tabs { display: inline-flex; background: var(--surface-2); border-radius: var(--r-pill); padding: 4px; margin-bottom: 26px; }
+  .tabs button { border: 0; background: transparent; padding: 8px 20px; border-radius: var(--r-pill); font-weight: 600; font-size: var(--fs-sm); color: var(--muted); cursor: pointer; }
+  .tabs button.on { background: var(--surface); color: var(--ink); box-shadow: var(--sh-1); }
+
+  /* confirmation state */
+  .state { display: none; }
+  .state.on { display: block; }
+  .confirm { text-align: center; }
+  .confirm .env { width: 82px; height: 82px; border-radius: 22px; background: var(--basil-wash); display: grid; place-items: center; font-size: 38px; margin: 0 auto 24px; }
+  .confirm h1 { font-size: var(--fs-h2); }
+  .confirm p { color: var(--muted); margin: 12px auto 0; max-width: 34ch; }
+  .confirm .mailto { font-weight: 600; color: var(--ink); }
+</style>
+</head>
+<body>
+  <div class="aside">
+    <img src="https://images.unsplash.com/photo-1498837167922-ddd27525d352?auto=format&fit=crop&w=1000&q=75" alt="A spread of fresh dishes">
+    <div class="veil"></div>
+    <div class="logo-top"><span class="mark">🍽</span> Table</div>
+    <div class="copy">
+      <h2>Dinner, sorted — for the whole week.</h2>
+      <p>Join for free and get your first personalized week in about two minutes.</p>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="form-card">
+      <!-- SIGN-IN STATE -->
+      <div class="state on" id="s-form">
+        <a class="top-back" href="01-landing.html">← Back home</a>
+        <div class="tabs">
+          <button class="on">Sign up</button>
+          <button>Log in</button>
+        </div>
+        <h1>Create your account</h1>
+        <p class="lede">Free forever. No card. Your data stays yours.</p>
+
+        <button class="btn btn-secondary btn-google btn-block"><span class="g"></span> Continue with Google</button>
+        <div class="divider">or with email</div>
+        <div class="field" style="margin-bottom:16px">
+          <label for="em">Email</label>
+          <input class="input" id="em" type="email" placeholder="you@email.com">
+        </div>
+        <button class="btn btn-primary btn-block" onclick="document.getElementById('s-form').classList.remove('on');document.getElementById('s-sent').classList.add('on')">Email me a magic link</button>
+
+        <ul class="promise">
+          <li><span class="tick">✓</span> <span><b>Free forever</b> — no card, no trial clock</span></li>
+          <li><span class="tick">✓</span> <span><b>No passwords</b> — we email you a one-tap link</span></li>
+          <li><span class="tick">✓</span> <span><b>Your data stays yours</b> — export or delete anytime</span></li>
+        </ul>
+        <p class="fine">By continuing you agree to our friendly <a href="#">Terms</a> &amp; <a href="#">Privacy</a>.</p>
+      </div>
+
+      <!-- CONFIRMATION STATE -->
+      <div class="state" id="s-sent">
+        <div class="confirm">
+          <div class="env">📬</div>
+          <h1>Check your email</h1>
+          <p>We sent a magic link to <span class="mailto">you@email.com</span>. Tap it and you're in — no password needed.</p>
+          <div style="margin-top:26px;display:flex;flex-direction:column;gap:10px">
+            <a class="btn btn-primary btn-block" href="03-onboarding.html">Open my email ↗</a>
+            <button class="btn btn-ghost btn-block" onclick="document.getElementById('s-sent').classList.remove('on');document.getElementById('s-form').classList.add('on')">Use a different email</button>
+          </div>
+          <p class="fine">Didn't get it? Check spam, or <a href="#">resend the link</a>.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
