@@ -90,6 +90,68 @@ button.ghost {
 button.ghost:hover { transform: translateY(-2px); box-shadow: var(--sh-2); }
 button.ghost.on { background: var(--tomato-wash); border-color: var(--tomato); color: var(--tomato-deep); }
 
+/* ============================================================================
+   Onboarding questionnaire v2 — friendly 8-step wizard (design 03, §6)
+   Lifts design/03-onboarding.html markup onto the shared tokens. Namespaced
+   with q- / .goal / .connect so it never clashes with the 1·2·3 .steps bar.
+   ============================================================================ */
+.wizard { max-width: 560px; margin: 0 auto; }
+.q-top { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 16px; }
+.q-top #q-count { color: var(--muted); font-size: var(--fs-sm); }
+.q-dots { justify-content: center; margin: 0 auto 26px; }
+.q-step { display: none; }
+.q-step.on { display: block; animation: rise .3s var(--ease) both; }
+.q-emojihead { font-size: 40px; margin-bottom: 12px; }
+.q-step h2 { font-size: var(--fs-h1); margin: 0 0 2px; }
+.q-why { color: var(--faint); font-style: italic; font-size: var(--fs-sm); margin: 10px 0 24px; display: flex; gap: 7px; align-items: center; }
+.q-why::before { content: "💬"; font-style: normal; flex: none; }
+.q-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+@media (max-width: 480px) { .q-fields { grid-template-columns: 1fr; } }
+
+/* goal cards */
+.goal-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 14px; }
+@media (max-width: 520px) { .goal-grid { grid-template-columns: 1fr; } }
+.goal { border: 1.5px solid var(--hairline-2); border-radius: var(--r-card); padding: 26px 18px; text-align: center; cursor: pointer; background: var(--surface); transition: all var(--dur) var(--ease); }
+.goal:hover { border-color: var(--faint); transform: translateY(-2px); }
+.goal.on { border-color: var(--tomato); background: var(--tomato-wash); box-shadow: var(--sh-2); }
+.goal .g-em { font-size: 38px; }
+.goal .g-t { font-family: var(--font-display); font-weight: 600; font-size: var(--fs-lg); margin-top: 10px; }
+.goal .g-s { font-size: var(--fs-xs); color: var(--muted); margin-top: 4px; }
+
+/* chip grids (tokens supply .chip / .chip.selected) */
+.chip-grid { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 6px; }
+
+/* inline checkbox rows */
+.q-check { display: flex; align-items: flex-start; gap: 10px; font-weight: 400; margin: 0; cursor: pointer; }
+.q-check input { width: 18px; height: 18px; margin-top: 3px; accent-color: var(--basil); flex: none; }
+.q-util { margin-top: 24px; }
+
+/* numbers step: target banner + per-meal sliders */
+.q-target { background: linear-gradient(120deg, var(--basil-wash), var(--blush)); border-radius: 16px; padding: 20px; text-align: center; margin-bottom: 24px; }
+.q-target .big { font-family: var(--font-display); font-weight: 700; font-size: 40px; color: var(--basil-deep); line-height: 1; }
+.q-target .cap { color: var(--muted); font-size: var(--fs-sm); margin-top: 6px; }
+.slider-block { padding: 16px 0; border-bottom: 1px solid var(--hairline); }
+.slider-block:last-child { border: 0; }
+.slider-block .sl-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 10px; }
+.slider-block .sl-head b { font-weight: 600; }
+.slider-block .sl-val { font-family: var(--font-display); font-weight: 700; font-size: var(--fs-lg); color: var(--tomato-deep); font-variant-numeric: tabular-nums; }
+
+/* connect step */
+.connect-cards { display: grid; gap: 14px; }
+.connect { border: 1px solid var(--hairline); border-radius: var(--r-card); padding: 20px; display: flex; gap: 16px; align-items: flex-start; background: var(--surface); box-shadow: var(--sh-1); }
+.connect .ic { width: 50px; height: 50px; border-radius: 13px; display: grid; place-items: center; font-size: 25px; flex: none; }
+.connect .ic.cal { background: var(--basil-wash); }
+.connect .ic.bell { background: var(--honey-wash); }
+.connect .c-body { flex: 1; }
+.connect .c-body b { font-size: var(--fs-lg); }
+.connect .c-body p { color: var(--muted); font-size: var(--fs-sm); margin: 3px 0 12px; }
+
+/* sticky footer nav */
+.q-foot { position: sticky; bottom: 0; background: linear-gradient(transparent, var(--paper) 34%); padding: 20px 0 10px; margin-top: 12px; display: flex; gap: 12px; align-items: center; }
+.q-foot .q-back { color: var(--muted); font-weight: 600; font-size: var(--fs-sm); cursor: pointer; background: none; border: 0; padding: 10px; }
+.q-foot .q-back:hover { color: var(--ink); }
+.q-foot .btn { flex: 1; }
+
 /* ---- review: day blocks + meal rows ---- */
 .day-block { margin-bottom: var(--s-6); }
 .day-head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; margin: 0 0 10px; flex-wrap: wrap; }

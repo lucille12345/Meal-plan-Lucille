@@ -58,10 +58,38 @@ _Last updated: 2026-07-19. This file is auto-loaded by Claude Code every session
 >   stat band, FAQ, footer, parallax doodads. Signed-out visitors land here → CTAs → sign-in.
 >   Shell split: app screens in `#app-shell` (narrow), landing in `#landing-root` (full width).
 > - **To view locally:** `node server.js` → open `http://localhost:8787/`.
-> - **NEXT (in order):** questionnaire v2 (5), meals v3 = 3 courses + no-repeat + real links +
+> - **NEXT (in order):** meals v3 = 3 courses + no-repeat + real links +
 >   photo/image mapping (6), Woolworths planner rail+carousels+DnD (7), per-day pricing (8),
 >   PWA (9), integrations incl. Google OAuth (10), Tauri desktop (11).
 >   Merge `v2-rebuild` → `main` + deploy only on Lucille's word.
+
+> **BUILD SESSION — Phase 5 DONE (2026-07-19, Opus). Not committed yet — awaiting Lucille's OK.**
+> Questionnaire v2 (§6) + targets engine wiring, on branch `v2-rebuild`, verified in-browser AI OFF.
+> - **8-step onboarding wizard** replaces the old single-page form (`renderProfile` in `public/app.js`),
+>   lifting `design/03-onboarding.html` markup onto the shared tokens: Welcome (name) · You
+>   (age/household steppers, weight/height, gender) · Rhythm (life stage, activity, times/week) ·
+>   Goal (Feel light/Stay balanced/Get stronger cards → stable internal `lose/maintain/gain` keys) ·
+>   Tastes (sweet/savory breakfast single-select, cuisine chips, dislikes, allergies, free-text) ·
+>   Kitchen (cooking confidence + time-per-meal sliders, cook-once-eat-twice, pantry) · Numbers
+>   (live calorie target + per-meal kcal split sliders + budget €/day + city) · Connect (skippable;
+>   Calendar/reminders shown as "Coming soon" — real wiring is Phase 10). Own progress dots; the
+>   1·2·3 bar is hidden during the wizard. **Persists to state on every step** (so cloud sync + resume work).
+> - **Targets engine:** `computeMealTargets()` splits the daily kcal 25/40/35 (user-adjustable,
+>   normalized); shown live in the Numbers step and on the review banner
+>   ("roughly 590 / 950 / 830 kcal across breakfast, lunch & dinner"). `goalWord()` keeps UI wording
+>   friendly. New profile fields: `name`, `breakfastPref`, `cuisines[]`, `timePerMeal`, `mealSplit`,
+>   `budgetPerDay`. **Budget is now €/day**; `migrateProfile()` derives it from an old weekly value
+>   (÷7) and sets `budget = budgetPerDay×7` so the current (weekly) shopping-list pill keeps working
+>   until Phase 8 reworks pricing to per-day. `timePerMeal` now feeds the recipe time filter.
+> - **Verified:** all 8 steps render + navigate, per-step persistence, single/multi chip logic, goal
+>   mapping, live target math (~2,370 kcal / 128 g for the test profile — Mifflin check passed),
+>   dislikes+allergies excluded from the generated week, pantry hiding on the shopping list, zero
+>   `/generate-week` calls with AI off, zero console errors, 375px + 1280px. Edit-profile re-enters
+>   the wizard pre-filled.
+> - **Known (NOT a Phase-5 bug):** the small offline pool + time/difficulty filter can repeat dish
+>   names across the week when AI is off. The **hard no-repeat rule + expanded pool + 3-course
+>   structure is Phase 6 (Meals v3)** — the "no doubles" QA item lands there, not here.
+> - **Files touched:** `public/app.js` (wizard + targets), `public/app-screens.css` (wizard styles).
 
 Source of truth for the meal-planner project. **Phases 1–4 are all DONE.** The app is live on
 the public internet (Render free tier) — frontend + backend + AI generation all verified working.

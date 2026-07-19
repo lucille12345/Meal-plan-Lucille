@@ -60,6 +60,21 @@ const DAYS = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sun
 const DISLIKE_OPTIONS = ['Fish','Beef','Chicken','Pork','Mushrooms','Eggs','Onion','Spicy food','Cheese'];
 const ALLERGY_OPTIONS = ['Nuts','Dairy','Gluten','Shellfish','Soy'];
 const PANTRY_OPTIONS = ['Salt','Pepper','Olive oil','Cooking oil','Butter','Flour','Sugar','Rice','Pasta','Onion','Garlic','Soy sauce','Honey','Spices'];
+// Questionnaire v2 (§6): friendly taste + cuisine choices.
+const CUISINE_OPTIONS = [
+  {v:'French',emoji:'🇫🇷'},{v:'Italian',emoji:'🇮🇹'},{v:'Asian',emoji:'🥢'},
+  {v:'Mexican',emoji:'🌶'},{v:'Middle-Eastern',emoji:'🧆'},{v:'Surprise me',emoji:'✨'},
+];
+const BREAKFAST_OPTIONS = [
+  {v:'sweet',label:'🥐 Sweet'},{v:'savory',label:'🍳 Savory'},{v:'surprise',label:'✨ Surprise me'},
+];
+// The three friendly goal cards map 1:1 to the stable internal keys (never shown in UI).
+const GOAL_CARDS = [
+  {key:'lose',    emoji:'🍃', title:'Feel light',   sub:'lighter, fresher plates'},
+  {key:'maintain',emoji:'⚖️', title:'Stay balanced', sub:'steady & satisfying'},
+  {key:'gain',    emoji:'💪', title:'Get stronger',  sub:'fuller, protein-rich'},
+];
+const DEFAULT_SPLIT = { breakfast:25, lunch:40, dinner:35 };   // per-meal kcal % (§6.7)
 
 /* ---- persistence (localStorage + optional Supabase cloud) ---- */
 const STORAGE_KEY = 'mealPlannerState';
@@ -90,7 +105,7 @@ function loadState(){
     if (!raw) return;
     const saved = JSON.parse(raw);
     if (saved && typeof saved === 'object') {
-      state.profile = saved.profile || null;
+      state.profile = migrateProfile(saved.profile) || null;
       state.week = Array.isArray(saved.week) ? saved.week : [];
       state.useAI = !!saved.useAI;
       state.favorites = Array.isArray(saved.favorites) ? saved.favorites : [];
@@ -137,6 +152,32 @@ function computeTargets(p){
   const kcal=Math.round(tdee/10)*10;
   const protein=Math.round(kg*(goal==='maintain'?1.6:2.0));
   return { kcal, protein };
+}
+/* ---- per-meal kcal split (§6.7): user-adjustable %, normalized so any mix works ---- */
+function mealSplitOf(p){
+  const s=(p&&p.mealSplit)||DEFAULT_SPLIT;
+  const b=Number(s.breakfast)||0, l=Number(s.lunch)||0, d=Number(s.dinner)||0;
+  return (b+l+d)>0 ? {breakfast:b,lunch:l,dinner:d} : {...DEFAULT_SPLIT};
+}
+function computeMealTargets(p){
+  const t=computeTargets(p); if(!t) return null;
+  const s=mealSplitOf(p); const sum=s.breakfast+s.lunch+s.dinner;
+  const per=m=>Math.round(t.kcal*s[m]/sum/10)*10;
+  return { breakfast:per('breakfast'), lunch:per('lunch'), dinner:per('dinner') };
+}
+// UI never shows clinical words — this maps the internal goal key to friendly copy.
+function goalWord(goal){ return {lose:'feeling light',maintain:'balanced',gain:'getting stronger'}[goal]||'balanced'; }
+
+/* ---- keep older saved profiles working as fields are added (§4 budget migration) ---- */
+function migrateProfile(p){
+  if(!p||typeof p!=='object') return p;
+  if(p.budgetPerDay==null && p.budget!=null && p.budget!==''){
+    const w=Number(p.budget); if(isFinite(w)&&w>0) p.budgetPerDay=Math.max(1,Math.round(w/7));
+  }
+  if(!p.mealSplit) p.mealSplit={...DEFAULT_SPLIT};
+  if(!p.breakfastPref) p.breakfastPref='surprise';
+  if(!Array.isArray(p.cuisines)) p.cuisines=[];
+  return p;
 }
 
 /* ---- pantry staples: skip what the user already owns ---- */
@@ -208,7 +249,8 @@ function eligibleRecipes(type,profile){
   // favorites of this meal type join the pool (they've earned it)
   const pool=[...RECIPES, ...state.favorites.filter(f=>f.type===type)];
   const base=pool.filter(r=>r.type===type&&passesDietFilters(r,profile));
-  const maxDiff=maxDifficultyFor(profile.cookingLevel), maxTime=maxTimeFor(profile.lifeStage);
+  const maxDiff=maxDifficultyFor(profile.cookingLevel);
+  const maxTime=Number(profile.timePerMeal)>0 ? Number(profile.timePerMeal) : maxTimeFor(profile.lifeStage);
   const strict=base.filter(r=>r.difficulty<=maxDiff&&r.time<=maxTime);
   return strict.length?strict:base;
 }
@@ -336,7 +378,8 @@ function render(){
   updateSteps();
   // The 1·2·3 step bar is only meaningful inside the planner flow — hide it on sign-in.
   const stepsEl=document.querySelector('.steps');
-  if(stepsEl)stepsEl.style.display=(state.screen==='signin')?'none':'';
+  // Sign-in and the onboarding wizard each have their own progress UI — hide the 1·2·3 bar there.
+  if(stepsEl)stepsEl.style.display=(state.screen==='signin'||state.screen==='profile')?'none':'';
   if(state.screen==='signin')renderSignIn();
   else if(state.screen==='profile')renderProfile();
   else if(state.screen==='loading')renderLoading();
@@ -577,112 +620,271 @@ function renderSignIn(){
   };
 }
 
-/* ----- Screen 1: questionnaire ----- */
+/* ----- Screen 1: questionnaire v2 — friendly 8-step onboarding (§6) ----- */
+const Q_STEPS = 8;   // Welcome · You · Rhythm · Goal · Tastes · Kitchen · Numbers · Connect
 function renderProfile(){
-  const p=state.profile||{weight:'',height:'',age:'',gender:'female',lifeStage:'working',goal:'maintain',sport:'none',frequency:0,cookingLevel:5,people:1,dislikes:[],allergies:[],pantry:[],leftovers:false,avoidText:'',budget:'',city:''};
+  const d={weight:'',height:'',age:'',gender:'female',lifeStage:'working',goal:'maintain',
+    sport:'none',frequency:0,cookingLevel:5,timePerMeal:30,people:1,name:'',
+    breakfastPref:'surprise',cuisines:[],dislikes:[],allergies:[],pantry:[],leftovers:false,
+    avoidText:'',budget:'',budgetPerDay:12,city:'',mealSplit:{...DEFAULT_SPLIT}};
+  const p={...d,...(state.profile||{})};
+  const split={...DEFAULT_SPLIT,...(p.mealSplit||{})};
+  const sel=(v,cur)=>v===cur?'selected':'';
+  const chipRow=(id,opts,chosen,label)=>`<div class="chip-grid" id="${id}">${opts.map(o=>{
+    const v=typeof o==='string'?o:o.v; const lab=typeof o==='string'?o:(o.label||`${o.emoji} ${o.v}`);
+    return `<button type="button" class="chip ${chosen.includes(v)?'selected':''}" data-v="${v}">${lab}</button>`;
+  }).join('')}</div>`;
+
   app.innerHTML=`
-    <div class="card">
-      <h2>Tell us about you</h2>
-      <p class="sub">This shapes which meals we suggest, how involved they are, portions, and the budget.</p>
-      <div class="row">
-        <div><label>Weight (kg)</label><input type="number" id="weight" value="${p.weight}" placeholder="e.g. 65"></div>
-        <div><label>Height (cm)</label><input type="number" id="height" value="${p.height||''}" placeholder="e.g. 170"></div>
-        <div><label>Age</label><input type="number" id="age" value="${p.age||''}" min="1" max="120" placeholder="e.g. 30"></div>
+  <div class="wizard">
+    <div class="q-top">
+      <span class="hint" id="q-count" style="font-style:normal;font-weight:600">Step 1 of ${Q_STEPS}</span>
+      ${cloudEnabled()?'<button type="button" class="btn btn-ghost btn-sm" id="q-signout">Sign out</button>':''}
+    </div>
+    <div class="dots q-dots" id="q-dots">${Array.from({length:Q_STEPS},()=>'<i></i>').join('')}</div>
+
+    <!-- 1 · Welcome -->
+    <div class="q-step on" data-step="0">
+      <div class="q-emojihead">👋</div>
+      <h2>First — what should we call you?</h2>
+      <div class="q-why">So your week feels like yours, not a spreadsheet.</div>
+      <div class="field"><label for="q-name">Your name</label>
+        <input class="input" id="q-name" value="${p.name||''}" placeholder="Lucille" style="font-size:var(--fs-lg)"></div>
+      ${hasSavedData()?'<div class="q-util"><button type="button" class="btn btn-ghost btn-sm" id="q-clear">Clear saved data &amp; start fresh</button></div>':''}
+    </div>
+
+    <!-- 2 · You -->
+    <div class="q-step" data-step="1">
+      <div class="q-emojihead">🧍</div>
+      <h2>A little about you</h2>
+      <div class="q-why">We use this to size portions — never to judge. Friendly numbers only.</div>
+      <div class="q-fields" style="margin-bottom:18px">
+        <div class="field"><label>Age</label>
+          <div class="stepper" data-step-min="14" data-step-max="99"><button type="button" data-dir="-1" aria-label="less">−</button><span class="val" id="q-age">${Number(p.age)||32}</span><button type="button" data-dir="1" aria-label="more">＋</button></div></div>
+        <div class="field"><label>Household size</label>
+          <div class="stepper" data-step-min="1" data-step-max="8"><button type="button" data-dir="-1" aria-label="less">−</button><span class="val" id="q-people">${Number(p.people)||1}</span><button type="button" data-dir="1" aria-label="more">＋</button></div></div>
       </div>
-      <p class="hint" style="margin:-6px 0 0">Weight, height and age let us estimate your daily calorie & protein target — the meals are portioned to hit it. Leave blank to skip.</p>
-      <div class="row">
-        <div><label>Gender</label><select id="gender">
-          <option value="female" ${p.gender==='female'?'selected':''}>Female</option>
-          <option value="male" ${p.gender==='male'?'selected':''}>Male</option>
-          <option value="other" ${p.gender==='other'?'selected':''}>Other / prefer not to say</option>
+      <div class="q-fields">
+        <div class="field"><label for="q-weight">Weight (kg)</label><input class="input" id="q-weight" type="number" value="${p.weight}" placeholder="64"></div>
+        <div class="field"><label for="q-height">Height (cm)</label><input class="input" id="q-height" type="number" value="${p.height}" placeholder="168"></div>
+      </div>
+      <div class="field" style="margin-top:16px"><label for="q-gender">Gender</label>
+        <select class="select" id="q-gender">
+          <option value="female" ${sel('female',p.gender)}>Female</option>
+          <option value="male" ${sel('male',p.gender)}>Male</option>
+          <option value="other" ${sel('other',p.gender)}>Other / prefer not to say</option>
         </select></div>
-        <div><label>Cooking for how many?</label><input type="number" id="people" value="${p.people||1}" min="1" max="8"></div>
-      </div>
-      <div class="row">
-        <div><label>Life stage <span class="hint">(affects cooking time)</span></label><select id="lifeStage">
-          <option value="student" ${p.lifeStage==='student'?'selected':''}>Student (quick & cheap)</option>
-          <option value="working" ${p.lifeStage==='working'?'selected':''}>Working adult</option>
-          <option value="parent" ${p.lifeStage==='parent'?'selected':''}>Parent / family</option>
-          <option value="flexible" ${p.lifeStage==='flexible'?'selected':''}>Plenty of time to cook</option>
+      <p class="q-why" style="margin-top:16px">Weight, height & age let us estimate your calorie target — leave blank to skip.</p>
+    </div>
+
+    <!-- 3 · Rhythm -->
+    <div class="q-step" data-step="2">
+      <div class="q-emojihead">🏃</div>
+      <h2>Your rhythm</h2>
+      <div class="q-why">Busy weeks get quicker meals; active weeks get bigger portions.</div>
+      <div class="field"><label for="q-lifeStage">Life stage</label>
+        <select class="select" id="q-lifeStage">
+          <option value="student" ${sel('student',p.lifeStage)}>Student (quick & cheap)</option>
+          <option value="working" ${sel('working',p.lifeStage)}>Working adult</option>
+          <option value="parent" ${sel('parent',p.lifeStage)}>Parent / family</option>
+          <option value="flexible" ${sel('flexible',p.lifeStage)}>Plenty of time to cook</option>
         </select></div>
-        <div><label>Goal</label><select id="goal">
-          <option value="lose" ${p.goal==='lose'?'selected':''}>Lose weight</option>
-          <option value="maintain" ${p.goal==='maintain'?'selected':''}>Maintain</option>
-          <option value="gain" ${p.goal==='gain'?'selected':''}>Build muscle / gain</option>
-        </select></div>
+      <div class="q-fields" style="margin-top:16px">
+        <div class="field"><label for="q-sport">Main activity</label>
+          <select class="select" id="q-sport">
+            <option value="none" ${sel('none',p.sport)}>None</option>
+            <option value="running" ${sel('running',p.sport)}>Running / cardio</option>
+            <option value="gym" ${sel('gym',p.sport)}>Gym / weights</option>
+            <option value="team" ${sel('team',p.sport)}>Team sport</option>
+            <option value="yoga" ${sel('yoga',p.sport)}>Yoga / pilates</option>
+          </select></div>
+        <div class="field"><label for="q-frequency">Times per week</label>
+          <input class="input" id="q-frequency" type="number" min="0" max="14" value="${p.frequency}" placeholder="3"></div>
       </div>
-      <div class="row">
-        <div><label>Main sport / activity</label><select id="sport">
-          <option value="none" ${p.sport==='none'?'selected':''}>None</option>
-          <option value="running" ${p.sport==='running'?'selected':''}>Running / cardio</option>
-          <option value="gym" ${p.sport==='gym'?'selected':''}>Gym / weights</option>
-          <option value="team" ${p.sport==='team'?'selected':''}>Team sport</option>
-          <option value="yoga" ${p.sport==='yoga'?'selected':''}>Yoga / pilates</option>
-        </select></div>
-        <div><label>Times per week</label><input type="number" id="frequency" value="${p.frequency}" min="0" max="14" placeholder="e.g. 3"></div>
+    </div>
+
+    <!-- 4 · Goal -->
+    <div class="q-step" data-step="3">
+      <div class="q-emojihead">🎯</div>
+      <h2>What are you hoping for?</h2>
+      <div class="q-why">Guides your portions and the courses you get — change it anytime.</div>
+      <div class="goal-grid" id="q-goals">
+        ${GOAL_CARDS.map(g=>`<div class="goal ${g.key===p.goal?'on':''}" data-goal="${g.key}">
+          <div class="g-em">${g.emoji}</div><div class="g-t">${g.title}</div><div class="g-s">${g.sub}</div></div>`).join('')}
       </div>
-      <label>How confident are you at cooking? <span class="range-val" id="ckVal">${p.cookingLevel}</span>/10
-        <span class="hint">(lower = simpler recipes)</span></label>
-      <input type="range" id="cookingLevel" min="1" max="10" value="${p.cookingLevel}">
-      <div class="row">
-        <div><label>Weekly grocery budget (€)</label><input type="number" id="budget" value="${p.budget}" min="0" placeholder="e.g. 60"></div>
-        <div><label>City <span class="hint">(optional — for prices; we assume Paris)</span></label><input type="text" id="city" value="${p.city}" placeholder="Paris, France"></div>
+    </div>
+
+    <!-- 5 · Tastes -->
+    <div class="q-step" data-step="4">
+      <div class="q-emojihead">😋</div>
+      <h2>How do you like to eat?</h2>
+      <div class="q-why">The tastier your week, the more you'll actually cook it.</div>
+      <div class="field" style="margin-bottom:20px"><label>Breakfast mood</label>
+        ${chipRow('q-breakfast',BREAKFAST_OPTIONS,[p.breakfastPref])}</div>
+      <div class="field" style="margin-bottom:20px"><label>Cuisines you love</label>
+        ${chipRow('q-cuisines',CUISINE_OPTIONS,p.cuisines)}</div>
+      <div class="field" style="margin-bottom:20px"><label>Quick dislikes <span class="hint">(tap to toggle)</span></label>
+        ${chipRow('q-dislikes',DISLIKE_OPTIONS,p.dislikes)}</div>
+      <div class="field" style="margin-bottom:20px"><label>Allergies <span class="hint">(strictly excluded)</span></label>
+        ${chipRow('q-allergies',ALLERGY_OPTIONS,p.allergies)}</div>
+      <div class="field"><label for="q-avoid">Anything else to avoid <span class="hint">(free text)</span></label>
+        <textarea class="input" id="q-avoid" placeholder="e.g. no pork, hate coriander, lactose-free">${p.avoidText||''}</textarea></div>
+    </div>
+
+    <!-- 6 · Kitchen -->
+    <div class="q-step" data-step="5">
+      <div class="q-emojihead">🍳</div>
+      <h2>You in the kitchen</h2>
+      <div class="q-why">So the recipes match your time and confidence — no stress.</div>
+      <div class="slider-block"><div class="sl-head"><b>Cooking confidence</b><span class="sl-val" id="q-cook-val">${p.cookingLevel}/10</span></div>
+        <input class="slider" id="q-cook" type="range" min="1" max="10" value="${p.cookingLevel}"></div>
+      <div class="slider-block"><div class="sl-head"><b>Time per meal</b><span class="sl-val" id="q-time-val">${p.timePerMeal} min</span></div>
+        <input class="slider" id="q-time" type="range" min="10" max="90" step="5" value="${p.timePerMeal}"></div>
+      <label class="q-check" style="margin-top:18px"><input type="checkbox" id="q-leftovers" ${p.leftovers?'checked':''}>
+        <span><b>Cook once, eat twice</b> <span class="hint">— reuse some dinners as next-day lunch (less cooking, less waste)</span></span></label>
+      <div class="field" style="margin-top:18px"><label>Already in your cupboard <span class="hint">(we'll leave these off the shopping list)</span></label>
+        ${chipRow('q-pantry',PANTRY_OPTIONS,p.pantry)}</div>
+    </div>
+
+    <!-- 7 · Numbers -->
+    <div class="q-step" data-step="6">
+      <div class="q-emojihead">📊</div>
+      <h2>Your numbers, sound right?</h2>
+      <div class="q-why">We worked these out for you — nudge anything that feels off.</div>
+      <div class="q-target"><div class="big" id="q-target-num">~2,430</div><div class="cap" id="q-target-cap">kcal a day</div></div>
+      <div class="slider-block"><div class="sl-head"><b>Breakfast</b><span class="sl-val" id="q-split-breakfast-val"></span></div>
+        <input class="slider" id="q-split-breakfast" type="range" min="10" max="45" value="${split.breakfast}"></div>
+      <div class="slider-block"><div class="sl-head"><b>Lunch</b><span class="sl-val" id="q-split-lunch-val"></span></div>
+        <input class="slider" id="q-split-lunch" type="range" min="20" max="55" value="${split.lunch}"></div>
+      <div class="slider-block"><div class="sl-head"><b>Dinner</b><span class="sl-val" id="q-split-dinner-val"></span></div>
+        <input class="slider" id="q-split-dinner" type="range" min="20" max="55" value="${split.dinner}"></div>
+      <div class="slider-block"><div class="sl-head"><b>Budget</b><span class="sl-val" id="q-budget-val">€${p.budgetPerDay} / day</span></div>
+        <input class="slider" id="q-budget" type="range" min="5" max="40" value="${p.budgetPerDay}"></div>
+      <div class="field" style="margin-top:16px"><label for="q-city">City <span class="hint">(optional — for prices; we assume Paris)</span></label>
+        <input class="input" id="q-city" value="${p.city}" placeholder="Paris, France"></div>
+    </div>
+
+    <!-- 8 · Connect -->
+    <div class="q-step" data-step="7">
+      <div class="q-emojihead">🔗</div>
+      <h2>Want a little help remembering?</h2>
+      <div class="q-why">Totally optional. Skip it now, add it later — no pressure, ever.</div>
+      <div class="connect-cards">
+        <div class="connect"><div class="ic cal">📅</div><div class="c-body"><b>Google Calendar</b>
+          <p>Your dinners and shopping reminders, right where you already look.</p>
+          <span class="badge badge-basil">Coming soon</span></div></div>
+        <div class="connect"><div class="ic bell">🔔</div><div class="c-body"><b>Shopping reminders</b>
+          <p>A gentle nudge on shopping days — "tonight, buy for tomorrow."</p>
+          <span class="badge badge-honey">Coming soon</span></div></div>
       </div>
-      <label>Anything you can't or won't eat <span class="hint">(free text — e.g. "no pork, hate coriander, lactose-free")</span></label>
-      <textarea id="avoidText" placeholder="Write anything specific here…">${p.avoidText||''}</textarea>
-      <label>Quick dislikes <span class="hint">(tap to toggle)</span></label>
-      <div class="chips" id="dislikes">
-        ${DISLIKE_OPTIONS.map(o=>`<div class="chip ${p.dislikes.includes(o)?'on':''}" data-v="${o}">${o}</div>`).join('')}
-      </div>
-      <label>Allergies <span class="hint">(strictly excluded)</span></label>
-      <div class="chips" id="allergies">
-        ${ALLERGY_OPTIONS.map(o=>`<div class="chip ${p.allergies.includes(o)?'on':''}" data-v="${o}">${o}</div>`).join('')}
-      </div>
-      <label>Already in your cupboard <span class="hint">(tap what you have — we'll leave it off the shopping list)</span></label>
-      <div class="chips" id="pantry">
-        ${PANTRY_OPTIONS.map(o=>`<div class="chip ${(p.pantry||[]).includes(o)?'on':''}" data-v="${o}">${o}</div>`).join('')}
-      </div>
-      <label class="ai-toggle" style="display:flex;align-items:center;gap:8px;margin:16px 0 0;font-weight:normal">
-        <input type="checkbox" id="leftovers" ${p.leftovers?'checked':''}>
-        Cook once, eat twice <span class="hint">(reuse some dinners as next-day lunch — less cooking, less waste)</span>
-      </label>
-      <label class="ai-toggle" style="display:flex;align-items:center;gap:8px;margin:14px 0;font-weight:normal">
-        <input type="checkbox" id="useAI" ${state.useAI?'checked':''}>
-        Use real AI generation <span class="hint">(personalized, but uses 1 of your ~20 free Gemini requests/day — off by default so testing doesn't burn your quota)</span>
-      </label>
-      ${state.favorites.length?`<p class="sub" style="margin:0 0 4px">♥ ${state.favorites.length} favorite ${state.favorites.length===1?'meal':'meals'} saved — they'll show up in your weeks.</p>`:''}
-      <button class="primary" id="genBtn">Generate my week →</button>
-      ${hasSavedData()?'<button type="button" class="ghost" id="clearBtn" style="margin-top:10px;margin-left:10px">Clear saved data &amp; start fresh</button>':''}
-      ${cloudEnabled()?'<button type="button" class="ghost" id="signOutBtn" style="margin-top:10px;margin-left:10px">Sign out</button>':''}
-    </div>`;
-  const slider=document.getElementById('cookingLevel');
-  slider.oninput=()=>document.getElementById('ckVal').textContent=slider.value;
-  app.querySelectorAll('.chip').forEach(c=>c.onclick=()=>c.classList.toggle('on'));
-  document.getElementById('useAI').onchange=(e)=>{ state.useAI=e.target.checked; saveState(); };
-  const clearBtn=document.getElementById('clearBtn');
-  if(clearBtn) clearBtn.onclick=()=>{ if(confirm("Clear your saved profile, week and favorites? This can't be undone.")) clearAllData(); };
-  const signOutBtn=document.getElementById('signOutBtn');
-  if(signOutBtn) signOutBtn.onclick=async()=>{ try{ await window.Cloud.signOut(); }catch(e){ console.warn('Sign out failed:', e&&e.message); } };
-  document.getElementById('genBtn').onclick=async()=>{
-    state.profile={
-      weight:document.getElementById('weight').value,
-      height:document.getElementById('height').value,
-      age:document.getElementById('age').value,
-      gender:document.getElementById('gender').value,
-      lifeStage:document.getElementById('lifeStage').value,
-      goal:document.getElementById('goal').value,
-      sport:document.getElementById('sport').value,
-      frequency:Number(document.getElementById('frequency').value)||0,
-      cookingLevel:Number(document.getElementById('cookingLevel').value),
-      people:Math.min(8,Math.max(1,Number(document.getElementById('people').value)||1)),
-      budget:document.getElementById('budget').value,
-      city:document.getElementById('city').value,
-      avoidText:document.getElementById('avoidText').value,
-      dislikes:[...app.querySelectorAll('#dislikes .chip.on')].map(c=>c.dataset.v),
-      allergies:[...app.querySelectorAll('#allergies .chip.on')].map(c=>c.dataset.v),
-      pantry:[...app.querySelectorAll('#pantry .chip.on')].map(c=>c.dataset.v),
-      leftovers:document.getElementById('leftovers').checked,
+      <label class="q-check" style="margin-top:22px"><input type="checkbox" id="q-useAI" ${state.useAI?'checked':''}>
+        <span><b>Use real AI generation</b> <span class="hint">— personalized, but uses 1 of your ~20 free Gemini requests/day. Off by default so testing doesn't burn your quota.</span></span></label>
+    </div>
+
+    <div class="q-foot">
+      <button type="button" class="q-back" id="q-back" style="visibility:hidden">← Back</button>
+      <button type="button" class="btn btn-primary" id="q-next">Continue</button>
+    </div>
+  </div>`;
+
+  // --- wizard navigation state ---
+  let cur=0;
+  const steps=[...app.querySelectorAll('.q-step')];
+  const dots=[...app.querySelectorAll('#q-dots i')];
+  const backBtn=document.getElementById('q-back');
+  const nextBtn=document.getElementById('q-next');
+  function showStep(i){
+    cur=Math.max(0,Math.min(Q_STEPS-1,i));
+    steps.forEach((s,idx)=>s.classList.toggle('on',idx===cur));
+    dots.forEach((dt,idx)=>{ dt.className=idx<cur?'done':(idx===cur?'on':''); });
+    document.getElementById('q-count').textContent=`Step ${cur+1} of ${Q_STEPS}`;
+    backBtn.style.visibility=cur===0?'hidden':'visible';
+    nextBtn.textContent=cur===Q_STEPS-1?'Plan my first week 🎉':'Continue';
+    if(cur===6) refreshNumbers();          // recompute target when the Numbers step opens
+    window.scrollTo(0,0);
+  }
+
+  // --- read the whole wizard into a profile object (used to persist + compute live) ---
+  function readWizard(){
+    const val=id=>document.getElementById(id)?.value;
+    const stepInt=id=>Number(document.getElementById(id)?.textContent)||0;
+    const chosen=sel=>[...app.querySelectorAll(sel+' .chip.selected')].map(c=>c.dataset.v);
+    const bpd=Number(val('q-budget'))||0;
+    return {
+      name:(val('q-name')||'').trim(),
+      weight:val('q-weight'), height:val('q-height'),
+      age:String(stepInt('q-age')||''),
+      gender:val('q-gender'),
+      people:Math.min(8,Math.max(1,stepInt('q-people')||1)),
+      lifeStage:val('q-lifeStage'), sport:val('q-sport'),
+      frequency:Number(val('q-frequency'))||0,
+      goal:app.querySelector('#q-goals .goal.on')?.dataset.goal||'maintain',
+      breakfastPref:app.querySelector('#q-breakfast .chip.selected')?.dataset.v||'surprise',
+      cuisines:chosen('#q-cuisines'),
+      dislikes:chosen('#q-dislikes'), allergies:chosen('#q-allergies'), pantry:chosen('#q-pantry'),
+      avoidText:val('q-avoid'),
+      cookingLevel:Number(val('q-cook')),
+      timePerMeal:Number(val('q-time')),
+      leftovers:document.getElementById('q-leftovers').checked,
+      mealSplit:{ breakfast:Number(val('q-split-breakfast')), lunch:Number(val('q-split-lunch')), dinner:Number(val('q-split-dinner')) },
+      budgetPerDay:bpd,
+      budget:String(Math.round(bpd*7)),   // legacy weekly value keeps the shopping screen working until Phase 8
+      city:val('q-city'),
     };
+  }
+  function persist(){ state.profile=readWizard(); saveState(); }   // §6: save at each step
+
+  // --- Numbers step: live calorie target + per-meal kcal from the split ---
+  function refreshNumbers(){
+    const cur=readWizard();
+    const t=computeTargets(cur);
+    const numEl=document.getElementById('q-target-num'), capEl=document.getElementById('q-target-cap');
+    if(t){ numEl.textContent='~'+t.kcal.toLocaleString('en-US'); capEl.textContent=`kcal a day · ${goalWord(cur.goal)} · ${t.protein} g protein`; }
+    else { numEl.textContent='—'; capEl.textContent='Add age, height & weight for a calorie estimate'; }
+    const per=computeMealTargets(cur);
+    ['breakfast','lunch','dinner'].forEach(m=>{
+      const v=Number(document.getElementById('q-split-'+m).value);
+      document.getElementById('q-split-'+m+'-val').textContent = per ? per[m]+' kcal' : v+'%';
+    });
+  }
+
+  // --- bindings ---
+  app.querySelectorAll('.stepper').forEach(st=>{
+    const valEl=st.querySelector('.val'); const lo=Number(st.dataset.stepMin), hi=Number(st.dataset.stepMax);
+    st.querySelectorAll('button').forEach(b=>b.onclick=()=>{
+      let n=Number(valEl.textContent)+Number(b.dataset.dir);
+      valEl.textContent=Math.max(lo,Math.min(hi,n));
+    });
+  });
+  app.querySelectorAll('#q-goals .goal').forEach(g=>g.onclick=()=>{
+    app.querySelectorAll('#q-goals .goal').forEach(x=>x.classList.remove('on')); g.classList.add('on');
+  });
+  // single-select chip group (breakfast); the rest are multi-select toggles
+  app.querySelectorAll('#q-breakfast .chip').forEach(c=>c.onclick=()=>{
+    app.querySelectorAll('#q-breakfast .chip').forEach(x=>x.classList.remove('selected')); c.classList.add('selected');
+  });
+  ['#q-cuisines','#q-dislikes','#q-allergies','#q-pantry'].forEach(grp=>
+    app.querySelectorAll(grp+' .chip').forEach(c=>c.onclick=()=>c.classList.toggle('selected')));
+  const cook=document.getElementById('q-cook');
+  cook.oninput=()=>document.getElementById('q-cook-val').textContent=cook.value+'/10';
+  const time=document.getElementById('q-time');
+  time.oninput=()=>document.getElementById('q-time-val').textContent=time.value+' min';
+  ['q-split-breakfast','q-split-lunch','q-split-dinner'].forEach(id=>
+    document.getElementById(id).oninput=refreshNumbers);
+  const budget=document.getElementById('q-budget');
+  budget.oninput=()=>document.getElementById('q-budget-val').textContent='€'+budget.value+' / day';
+  document.getElementById('q-useAI').onchange=(e)=>{ state.useAI=e.target.checked; saveState(); };
+
+  const clearBtn=document.getElementById('q-clear');
+  if(clearBtn) clearBtn.onclick=()=>{ if(confirm("Clear your saved profile, week and favorites? This can't be undone.")) clearAllData(); };
+  const signOutBtn=document.getElementById('q-signout');
+  if(signOutBtn) signOutBtn.onclick=async()=>{ try{ await window.Cloud.signOut(); }catch(e){ console.warn('Sign out failed:', e&&e.message); } };
+
+  backBtn.onclick=()=>{ persist(); showStep(cur-1); };
+  nextBtn.onclick=async()=>{
+    persist();
+    if(cur<Q_STEPS-1){ showStep(cur+1); return; }
+    // --- finish: generate the week ---
     state.checked={};   // fresh week, fresh list
     setScreen('loading');
     if(state.useAI){
@@ -694,6 +896,8 @@ function renderProfile(){
     if(state.profile.leftovers) applyLeftovers(state.week);
     setScreen('review');
   };
+
+  showStep(0);
 }
 
 /* ----- Screen 2: review ----- */
@@ -729,13 +933,18 @@ function dayKcal(day){
   return any?sum:null;
 }
 function renderReview(){
-  let html=`<div class="card"><h2>Your week</h2>
+  const nm=(state.profile?.name||'').trim();
+  let html=`<div class="card"><h2>${nm?nm+"'s week":'Your week'}</h2>
     <p class="sub">Tap ✕ on anything you don't fancy — it swaps to a new dish. Tap ♥ to keep a meal in your favorites forever.</p>`;
   const tgt=computeTargets(state.profile);
-  if(tgt)html+=`<div class="target-banner">
+  if(tgt){
+    const per=computeMealTargets(state.profile);
+    const perLine=per?` <span class="hint">· roughly ${per.breakfast} / ${per.lunch} / ${per.dinner} kcal across breakfast, lunch & dinner</span>`:'';
+    html+=`<div class="target-banner">
     <div class="tgt-ico">🎯</div>
     <div><div class="tgt-main">Your daily target: ~${tgt.kcal} kcal · ${tgt.protein} g protein <span class="hint">per person</span></div>
-    <div class="tgt-sub">Estimated from your height, weight, age, activity and goal (Mifflin–St Jeor). The 3 meals are portioned toward this.</div></div></div>`;
+    <div class="tgt-sub">Estimated from your height, weight, age, activity and goal (Mifflin–St Jeor). The 3 meals are portioned toward this.${perLine}</div></div></div>`;
+  }
   if(state.usedFallback)html+=`<div class="notice">⚠️ Backend offline — showing built-in meals, not AI (no budget/prices). Start the backend and regenerate.</div>`;
   else if(!state.useAI)html+=`<div class="notice info">ℹ️ Showing built-in meals — AI generation is off. Tick "Use real AI generation" on the profile page for a personalized week.</div>`;
   state.week.forEach((day,di)=>{
@@ -988,7 +1197,7 @@ function formatQty(qty,unit){ const q=Math.round(qty*100)/100; return unit?`${q}
    6. BOOT — local-only by default; cloud (Supabase) when configured
    ============================================================ */
 function applyBlob(s){
-  state.profile = s.profile || null;
+  state.profile = migrateProfile(s.profile) || null;
   state.week = Array.isArray(s.week) ? s.week : [];
   state.useAI = !!s.useAI;
   state.favorites = Array.isArray(s.favorites) ? s.favorites : [];
