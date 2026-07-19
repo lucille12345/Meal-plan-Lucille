@@ -270,6 +270,9 @@ button.ghost.on { background: var(--tomato-wash); border-color: var(--tomato); c
   background: var(--surface); display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap;
 }
 .total-bar .big { font-size: 26px; font-weight: 700; font-family: var(--font-display); }
+.total-bar .big .per { font-size: var(--fs-sm); font-weight: 600; color: var(--muted); font-family: var(--font-ui); }
+.day-total { display: inline-block; margin-left: 8px; font-size: var(--fs-xs); font-weight: 700; color: var(--basil-deep); background: var(--basil-wash); padding: 2px 9px; border-radius: var(--r-pill); font-variant-numeric: tabular-nums; vertical-align: middle; }
+.list-col h3 .day-total, .buyday .head .day-total { float: right; }
 .pill { font-size: var(--fs-sm); padding: 4px 12px; border-radius: var(--r-pill); font-weight: 700; }
 .pill.under { background: var(--basil-wash); color: var(--basil-deep); }
 .pill.over  { background: var(--reject-wash); color: var(--reject); }

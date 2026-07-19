@@ -1371,18 +1371,24 @@ function openCookMode(recipe){
 }
 
 /* ----- Screen 3: shopping list ----- */
+function sumPrices(items){ return items.reduce((s,i)=>s+(typeof i.price==='number'?i.price:0),0); }
+function dayChip(items){ const t=sumPrices(items); return t>0?`<span class="day-total">€${t.toFixed(2)}</span>`:''; }
 function renderShopping(){
   const { pantry, fresh, total, anyPrice, skipped }=buildShoppingList();
   const buyOrder=['Sunday (before the week)',...DAYS];
   const freshDays=Object.keys(fresh).sort((a,b)=>buyOrder.indexOf(a)-buyOrder.indexOf(b));
-  const budget=Number(state.profile?.budget)||0;
+  // Budget is now per-day (§4): compare the week's average day against it.
+  const budgetPerDay=Number(state.profile?.budgetPerDay)|| (state.profile?.budget?Math.round(Number(state.profile.budget)/7):0);
+  const perDay=total/7;
   const city=(state.profile?.city&&state.profile.city.trim())?state.profile.city.trim():'Paris';
   let totalBar='';
   if(anyPrice){
     let pill='';
-    if(budget>0){ const under=total<=budget; pill=`<span class="pill ${under?'under':'over'}">${under?'within':'over'} budget (€${budget})</span>`; }
+    if(budgetPerDay>0){ const under=perDay<=budgetPerDay; pill=`<span class="pill ${under?'under':'over'}">${under?'within':'over'} your €${budgetPerDay}/day</span>`; }
     totalBar=`<div class="total-bar">
-      <div><div class="sub" style="margin:0">Estimated total · ${city}${peopleCount()>1?` · ${peopleCount()} people`:''}</div><div class="big">€${total.toFixed(2)}</div></div>
+      <div><div class="sub" style="margin:0">Roughly · ${city}${peopleCount()>1?` · ${peopleCount()} people`:''}</div>
+        <div class="big">€${perDay.toFixed(2)} <span class="per">/ day</span></div>
+        <div class="sub" style="margin:4px 0 0">€${total.toFixed(2)} for the whole week</div></div>
       ${pill}</div>
       <p class="sub" style="margin:0 0 14px">Prices are rough estimates and will vary by shop.</p>`;
   }
@@ -1397,15 +1403,15 @@ function renderShopping(){
         <button class="ghost" id="printList">🖨 Print / PDF</button>
       </div>
       <div class="list-col">
-        <h3>🛒 Buy at the start of the week</h3>
+        <h3>🛒 Buy at the start of the week ${anyPrice?dayChip(pantry):''}</h3>
         <p class="when">Keeps for days — pantry, dairy, frozen, sturdy veg.</p>
         ${pantry.length?renderCategories(pantry):'<p class="sub">Nothing here.</p>'}
       </div>
       <div class="list-col">
         <h3>🥬 Buy fresh — day by day</h3>
-        <p class="when">Perishable, bought the day before you need it.</p>
-        ${freshDays.length?freshDays.map(bd=>`<div class="buyday"><div class="head">📅 ${bd}</div>
-          ${[...fresh[bd].values()].sort((a,b)=>a.name.localeCompare(b.name)).map(i=>itemRow(i)).join('')}</div>`).join(''):'<p class="sub">Nothing perishable this week.</p>'}
+        <p class="when">Perishable, bought the day before you need it. Each day shows its own €.</p>
+        ${freshDays.length?freshDays.map(bd=>{ const items=[...fresh[bd].values()]; return `<div class="buyday"><div class="head">📅 ${bd} ${anyPrice?dayChip(items):''}</div>
+          ${items.sort((a,b)=>a.name.localeCompare(b.name)).map(i=>itemRow(i)).join('')}</div>`;}).join(''):'<p class="sub">Nothing perishable this week.</p>'}
       </div>
       <div class="btn-row no-print">
         <button class="ghost" id="backReview">← Back to meals</button>
