@@ -1,6 +1,6 @@
 /* #Foodie — service worker: offline app-shell cache (Phase 9 PWA).
    Bump CACHE when the shell changes so old caches are cleaned up. */
-const CACHE = 'foodie-shell-v3';
+const CACHE = 'foodie-shell-v4';
 const SHELL = [
   './',
   './index.html',
@@ -9,6 +9,8 @@ const SHELL = [
   './app.js',
   './config.js',
   './cloud.js',
+  './recipes-db.js',
+  './ingredient-prices.js',
   './manifest.json',
   './icons/icon.svg',
   './icons/icon-maskable.svg',

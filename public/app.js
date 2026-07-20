@@ -309,11 +309,30 @@ function migrateProfile(p){
   return p;
 }
 
-/* ---- pantry staples: skip what the user already owns ---- */
+/* ---- pantry staples: skip what the user already owns ----
+   Plain substring matching has one real failure mode: a few pantry staples share a word with
+   an UNRELATED ingredient — a compound name where the word is a false-positive substring, not
+   the same product. Ticking "Pepper" (the spice) must not hide "Red bell pepper" (a vegetable);
+   "Rice" must not hide "Rice wine"; "Onion" must not hide "Spring onions"; "Flour" must not hide
+   "Large flour tortilla". These are listed explicitly rather than guessed at generically —
+   whole-word tokenizing does NOT fix this (the word "pepper" IS one of the words in "bell
+   pepper"), so the exclusion has to name the specific compounds it must not match. */
+const PANTRY_FALSE_MATCHES = {
+  pepper: /bell pepper|pepper flakes|jalape[nñ]o pepper/,
+  rice:   /rice wine|rice noodle|rice paper/,
+  onion:  /spring onion|onion powder/,
+  flour:  /flour tortilla/,
+  garlic: /garlic powder/,
+};
 function pantryHas(name){
   const list=state.profile?.pantry||[]; if(!list.length)return false;
   const n=name.toLowerCase();
-  return list.some(term=>{ const t=term.toLowerCase(); return n.includes(t)||t.includes(n); });
+  return list.some(term=>{
+    const t=term.toLowerCase();
+    const exclude=PANTRY_FALSE_MATCHES[t];
+    if(exclude&&exclude.test(n))return false;
+    return n.includes(t)||t.includes(n);
+  });
 }
 
 /* ---- "cook once, eat twice": turn some lunches into leftovers of the prior dinner ---- */
@@ -361,6 +380,13 @@ function toggleFavorite(recipe){
 /* ============================================================
    3. LOCAL GENERATION (fallback)
    ============================================================ */
+// The curated database (§0 of docs/V3-REDESIGN-BRIEF.md) — primary source of dishes.
+// A function, not a frozen array: §0.7 (user-researched dishes) appends to the effective
+// pool later, and callers must see that without re-reading this file.
+function DB(){ return (typeof RECIPES_DB !== 'undefined') ? RECIPES_DB : []; }
+const dishRoles = r => r.types || [r.type];      // legacy pool dishes only have .type
+const isCurated = r => typeof r.id === 'string' && r.id.startsWith('db-');
+
 function maxDifficultyFor(l){ if(l<=3)return 2; if(l<=6)return 3; if(l<=8)return 4; return 5; }
 function maxTimeFor(s){ return {student:25,working:30,parent:40,flexible:999}[s] ?? 999; }
 function passesDietFilters(recipe, profile){
@@ -369,6 +395,12 @@ function passesDietFilters(recipe, profile){
   for(const ing of recipe.ingredients){
     const n=ing.name.toLowerCase();
     if(dislikes.some(d=>n.includes(d.replace(' food',''))))return false;
+  }
+  // Curated dishes carry an explicit, honest allergen list — trust it completely and skip
+  // the regex guesses below (which miss things like "Baguette" or "Soy sauce" for gluten/soy).
+  if(Array.isArray(recipe.contains)){
+    if(allergies.some(a=>recipe.contains.includes(a)))return false;
+    return true;
   }
   if(allergies.includes('fish')&&recipe.tags.includes('fish'))return false;
   if(allergies.includes('shellfish')&&/shrimp|prawn|crab/.test(recipe.name.toLowerCase()))return false;
@@ -379,13 +411,16 @@ function passesDietFilters(recipe, profile){
 }
 // `role` is breakfast|lunch|dinner|starter|dessert. Starters/desserts have their own pools.
 function eligibleRecipes(role,profile){
-  const pool=[...RECIPES, ...STARTERS, ...DESSERTS, ...state.favorites.filter(f=>f.type===role)];
-  const base=pool.filter(r=>r.type===role&&passesDietFilters(r,profile));
+  const seen=new Set();
+  const pool=[...DB(), ...RECIPES, ...STARTERS, ...DESSERTS, ...state.favorites]
+    .filter(r=>r && !seen.has(r.id) && seen.add(r.id));   // dedupe: a favourited DB dish re-enters via state.favorites
+  const base=pool.filter(r=>dishRoles(r).includes(role)&&passesDietFilters(r,profile));
   const maxDiff=maxDifficultyFor(profile.cookingLevel);
   const maxTime=Number(profile.timePerMeal)>0 ? Number(profile.timePerMeal) : maxTimeFor(profile.lifeStage);
   const strict=base.filter(r=>r.difficulty<=maxDiff&&r.time<=maxTime);
   return strict.length?strict:base;
 }
+const preferCurated = list => { const c = list.filter(isCurated); return c.length ? c : list; };
 // usedNames (lowercased dish names) enforces the hard "no dish twice a week" rule (§3) across ALL types.
 function pickMeal(type,profile,usedIds,usedNames){
   const pool=eligibleRecipes(type,profile);
@@ -396,9 +431,10 @@ function pickMeal(type,profile,usedIds,usedNames){
   if(!choices.length)choices=pool.filter(r=>!usedIds.has(r.id));
   if(!choices.length)choices=pool;
   if(!choices.length)return null;
-  // favorites get first pick when available
+  // favorites get first pick when available; otherwise curated database dishes are preferred
+  // over the legacy pool (§0 precedence rule: the database always comes before Gemini/legacy).
   const favFresh=choices.filter(r=>String(r.id).startsWith('fav'));
-  const from=(favFresh.length&&Math.random()<0.5)?favFresh:choices;
+  const from=(favFresh.length&&Math.random()<0.5)?favFresh:preferCurated(choices);
   return from[Math.floor(Math.random()*from.length)];
 }
 function scaleRecipe(r,n){
@@ -439,7 +475,7 @@ function enforceNoRepeat(week,profile){
     // collision → try to find an eligible recipe (same course role) whose name isn't used yet
     const role=meal.course==='main'?meal.type:(meal.course||meal.type);
     const pool=eligibleRecipes(role,profile);
-    const fresh=pool.filter(r=>!seen.has(r.name.toLowerCase()));
+    const fresh=preferCurated(pool.filter(r=>!seen.has(r.name.toLowerCase())));
     if(fresh.length){
       const r=fresh[Math.floor(Math.random()*fresh.length)];
       meal.recipe=scaleRecipe(r,n); seen.add(r.name.toLowerCase());
@@ -471,6 +507,8 @@ function swapMeal(di,mi){
    ============================================================ */
 // Real, never-hallucinated recipe link: a Google search for the dish (always resolves).
 function recipeSearchUrl(name){ return 'https://www.google.com/search?q='+encodeURIComponent((name||'')+' recette'); }
+// Real recipe link when a curated dish has one; falls back to the search link — never an invented URL.
+function recipeUrl(recipe){ return (recipe && recipe.sourceUrl) ? recipe.sourceUrl : recipeSearchUrl(recipe && recipe.name); }
 
 // Curated Unsplash CDN photos (verified-loading IDs), keyed by the pool's img keyword or a
 // keyword found in the dish name. Unmatched dishes fall back to the emoji-gradient tile via onerror.
@@ -489,6 +527,7 @@ const DISH_IMG = {
 };
 function dishImageUrl(recipe){
   if(!recipe) return null;
+  if(recipe.photo) return recipe.photo;   // curated dishes carry their own real photo
   const keyify=k=>k&&DISH_IMG[k.toLowerCase()];
   // 1) exact img keyword(s) on the pool recipe  2) any keyword found in the dish name
   let id=null;
@@ -549,7 +588,12 @@ async function requestSwapAI(profile,role,avoidNames){
    4. SHOPPING LIST (with price totals)
    ============================================================ */
 function buyDayFor(di){ return di===0?'Sunday (before the week)':DAYS[di-1]; }
-function priceOf(ing){ return typeof ing.price==='number'&&isFinite(ing.price)?ing.price:0; }
+// AI-supplied prices win when present (real, per-week quote); otherwise fall back to the
+// offline estimate table so the shopping total/€/day pill/per-day chips work with AI off too.
+function priceOf(ing){
+  if(typeof ing.price==='number'&&isFinite(ing.price)) return ing.price;
+  return (typeof estimateIngredientPrice==='function') ? estimateIngredientPrice(ing) : 0;
+}
 function itemKey(ing){ return ing.name.toLowerCase()+'|'+ing.unit; }
 /* ============================================================
    4b. Integrations (§5) — .ics calendar export + feedback form
@@ -582,7 +626,7 @@ function buildICS(){
     const dinnerMain=day.meals.find(m=>m.type==='dinner'&&(m.course==='main'||!m.course)&&m.recipe&&!m.rejected);
     if(!dinnerMain)return;
     const courses=day.meals.filter(m=>m.type==='dinner'&&m.recipe&&!m.rejected).map(m=>m.recipe.name);
-    const desc=`Tonight's dinner: ${courses.join(', ')}.\nRecipe: ${recipeSearchUrl(dinnerMain.recipe.name)}`;
+    const desc=`Tonight's dinner: ${courses.join(', ')}.\nRecipe: ${recipeUrl(dinnerMain.recipe)}`;
     ev(di,19,0,19,45,`🍽 ${dinnerMain.recipe.name}`,desc);
   });
   // shopping reminders (17:00) on each buy-day
@@ -947,14 +991,32 @@ function renderSignIn(){
 
 // Generate a fresh week from the CURRENT profile (no questionnaire). Shared by the wizard
 // finish and the "re-plan" button, so a new week never re-asks the questionnaire.
+// §0 precedence rule: the database (+ legacy pool) always fills the week first, AI on or off.
+// AI's only job here is topping up the rare slot the database genuinely couldn't fill uniquely —
+// it is never asked to author the week from scratch. requestWeekAI() is kept for a possible future
+// "regenerate entirely with AI" action, but planWeek() no longer calls it by default.
 async function planWeek(){
   state.checked={};
   setScreen('loading');
-  if(state.useAI){
-    try { state.week=enforceNoRepeat(await requestWeekAI(state.profile),state.profile); state.usedFallback=false; }
-    catch(e){ console.warn('Backend unavailable, using local pool:',e.message); state.week=generateWeek(state.profile); state.usedFallback=true; }
-  } else {
-    state.week=generateWeek(state.profile); state.usedFallback=false;
+  state.week=generateWeek(state.profile);      // sets state.repeatedDishes via enforceNoRepeat
+  state.usedFallback=false;
+  if(state.useAI && state.repeatedDishes && state.repeatedDishes.length){
+    const n=Math.max(1,Number(state.profile.people)||1);
+    const toFix=[];
+    state.week.forEach((day,di)=>day.meals.forEach((meal,mi)=>{
+      if(meal.recipe && state.repeatedDishes.includes(meal.recipe.name)) toFix.push({di,mi});
+    }));
+    for(const {di,mi} of toFix.slice(0,5)){    // cap: mind the 20/day free-tier quota
+      const meal=state.week[di].meals[mi];
+      const role=meal.course==='main'?meal.type:(meal.course||meal.type);
+      const avoidNames=[];
+      state.week.forEach(d=>d.meals.forEach(m=>{ if(m.recipe) avoidNames.push(m.recipe.name); }));
+      try{
+        const r=await requestSwapAI(state.profile,role,avoidNames);
+        if(r) meal.recipe=scaleRecipe(r,n);
+      }catch(e){ console.warn('AI top-up failed for a repeated slot:',e.message); }
+    }
+    enforceNoRepeat(state.week,state.profile);   // recompute state.repeatedDishes after patching
   }
   if(state.profile.leftovers) applyLeftovers(state.week);
   state.plannerMode='plan';
@@ -1119,7 +1181,7 @@ function renderProfile(){
           <span class="badge badge-honey">Coming soon</span></div></div>
       </div>
       <label class="q-check" style="margin-top:22px"><input type="checkbox" id="q-useAI" ${state.useAI?'checked':''}>
-        <span><b>Use real AI generation</b> <span class="hint">— personalized, but uses 1 of your ~20 free Gemini requests/day. Off by default so testing doesn't burn your quota.</span></span></label>
+        <span><b>Let AI fill any gaps</b> <span class="hint">— your week always comes from the recipe cookbook first; this lets AI invent a dish on the rare occasion the cookbook can't fill a slot uniquely. Uses a small number of your ~20 free Gemini requests/day.</span></span></label>
     </div>
 
     <div class="q-foot">
@@ -1319,7 +1381,7 @@ function carousel(title,list){
     <div class="carousel">${list.map(browseCard).join('')}</div></div>`;
 }
 function findBrowseRecipe(id){
-  return [...RECIPES,...STARTERS,...DESSERTS,...state.favorites].find(r=>String(r.id)===String(id));
+  return [...DB(),...RECIPES,...STARTERS,...DESSERTS,...state.favorites].find(r=>String(r.id)===String(id));
 }
 // place a browsed dish onto a day at its natural meal (breakfast/lunch/dinner main)
 function addDishToDay(recipe,di){
@@ -1356,9 +1418,16 @@ function planBodyHtml(){
   }
   if(state.usedFallback)html+=`<div class="notice">⚠️ Backend offline — showing built-in meals, not AI (no budget/prices).</div>`;
   else if(state.partialAI)html+=`<div class="notice">ℹ️ The AI returned a short week this time, so the later days come from the built-in recipes. Re-plan to try the AI again.</div>`;
-  else if(!state.useAI)html+=`<div class="notice info">ℹ️ Showing built-in meals — AI generation is off. Tick "Use real AI generation" on the profile page for a personalized week.</div>`;
-  // Be honest when the built-in recipe book simply can't fill the week without repeating.
-  if(state.repeatedDishes&&state.repeatedDishes.length)html+=`<div class="notice">🔁 Your allergies and dislikes leave only a few matching dishes, so ${state.repeatedDishes.length===1?'one dish repeats':state.repeatedDishes.length+' dishes repeat'} this week (${state.repeatedDishes.join(', ')}). Turning on <b>AI generation</b> gives you a fully unique week.</div>`;
+  else if(!state.useAI)html+=`<div class="notice info">ℹ️ Showing built-in meals — tick "Let AI fill any gaps" on the profile page if a week ever can't be filled uniquely.</div>`;
+  // Be honest when the built-in recipe book simply can't fill the week without repeating —
+  // even with AI on, since AI is only asked to top up specific gaps, not author the week.
+  if(state.repeatedDishes&&state.repeatedDishes.length){
+    const many=state.repeatedDishes.length===1?'one dish repeats':state.repeatedDishes.length+' dishes repeat';
+    const suggestion=state.useAI
+      ? `AI tried to fill the gap but couldn't find a unique dish this time — re-plan to try again.`
+      : `Turning on <b>AI generation</b> lets it try to fill the gap.`;
+    html+=`<div class="notice">🔁 Your allergies and dislikes leave only a few matching dishes, so ${many} this week (${state.repeatedDishes.join(', ')}). ${suggestion}</div>`;
+  }
   state.week.forEach((day,di)=>{
     const kc=dayKcal(day);
     html+=`<div class="day-block"><div class="day-head"><h3 class="day-title">${day.day}</h3>
@@ -1370,10 +1439,10 @@ function planBodyHtml(){
 }
 function browseBodyHtml(){
   const favs=state.favorites.slice().reverse();
-  const quick=[...RECIPES].filter(r=>['breakfast','lunch','dinner'].includes(r.type)&&r.time<=12);
-  const bfast=RECIPES.filter(r=>r.type==='breakfast');
-  const lunches=RECIPES.filter(r=>r.type==='lunch');
-  const dinners=RECIPES.filter(r=>r.type==='dinner');
+  const quick=[...DB(),...RECIPES].filter(r=>['breakfast','lunch','dinner'].includes(r.type)&&r.time<=12);
+  const bfast=[...DB(),...RECIPES].filter(r=>r.type==='breakfast');
+  const lunches=[...DB(),...RECIPES].filter(r=>r.type==='lunch');
+  const dinners=[...DB(),...RECIPES].filter(r=>r.type==='dinner');
   return `<p class="drag-hint">↔ Drag a card onto a day in the week, or tap ⊕ to choose a day.</p>
     ${carousel('From your favorites ♥',favs)}
     ${carousel('Quick & easy',quick)}
@@ -1479,7 +1548,7 @@ function renderRecipes(){
           <div class="rdesc">${r.desc||''}</div>
           <div class="ing-head">🧾 Ingredients ${peopleCount()>1?`<span class="hint">(for ${peopleCount()} people)</span>`:''}${r.batchNote?' <span class="hint">— double batch, half becomes tomorrow\'s lunch</span>':''}</div>
           <ul class="ing-list">
-            ${r.ingredients.map(i=>`<li><span>${i.name}</span><span class="iq">${formatQty(i.qty,i.unit)}${typeof i.price==='number'?' · €'+i.price.toFixed(2):''}</span></li>`).join('')}
+            ${r.ingredients.map(i=>{const pr=priceOf(i);return `<li><span>${i.name}</span><span class="iq">${formatQty(i.qty,i.unit)}${pr>0?' · €'+pr.toFixed(2):''}</span></li>`;}).join('')}
           </ul>
           ${(r.steps&&r.steps.length)?`<div class="ing-head">👩‍🍳 Method</div><ol class="step-list">${r.steps.map(s=>`<li>${s}</li>`).join('')}</ol>`:''}
           <div class="badges">
@@ -1489,7 +1558,7 @@ function renderRecipes(){
           </div>
           <div class="recipe-actions">
             ${(r.steps&&r.steps.length)?`<button class="cook-btn" data-cook="${idx}">▶ Cook</button>`:''}
-            <a class="recipe-link" href="${recipeSearchUrl(r.name)}" target="_blank" rel="noopener noreferrer">See full recipe ↗</a>
+            <a class="recipe-link" href="${recipeUrl(r)}" target="_blank" rel="noopener noreferrer">See full recipe ↗</a>${r.sourceName?`<span class="sub" style="font-size:.85em">Recipe by ${r.sourceName}</span>`:''}
             <button class="ghost fav-inline ${isFavorite(r.name)?'on':''}" data-favr="${idx}" style="padding:9px 14px">${isFavorite(r.name)?'♥ Saved':'♡ Save as favorite'}</button>
           </div>
         </div>`;
