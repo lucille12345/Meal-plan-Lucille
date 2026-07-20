@@ -39,7 +39,7 @@ session blocks below still say Table). The `_template:'table'` string in `app.js
 leftover parameter, not the brand — leave it.
 
 **Code:** V2 is complete (Phases 1–10a) and **merged into `main`**.
-**⚠️ 28 commits are waiting to be pushed — the live site still runs the OLD v1 until Lucille pushes.**
+**⚠️ 31 commits are waiting to be pushed — the live site still runs the OLD v1 until Lucille pushes.**
 She pushes via **GitHub Desktop → Push origin** (no git credentials in the CLI here); Render then
 auto-deploys. Working tree clean; `main` and `v2-rebuild` hold the same content.
 
@@ -68,9 +68,21 @@ worked, the recipient was rejected. Use `TEST_EMAIL_TO`, or log into #Foodie wit
 and a classic POST over http). Replaced by `send-feedback`. Don't reintroduce it.
 
 ### Verified vs unverified
-- **Verified with AI OFF:** every screen, persistence, no-repeat, leftovers, pantry hiding, cook mode
-  + read-aloud, recipe links + photos, PWA install/offline, .ics export, 375px + 1280px, zero console
-  errors, zero `/generate-*` calls.
+- **✅ FULL VERIFICATION PASS RUN 2026-07-20 (AI OFF) — all green.** Re-run this before any release:
+  | Area | Result |
+  |---|---|
+  | Repo/build | clean tree, all JS+JSON parse, every required file present |
+  | Security | key loads server-side but is in **no** served file; `../gemini-key.txt` → 404; no Resend key in code |
+  | Shell | title+header `#Foodie`, manifest valid, SW active, boots to landing (auth gate intact), no FormSubmit left |
+  | Questionnaire | 8 steps; first-timer = "Plan my first week 🎉" (no Save btn); returning = "Save changes" + "Save & re-plan week 🔄" |
+  | Generation | 40 dishes, **0 duplicates**, correct 3-course shape, targets 2370 kcal / 128 g / 590-950-830 |
+  | Planner | 7-day rail, swap works, **drag-and-drop works**, 48 browse cards |
+  | Shopping | 76 items, per-day chips, .ics (14 valid events), feedback link, "🔄 Re-plan this week" |
+  | Recipes | 7 cards, 7 real links, photos, cook mode + read-aloud |
+  | Other | persistence, 375px single-col no h-scroll, 1280px two-col, **zero console errors, zero `/generate-*` calls** |
+- **Two false alarms worth remembering:** a `pantryHidden: 0` reading was legitimate (that week simply
+  contained no pantry item — `pantryHas()` unit-tests correctly); and a `viewport: 0` reading was a
+  browser-pane glitch from toggling sizes, not a layout bug. Re-test in a fresh pane before chasing either.
 - **🔴 UNVERIFIED: the AI-ON path.** Phase 6b changed the AI response shape to 3-course `courses`
   objects and Phase 5 changed the profile fields. Lucille must run **one** week with "Use real AI
   generation" ticked and report what happens. Gemini free tier = **20 requests/day** — don't burn it.
@@ -83,7 +95,7 @@ heavily-restricted profile (2 allergies + 2 dislikes) genuinely cannot fill 7 un
 repeated dishes and pointing at AI generation. Don't "fix" that notice by hiding it.
 
 ### NEXT STEPS, in order
-1. **Lucille:** GitHub Desktop → **Push origin** (28 commits) → Render deploys → v2 goes live.
+1. **Lucille:** GitHub Desktop → **Push origin** (31 commits) → Render deploys → v2 goes live.
 2. **Lucille:** deploy both Edge Functions, add the `RESEND_API_KEY` secret, install pg_net, create
    the cron job.
 3. **Together:** one AI-ON test week; fix whatever the real Gemini response reveals.
@@ -251,6 +263,9 @@ repeated dishes and pointing at AI generation. Don't "fix" that notice by hiding
 >   no Resend key in code; only the Supabase publishable key ships (public-safe by design).
 > - **Released:** `v2-rebuild` merged into `main` as "Release v2: #Foodie". Awaiting her push.
 > - **Wrote `docs/V3-REDESIGN-BRIEF.md`** from her Woolworths reference — see NEXT STEPS above.
+> - **Closed with a full verification pass (all green)** — the results table is in "Verified vs
+>   unverified" at the top. Nothing is broken; the only open risks are the untested AI-ON path and
+>   the two undeployed Edge Functions.
 
 > **BUILD SESSION — Phases 9 & 10a DONE (2026-07-19, Opus). Committed to `v2-rebuild`.**
 > - **Phase 9 PWA (Target A):** `public/manifest.json` (standalone, theme/bg colour, SVG icons
