@@ -38,10 +38,12 @@ _Last updated: 2026-07-20. This file is auto-loaded by Claude Code every session
 session blocks below still say Table). The `_template:'table'` string in `app.js` is a FormSubmit
 leftover parameter, not the brand — leave it.
 
-**Code:** V2 is complete (Phases 1–10a) and **merged into `main`**.
-**⚠️ 31 commits are waiting to be pushed — the live site still runs the OLD v1 until Lucille pushes.**
-She pushes via **GitHub Desktop → Push origin** (no git credentials in the CLI here); Render then
-auto-deploys. Working tree clean; `main` and `v2-rebuild` hold the same content.
+**Code:** V2 (Phases 1–10a) is **DEPLOYED AND LIVE** as of 2026-07-20. Lucille pushed `main` via
+GitHub Desktop and Render auto-deployed.
+**Live: https://meal-planner-km6f.onrender.com — verified serving `#Foodie`,** all assets 200 over
+HTTPS, and the Gemini key confirmed absent from every served file.
+Push future changes the same way: **GitHub Desktop → Push origin** (there are no git credentials in
+this CLI, so Claude cannot push). Working tree clean; `main` and `v2-rebuild` hold the same content.
 
 ### Accounts & tooling
 | Thing | State |
@@ -95,9 +97,10 @@ heavily-restricted profile (2 allergies + 2 dislikes) genuinely cannot fill 7 un
 repeated dishes and pointing at AI generation. Don't "fix" that notice by hiding it.
 
 ### NEXT STEPS, in order
-1. **Lucille:** GitHub Desktop → **Push origin** (31 commits) → Render deploys → v2 goes live.
+1. ~~Push + deploy v2~~ ✅ **DONE 2026-07-20 — live and verified.**
 2. **Lucille:** deploy both Edge Functions, add the `RESEND_API_KEY` secret, install pg_net, create
-   the cron job.
+   the cron job. **Until `send-feedback` is deployed the in-app feedback form fails** (the live app
+   already points at that URL).
 3. **Together:** one AI-ON test week; fix whatever the real Gemini response reveals.
 4. **V3 REDESIGN → `docs/V3-REDESIGN-BRIEF.md`** (already written & approved): deep walnut + emerald
    + gold-spark palette, one-page planner with `My Meal Plan` / `Shop Ingredients` tabs, day sidebar,
