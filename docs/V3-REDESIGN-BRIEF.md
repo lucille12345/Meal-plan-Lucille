@@ -18,37 +18,51 @@ screens) · `public/index.html` · `server.js` (AI prompt only).
 
 ## 1. Palette — replace tomato/honey ENTIRELY
 
-Wood + basil green + gold + white. Warm, fancy, not childish. Overwrite the token block in
-`public/styles.css`; every screen must inherit (no hardcoded hex anywhere else).
+**Direction: rich dark wood + deep luscious greens + sparks of gold, on white.** Think fine
+restaurant, not kitchen supply shop. Wood must read as *quality walnut* — deep and warm, never
+pale pine or beige. Greens run dark → emerald. Gold appears only in small glinting details.
+
+Overwrite the token block in `public/styles.css`; every screen inherits (no hardcoded hex elsewhere).
 
 | Token | Hex | Use |
 |---|---|---|
-| `--paper` | `#FBF9F5` | page background (warm white) |
+| `--paper` | `#FAF7F2` | page background (warm ivory) |
 | `--surface` | `#FFFFFF` | cards |
-| `--surface-2` | `#F2EDE4` | insets, pale wood wash |
-| `--ink` | `#1F2A22` | primary text (deep green-black) |
-| `--muted` | `#5F6B60` | secondary text |
-| `--faint` | `#98A199` | tertiary/placeholder |
-| `--hairline` | `#E7E0D4` | borders |
-| `--basil` | `#3E6B4A` | **primary actions** (was tomato) |
-| `--basil-deep` | `#24503A` | basil text on light (AA) |
-| `--basil-wash` | `#E6EFE7` | green tint fills |
-| `--gold` | `#C9A227` | accents, highlights, "fancy" details |
-| `--gold-deep` | `#8F6F14` | gold text on light (AA) |
-| `--gold-wash` | `#F7EFD8` | gold tint fills |
-| `--wood` | `#8B5E3C` | section bands, footer |
-| `--wood-light` | `#C4A484` | borders/dividers on wood |
-| `--wood-wash` | `#EFE3D5` | warm section backgrounds |
+| `--surface-2` | `#F3EEE6` | insets (soft linen) |
+| `--ink` | `#16241C` | primary text (deep green-black) |
+| `--muted` | `#55645A` | secondary text |
+| `--faint` | `#93A099` | tertiary/placeholder |
+| `--hairline` | `#E5DED2` | borders |
+| **Wood — deep & luscious** |
+| `--wood-deep` | `#2E1C11` | espresso; dark bands, footer, nav |
+| `--wood` | `#5C3823` | rich walnut; primary wood surfaces |
+| `--wood-mid` | `#8A5A38` | warm oak; dividers/detail on wood |
+| `--wood-wash` | `#EDE0D1` | pale wood tint; light section bands |
+| **Green — dark → emerald** |
+| `--green-deep` | `#12352A` | darkest forest; dark sections, headings |
+| `--green` | `#1F6B4D` | **primary actions** (deep emerald) |
+| `--emerald` | `#0E8055` | vivid emerald; highlights, success, active |
+| `--basil` | `#47764F` | softer herb green; secondary fills |
+| `--green-wash` | `#E3EFE8` | green tint; **photo backdrops** |
+| **Gold — sparks only** |
+| `--gold` | `#C9A227` | antique gold; thin rules, price pills, ♥ active |
+| `--gold-bright` | `#E3C463` | shimmer on hover/selected |
+| `--gold-deep` | `#8A6B12` | gold text on light (AA) |
+| `--gold-wash` | `#F7EFD8` | rare gold tint fill |
 
 **Rules**
-- Primary button = `--basil`, white text. Secondary = white + `--hairline`. Never a red/tomato button.
-- Gold is an **accent only** (thin rules, price pills, ♥ active, selected states). Never a large gold fill.
+- Primary button = `--green`, white text. Secondary = white + `--hairline`. Never a red/tomato button.
+- **Gold is a spark, not a surface.** Hairline rules, a thin underline beneath section titles, the
+  ⊕/♥ active state, price pills, a 1px card edge on hover. Never a gold-filled button, banner or
+  large block — it turns cheap instantly.
 - **Photo backdrops must be tinted, never bare white** — this is the Woolworths look she pointed at.
-  Give every recipe image a container with `background: var(--basil-wash)`; alternate section bands
-  between `--basil-wash` and `--wood-wash`.
-- Wood is a flat colour band (no fake wood-grain images).
+  Every recipe image sits on `background: var(--green-wash)`.
+- Alternate section bands: `--paper` → `--green-wash` → `--wood-wash` down the page so it never
+  reads flat. Use `--wood-deep` for the footer and any full-bleed dark band, with white text and
+  `--gold` hairlines.
+- Wood is flat colour (no fake wood-grain images/textures).
 - Keep Fraunces (display) + Inter (UI). Keep radii, shadows, `:focus-visible`, reduced-motion.
-- Re-check AA contrast; use `--basil-deep` / `--gold-deep` for small text.
+- Re-check AA contrast; use `--green-deep` / `--gold-deep` for small text on light.
 
 ---
 
@@ -174,7 +188,9 @@ Keep the friendly goal words (Feel light / Stay balanced / Get stronger) and the
 
 ## 8. Acceptance checklist
 
-☐ No tomato/honey colour anywhere; wood + basil + gold + white only, AA contrast passes.
+☐ No tomato/honey anywhere. Deep walnut wood + dark/emerald greens + gold sparks + white only.
+☐ Gold appears only as thin details — no gold-filled buttons, banners or blocks. AA contrast passes.
+☐ The 1·2·3 step bar is gone (removed from `index.html` and `updateSteps()` in `app.js`).
 ☐ Every recipe photo sits **above** its own text, on a tinted (never white) backdrop.
 ☐ Meal plan, browse and shopping all live on **one page**; only detail/cook open as overlays.
 ☐ Sidebar shows all 7 days with thumbnails, kcal, €/day; drag-and-drop still works.
