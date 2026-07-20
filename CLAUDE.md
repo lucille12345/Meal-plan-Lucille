@@ -116,23 +116,47 @@ repeated dishes and pointing at AI generation. Don't "fix" that notice by hiding
    the cron job. **Until `send-feedback` is deployed the in-app feedback form fails** (the live app
    already points at that URL).
 3. ~~AI-ON test~~ ✅ **DONE 2026-07-20** — tested, three bugs found and fixed (see above). Deploy the fix by pushing.
-4. **▶️ V3 REDESIGN → `docs/V3-REDESIGN-BRIEF.md` — READY TO START, this is the next thing to do.**
-   Deep walnut + emerald + gold-spark palette, one-page planner with `My Meal Plan` /
-   `Shop Ingredients` tabs, day sidebar, filter row, image-on-top cards, dessert + starter browse
-   sections, shopping total at the bottom, delete the 1·2·3 step bar — plus the dish database (§0)
-   and "Add a dish I love" (§0.7).
-   - **Start at the brief's `§00. How to run this build`.** It holds the per-phase model plan,
-     session hygiene, and the stop-don't-guess rules. **`§7` is the order to build in — the section
-     numbering is historical, do not work top-to-bottom.**
-   - **10 phases, one per session.** Phases 0,1,2,4,5,6,8 → **Sonnet** (the spec hands over exact
-     code + search anchors). Phases **3 (one-page planner)**, **7 (§0.7)** and **9 (final
-     verification)** → **Opus, thinking high** — those are the three where the spec deliberately
-     stops short and judgment fills the gap.
-   - **No line numbers anywhere in the brief — every reference is a `grep` anchor.** Several cited
-     line numbers had already drifted ~9 lines before the build started, and each edit shifts
-     everything below it. All anchors verified resolving uniquely as of 2026-07-20.
+4. **▶️ V3 REDESIGN → `docs/V3-REDESIGN-BRIEF.md` — IN PROGRESS.** Phase 0 done (below);
+   **next up is phase 1 (palette), then phase 2 (card), then switch to Opus for phase 3.**
+   - **Start each phase at the brief's `§00. How to run this build`.** It holds the per-phase model
+     plan, session hygiene, and the stop-don't-guess rules. **`§7` is the order to build in — the
+     section numbering is historical, do not work top-to-bottom.**
+   - **10 phases, one per session.** Phases 0,1,2,4,5,6,8 → **Sonnet**. Phases **3 (one-page
+     planner)**, **7 (§0.7)** and **9 (final verification)** → **Opus, thinking high**.
+   - **No line numbers anywhere in the brief — every reference is a `grep` anchor.**
    - `§9` is a full final verification pass with copy-pasteable check scripts; `§8` is the
      acceptance checklist.
+   - **✅ PHASE 0 DONE + VERIFIED (2026-07-20, Sonnet).** All 11 steps of §0.3 + the §0.4 price
+     wiring, committed. What changed in `public/app.js`/`index.html`/`sw.js` (`CACHE` bumped to
+     `foodie-shell-v4`): `recipes-db.js` + `ingredient-prices.js` now load; `eligibleRecipes()` /
+     `pickMeal()` / `enforceNoRepeat()` prefer curated (`db-`) dishes via a `preferCurated()` helper,
+     with the pool deduped by `id` so a favourited curated dish can't double-count;
+     `passesDietFilters()` now trusts a dish's `contains[]` over the old regex; `recipeUrl()` /
+     `dishImageUrl()` use a dish's real `sourceUrl`/`photo` when present; `priceOf()` falls back to
+     `estimateIngredientPrice()` so prices work with AI off; **`pantryHas()` rewritten** with an
+     explicit `PANTRY_FALSE_MATCHES` exclusion map (whole-word tokenizing alone does **not** fix
+     this — "pepper" is genuinely one of the words in "bell pepper" — so the fix names the specific
+     compounds it must not match: `bell pepper`/`pepper flakes`/`jalapeño pepper` for "Pepper",
+     `rice wine`/`rice noodle`/`rice paper` for "Rice", `spring onion`/`onion powder` for "Onion",
+     `flour tortilla` for "Flour", `garlic powder` for "Garlic"); `planWeek()` now always builds
+     from the database first and only calls the existing `requestSwapAI()` to top up genuine gaps
+     (capped at 5/week) — **no new endpoint**; the AI checkbox is relabelled *"Let AI fill any
+     gaps"* and its related notices reworded to stay honest about what actually happened.
+     **Verified live in-browser (AI off):** 57 dishes load; a relaxed profile fills **35/35** slots
+     from the database with 0 duplicate names; Gluten and Soy allergy tests both leaked zero
+     forbidden dishes; all 4 previously-broken pantry cases now correct *and* the 5 correct-hide
+     cases still hide; a curated dish showed its real €-price/link/photo with AI off;
+     `findBrowseRecipe` + the browse carousels include curated dishes; zero console errors, zero
+     `/generate-*` calls.
+   - **🟡 Correction to the earlier "21/21" and "49/49" coverage claims below: those numbers ignored
+     the pre-existing difficulty/time filter.** Once verified live against a **realistic** profile
+     (cooking confidence 5, 30 min/meal), a "Stay balanced" week (starter+main, 35 slots) filled
+     only **18/35** from the database — the other 17 fell to the legacy pool because several curated
+     dishes exceed 30 minutes (e.g. Homemade granola 40 min, Breakfast burritos 50 min, Breakfast
+     potatoes 45 min all get filtered out for that profile). This is the **existing** filter working
+     correctly, not a wiring bug — but the earlier simulation never modelled it, so treat "21/21" /
+     "49/49" as an unrestricted **upper bound**, not what most real users will see. Faster/lower-
+     difficulty dishes are worth prioritizing in future additions alongside the dessert/starter gap.
 5. **Phase 11:** Tauri desktop wrapper over `/public` → `.dmg`/`.exe` via GitHub Releases.
 6. **🟡 CURATED RECIPE DATABASE — DATA BUILT, WIRING NOT DONE (2026-07-20, grown same day).**
    - **Built:** `public/recipes-db.js` (`RECIPES_DB`, **57 real dishes** — 9 breakfasts, 16 starters,
