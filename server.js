@@ -64,17 +64,40 @@ function computeTargets(p) {
   return { kcal: Math.round(tdee / 10) * 10, protein: Math.round(kg * (goal === 'maintain' ? 1.6 : 2.0)) };
 }
 
+/* ---- per-meal kcal split (mirrors the client's mealSplit, §6.7) ---- */
+function mealKcal(p, t) {
+  if (!t) return null;
+  const s = p.mealSplit || { breakfast: 25, lunch: 40, dinner: 35 };
+  const b = Number(s.breakfast) || 0, l = Number(s.lunch) || 0, d = Number(s.dinner) || 0;
+  const sum = (b + l + d) || 1;
+  const per = x => Math.round(t.kcal * x / sum / 10) * 10;
+  return { breakfast: per(b), lunch: per(l), dinner: per(d) };
+}
+function coursesForGoal(goal) {
+  if (goal === 'gain') return ['starter', 'main', 'dessert'];
+  if (goal === 'lose') return ['main', 'dessert'];
+  return ['starter', 'main'];
+}
+
 /* ---- 2. The instructions we give the AI ---- */
 function buildPrompt(profile, mode, avoid = {}) {
   const p = profile || {};
   const city = (p.city && p.city.trim()) ? p.city.trim() : 'Paris, France';
   const people = Math.min(8, Math.max(1, Number(p.people) || 1));
   const t = computeTargets(p);
+  const mk = mealKcal(p, t);
+  const bpd = Number(p.budgetPerDay) || (p.budget ? Math.round(Number(p.budget) / 7) : 0);
+  const courses = coursesForGoal(p.goal);
+  const brk = p.breakfastPref === 'sweet' ? 'SWEET' : p.breakfastPref === 'savory' ? 'SAVORY' : 'either sweet or savory';
+  const cuisines = (p.cuisines || []).filter(c => c && c !== 'Surprise me');
   const targetLine = t
-    ? `\n- DAILY TARGET (per person): about ${t.kcal} kcal and ${t.protein} g protein per day. Portion the 3 meals so their kcal add up to roughly this, and hit the protein.`
+    ? `\n- DAILY TARGET (per person): about ${t.kcal} kcal and ${t.protein} g protein per day.`
+    : '';
+  const perMealLine = mk
+    ? `\n- PER-MEAL kcal targets (per person, stay within ±10%): breakfast ≈ ${mk.breakfast}, lunch ≈ ${mk.lunch}, dinner ≈ ${mk.dinner}. For a multi-course lunch/dinner, the courses together should sum to that meal's target (starter & dessert lighter than the main).`
     : '';
   const leftoverLine = p.leftovers
-    ? `\n- LEFTOVERS: the person reuses some dinners as next-day lunch. Make dinners reheat well and portion them generously.`
+    ? `\n- LEFTOVERS: the person reuses some dinners as next-day lunch. Make dinner mains reheat well and portion them generously.`
     : '';
   const who = `
 Person's profile:
@@ -85,11 +108,14 @@ Person's profile:
 - Goal: ${p.goal || 'maintain'} (lose / maintain / gain muscle)
 - Activity: ${p.sport || 'none'}, ${p.frequency || 0} times per week
 - Cooking confidence: ${p.cookingLevel || 5}/10 (lower = keep recipes simple)
+- Time per meal: about ${p.timePerMeal || 30} minutes max
+- Breakfast preference: ${brk} breakfasts.
+- Cuisines they love (favor these): ${cuisines.length ? cuisines.join(', ') : 'any — surprise them'}
 - Dislikes to AVOID: ${(p.dislikes || []).join(', ') || 'none'}
 - Also cannot / will NOT eat (respect strictly): ${p.avoidText && p.avoidText.trim() ? p.avoidText.trim() : 'nothing extra'}
 - Allergies (STRICTLY EXCLUDE): ${(p.allergies || []).join(', ') || 'none'}
-- Weekly grocery budget: ${p.budget ? '€' + p.budget : 'no strict budget'}
-- Prices reflect a typical supermarket in: ${city}${targetLine}${leftoverLine}`;
+- Daily grocery budget: ${bpd ? '€' + bpd + ' per day' : 'no strict budget'}
+- Prices reflect a typical supermarket in: ${city}${targetLine}${perMealLine}${leftoverLine}`;
 
   const portions = `
 PORTION SIZES — make meals genuinely filling for a full-grown adult, enough to actually satisfy for the whole day. Do NOT under-portion. Rough guide per person:
@@ -106,17 +132,16 @@ PRICING — use REALISTIC ${city} supermarket prices (2026), not cheap guesses. 
 Price EACH ingredient for its actual quantity. A realistic weekly grocery total for ONE person eating 3 real meals a day is typically €45-85. If your running total is far below ~€45, your prices are too low — raise them to be realistic. Respect the budget if given, but never make prices unrealistically cheap to fit it.`;
 
   const shape = `
-Each meal MUST be an object with EXACTLY these fields:
+A RECIPE object has EXACTLY these fields:
 {
-  "type": "breakfast" | "lunch" | "dinner",
   "name": "short dish name",
   "desc": "4-6 word ingredient summary",
   "time": integer minutes to prepare,
   "difficulty": integer 1-5 (1=very easy, 5=advanced),
   "emoji": "one food emoji",
   "img": "1-2 lowercase photo keywords, e.g. salmon,dinner",
-  "kcal": integer, estimated calories PER PERSON for this meal,
-  "protein": integer, estimated grams of protein PER PERSON for this meal,
+  "kcal": integer, estimated calories PER PERSON for this course,
+  "protein": integer, estimated grams of protein PER PERSON for this course,
   "ingredients": [
     { "name": "Ingredient", "qty": number, "unit": "g|ml|tbsp|can|slices or '' for a count",
       "category": "Produce" | "Meat & Fish" | "Dairy" | "Bakery" | "Frozen" | "Pantry",
@@ -125,27 +150,42 @@ Each meal MUST be an object with EXACTLY these fields:
   ],
   "steps": [ "short step 1", "short step 2", ... 3 to 6 clear cooking steps ]
 }
-Rules: portions per ONE person (see PORTION SIZES). Match difficulty/time to cooking confidence and life stage. Realistic quantities, categories, and EUR prices (see PRICING). Output valid JSON only. No trailing commas.`;
+Rules: portions per ONE person (see PORTION SIZES). Match difficulty/time to cooking confidence and time-per-meal. Realistic quantities, categories, and EUR prices (see PRICING). Do NOT include any "url"/"link" field — never invent recipe links. Output valid JSON only. No trailing commas.`;
+
+  // Which courses lunch & dinner get for this person's goal.
+  const courseList = courses.join(' + ');
+  const coursesShape = `
+COURSES — lunch and dinner are multi-course for this person: ${courseList}. Starters and desserts are LIGHTER than the main (starter ≈ 120-220 kcal, dessert ≈ 120-220 kcal). ${courses.includes('starter') ? '' : 'No starter. '}${courses.includes('dessert') ? '' : 'No dessert. '}Breakfast is a single ${brk} dish.`;
 
   if (mode === 'week') {
-    return `You are a meal-planning assistant. Create a 7-day meal plan (breakfast, lunch, dinner each day) personalised to this person. Vary meals across the week — no repeats.
+    return `You are a meal-planning assistant. Create a 7-day meal plan personalised to this person.
+CRITICAL: every dish name must be UNIQUE across the ENTIRE week — no dish (main, starter or dessert) may appear twice, on any day. A repeated name makes the whole response invalid. Favor the cuisines they love.
 ${who}
 ${portions}
 ${pricing}
+${coursesShape}
 ${shape}
 
-Return ONLY this JSON structure:
-{ "week": [ { "day": "Monday", "meals": [ <breakfast>, <lunch>, <dinner> ] }, ... 7 days Monday..Sunday ] }`;
+Return ONLY this JSON structure (breakfast is a RECIPE; lunch & dinner hold a "courses" object with ${courseList}):
+{ "week": [ { "day": "Monday", "meals": [
+    { "type": "breakfast", ...RECIPE fields... },
+    { "type": "lunch",  "courses": { ${courses.map(c => `"${c}": <RECIPE>`).join(', ')} } },
+    { "type": "dinner", "courses": { ${courses.map(c => `"${c}": <RECIPE>`).join(', ')} } }
+] }, ... 7 days Monday..Sunday ] }`;
   }
 
-  return `You are a meal-planning assistant. Suggest ONE ${avoid.type || 'dinner'} for this person, DIFFERENT from these already-used dishes: ${(avoid.names || []).join(', ') || 'none'}.
+  const role = avoid.type || 'dinner';
+  const roleWord = role === 'starter' ? 'starter (light, ~120-220 kcal)'
+    : role === 'dessert' ? 'dessert (light, ~120-220 kcal)'
+    : `${role} dish`;
+  return `You are a meal-planning assistant. Suggest ONE ${roleWord} for this person, DIFFERENT from these already-used dishes: ${(avoid.names || []).join(', ') || 'none'}.
 ${who}
 ${portions}
 ${pricing}
 ${shape}
 
 Return ONLY this JSON structure:
-{ "meal": <a single meal object of type "${avoid.type || 'dinner'}"> }`;
+{ "meal": <a single RECIPE object> }`;
 }
 
 /* ---- 3. Call the Gemini API ---- */
@@ -198,18 +238,42 @@ function readBody(req) {
     req.on('end', () => { try { resolve(JSON.parse(data || '{}')); } catch { resolve({}); } });
   });
 }
-function sendHtml(res) {
-  const htmlPath = path.join(__dirname, 'meal-planner.html');
-  fs.readFile(htmlPath, (err, buf) => {
-    if (err) { res.writeHead(404, { 'content-type': 'text/plain' }); return res.end('meal-planner.html not found'); }
-    res.writeHead(200, { 'content-type': 'text/html; charset=utf-8' });
+/* ---- static file serving for the /public app-shell ---- */
+const PUBLIC_DIR = path.join(__dirname, 'public');
+const MIME = {
+  '.html': 'text/html; charset=utf-8',
+  '.js':   'text/javascript; charset=utf-8',
+  '.css':  'text/css; charset=utf-8',
+  '.json': 'application/json; charset=utf-8',
+  '.svg':  'image/svg+xml',
+  '.png':  'image/png',
+  '.jpg':  'image/jpeg',
+  '.jpeg': 'image/jpeg',
+  '.webp': 'image/webp',
+  '.ico':  'image/x-icon',
+  '.woff': 'font/woff',
+  '.woff2': 'font/woff2',
+};
+// Serve a file from /public. urlPath '/' maps to index.html.
+// Rejects anything that escapes /public (path-traversal guard).
+function sendStatic(res, urlPath) {
+  let decoded;
+  try { decoded = urlPath === '/' ? 'index.html' : decodeURIComponent(urlPath); }
+  catch { res.writeHead(400, { 'content-type': 'text/plain' }); return res.end('Bad request'); }
+  const rel = decoded.replace(/^\/+/, '');
+  const filePath = path.join(PUBLIC_DIR, rel);
+  if (!filePath.startsWith(PUBLIC_DIR + path.sep) && filePath !== path.join(PUBLIC_DIR, 'index.html')) {
+    res.writeHead(403, { 'content-type': 'text/plain' }); return res.end('Forbidden');
+  }
+  fs.readFile(filePath, (err, buf) => {
+    if (err) { res.writeHead(404, { 'content-type': 'text/plain' }); return res.end('Not found'); }
+    res.writeHead(200, { 'content-type': MIME[path.extname(filePath).toLowerCase()] || 'application/octet-stream' });
     res.end(buf);
   });
 }
 const server = http.createServer(async (req, res) => {
+ try {
   if (req.method === 'OPTIONS') return sendJson(res, 204, {});
-  // Serve the app itself so the whole thing lives at one URL (frontend + backend together).
-  if (req.method === 'GET' && (req.url === '/' || req.url === '/meal-planner.html')) return sendHtml(res);
   if (req.method === 'POST' && req.url === '/generate-week') {
     if (!API_KEY) return sendJson(res, 500, { error: 'No API key configured on the server.' });
     try { const profile = await readBody(req); return sendJson(res, 200, await callAI(buildPrompt(profile, 'week'))); }
@@ -220,7 +284,14 @@ const server = http.createServer(async (req, res) => {
     try { const { profile, type, avoidNames } = await readBody(req); return sendJson(res, 200, await callAI(buildPrompt(profile, 'meal', { type, names: avoidNames }))); }
     catch (e) { console.error(e.message); return sendJson(res, 500, { error: e.message }); }
   }
+  // Any other GET → serve the app-shell from /public (index.html, styles.css, app.js, assets…).
+  if (req.method === 'GET') return sendStatic(res, req.url.split('?')[0]);
   sendJson(res, 404, { error: 'Not found' });
+ } catch (e) {
+  // Never let a single bad request take the whole server down.
+  console.error('Request error:', e && e.message);
+  try { if (!res.headersSent) sendJson(res, 500, { error: 'Server error' }); else res.end(); } catch {}
+ }
 });
 server.listen(PORT, () => {
   console.log(`\n✅ Meal Planner backend running at http://localhost:${PORT}`);

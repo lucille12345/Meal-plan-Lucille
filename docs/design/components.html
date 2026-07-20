@@ -1,0 +1,229 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Table — Components</title>
+<link rel="stylesheet" href="tokens.css">
+<style>
+  body { padding-bottom: 120px; }
+  .doc-head { padding: 56px 24px 32px; max-width: 1120px; margin: 0 auto; }
+  .doc-head .kicker { font-size: var(--fs-xs); letter-spacing: .16em; text-transform: uppercase; color: var(--tomato-deep); font-weight: 700; }
+  .doc-head h1 { font-size: var(--fs-h1); margin: 8px 0 10px; }
+  section.block { max-width: 1120px; margin: 0 auto; padding: 28px 24px; border-top: 1px solid var(--hairline); }
+  .block > h2 { font-size: 22px; margin-bottom: 4px; }
+  .block > .sub { color: var(--muted); font-size: var(--fs-sm); margin-bottom: 22px; }
+  .row { display: flex; flex-wrap: wrap; gap: 14px; align-items: center; }
+  .stack { display: flex; flex-direction: column; gap: 14px; max-width: 420px; }
+  .swatches { display: grid; grid-template-columns: repeat(auto-fill, minmax(128px,1fr)); gap: 12px; }
+  .sw { border: 1px solid var(--hairline); border-radius: var(--r-sm); overflow: hidden; background: var(--surface); }
+  .sw .chip-color { height: 62px; }
+  .sw .lab { padding: 8px 10px; font-size: var(--fs-xs); }
+  .sw .lab b { display: block; font-size: var(--fs-sm); }
+  .sw .lab code { color: var(--muted); font-family: ui-monospace, Menlo, monospace; }
+  .type-row { display: flex; align-items: baseline; gap: 16px; padding: 12px 0; border-bottom: 1px dashed var(--hairline); }
+  .type-row .tag { width: 120px; flex: none; color: var(--muted); font-size: var(--fs-xs); font-family: ui-monospace,Menlo,monospace; }
+  .grid-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px,1fr)); gap: 20px; }
+  .label { font-size: var(--fs-xs); color: var(--faint); text-transform: uppercase; letter-spacing: .08em; margin-bottom: 8px; font-weight: 600; }
+</style>
+</head>
+<body>
+  <header class="doc-head">
+    <div class="kicker">Table · Design System</div>
+    <h1>Components &amp; states</h1>
+    <p class="muted">Every building block Opus lifts. Colors, type, and shape all reference <code class="mono">tokens.css</code>.</p>
+  </header>
+
+  <!-- COLOR -->
+  <section class="block">
+    <h2>Color</h2>
+    <p class="sub">Warm paper base, three appetite accents. Deep variants exist for small text (AA).</p>
+    <div class="label">Base &amp; ink</div>
+    <div class="swatches" style="margin-bottom:22px">
+      <div class="sw"><div class="chip-color" style="background:var(--paper)"></div><div class="lab"><b>Paper</b><code>#FDFBF7</code></div></div>
+      <div class="sw"><div class="chip-color" style="background:var(--surface)"></div><div class="lab"><b>Surface</b><code>#FFFFFF</code></div></div>
+      <div class="sw"><div class="chip-color" style="background:var(--surface-2)"></div><div class="lab"><b>Surface-2</b><code>#F7F3EC</code></div></div>
+      <div class="sw"><div class="chip-color" style="background:var(--ink)"></div><div class="lab"><b>Ink</b><code>#1D1D1F</code></div></div>
+      <div class="sw"><div class="chip-color" style="background:var(--muted)"></div><div class="lab"><b>Muted</b><code>#6E6A63</code></div></div>
+      <div class="sw"><div class="chip-color" style="background:var(--hairline)"></div><div class="lab"><b>Hairline</b><code>#ECE7DD</code></div></div>
+    </div>
+    <div class="label">Appetite accents</div>
+    <div class="swatches">
+      <div class="sw"><div class="chip-color" style="background:var(--tomato)"></div><div class="lab"><b>Tomato</b><code>#E0532F</code></div></div>
+      <div class="sw"><div class="chip-color" style="background:var(--tomato-deep)"></div><div class="lab"><b>Tomato-deep</b><code>#B8401F</code></div></div>
+      <div class="sw"><div class="chip-color" style="background:var(--basil)"></div><div class="lab"><b>Basil</b><code>#2F7D5B</code></div></div>
+      <div class="sw"><div class="chip-color" style="background:var(--basil-deep)"></div><div class="lab"><b>Basil-deep</b><code>#246147</code></div></div>
+      <div class="sw"><div class="chip-color" style="background:var(--honey)"></div><div class="lab"><b>Honey</b><code>#F5B841</code></div></div>
+      <div class="sw"><div class="chip-color" style="background:var(--blush)"></div><div class="lab"><b>Blush</b><code>#F8E8E0</code></div></div>
+    </div>
+  </section>
+
+  <!-- TYPE -->
+  <section class="block">
+    <h2>Type</h2>
+    <p class="sub">Fraunces for display &amp; numbers-as-heroes · Inter for UI &amp; body.</p>
+    <div class="type-row"><span class="tag">hero · Fraunces</span><span class="display" style="font-size:var(--fs-hero);font-weight:600">Your week, sorted.</span></div>
+    <div class="type-row"><span class="tag">h1 · Fraunces</span><span class="display" style="font-size:var(--fs-h1);font-weight:600">Dinner, deliciously planned</span></div>
+    <div class="type-row"><span class="tag">h2 · Fraunces</span><span class="display" style="font-size:var(--fs-h2);font-weight:600">Budget-friendly dinners</span></div>
+    <div class="type-row"><span class="tag">numeral · Fraunces</span><span class="display" style="font-size:52px;font-weight:700;color:var(--tomato-deep)">2,430</span></div>
+    <div class="type-row"><span class="tag">lg · Inter</span><span style="font-size:var(--fs-lg)">A calm, confident subhead.</span></div>
+    <div class="type-row"><span class="tag">body · Inter</span><span>Warm, appetized, zero clinical jargon — the everyday voice.</span></div>
+    <div class="type-row"><span class="tag">small · Inter</span><span style="font-size:var(--fs-sm);color:var(--muted)">Secondary detail &amp; captions.</span></div>
+  </section>
+
+  <!-- BUTTONS -->
+  <section class="block">
+    <h2>Buttons</h2>
+    <p class="sub">Verbs, never nouns. Primary = tomato. One primary per view.</p>
+    <div class="row" style="margin-bottom:16px">
+      <button class="btn btn-primary">Plan my week</button>
+      <button class="btn btn-secondary">Log in</button>
+      <button class="btn btn-basil">Connect ✓</button>
+      <button class="btn btn-ghost">Maybe later</button>
+      <button class="btn btn-primary" disabled>Disabled</button>
+    </div>
+    <div class="row" style="margin-bottom:16px">
+      <button class="btn btn-primary btn-lg">Start free</button>
+      <button class="btn btn-secondary btn-sm">Add your photo</button>
+    </div>
+    <div class="row">
+      <button class="icon-btn add" aria-label="Add">＋</button>
+      <button class="icon-btn" aria-label="Favorite">♡</button>
+      <button class="icon-btn" aria-label="Swap">✕</button>
+      <button class="icon-btn" aria-label="Read aloud">🔊</button>
+    </div>
+  </section>
+
+  <!-- CHIPS + BADGES -->
+  <section class="block">
+    <h2>Chips &amp; badges</h2>
+    <p class="sub">Chips select (taste prefs). Badges label (recipe meta).</p>
+    <div class="label">Selectable chips</div>
+    <div class="row" style="margin-bottom:22px">
+      <button class="chip selected">🇫🇷 French</button>
+      <button class="chip">🇮🇹 Italian</button>
+      <button class="chip">🥢 Asian</button>
+      <button class="chip selected">🌶 Mexican</button>
+      <button class="chip">✨ Surprise me</button>
+    </div>
+    <div class="label">Recipe badges</div>
+    <div class="row">
+      <span class="badge">⏱ 25 min</span>
+      <span class="badge">👐 Easy</span>
+      <span class="badge badge-tomato">520 kcal</span>
+      <span class="badge badge-basil">38 g protein</span>
+      <span class="badge badge-honey">Cook double</span>
+      <span class="badge badge-ink">Main</span>
+    </div>
+  </section>
+
+  <!-- INPUTS -->
+  <section class="block">
+    <h2>Inputs</h2>
+    <p class="sub">Rounded 12, focus ring in tomato wash. Every field can carry a "why we ask" whisper.</p>
+    <div class="stack">
+      <div class="field">
+        <label for="e">Email</label>
+        <input class="input" id="e" type="email" placeholder="you@email.com">
+      </div>
+      <div class="field">
+        <label for="c">City <span class="why">— why we ask: local prices</span></label>
+        <input class="input" id="c" value="Paris">
+      </div>
+      <div class="field">
+        <label>Household size</label>
+        <div class="stepper"><button aria-label="less">−</button><span class="val">2</span><button aria-label="more">＋</button></div>
+      </div>
+      <div class="field">
+        <label>Budget — €12 / day</label>
+        <input class="slider" type="range" min="5" max="30" value="12">
+      </div>
+      <div class="field" style="flex-direction:row;align-items:center;justify-content:space-between">
+        <label style="margin:0">Cook once, eat twice</label>
+        <button class="toggle" aria-checked="true" role="switch"></button>
+      </div>
+      <div class="field">
+        <label for="t">Anything to avoid?</label>
+        <textarea class="input" id="t" rows="2" placeholder="e.g. coriander, shellfish…"></textarea>
+      </div>
+    </div>
+  </section>
+
+  <!-- RECIPE CARD -->
+  <section class="block">
+    <h2>Recipe card</h2>
+    <p class="sub">Mob language: photo top (4:3), category, title, meta. ⊕ to add, ♡ to save.</p>
+    <div class="grid-cards">
+      <article class="recipe-card">
+        <div class="photo">
+          <img src="https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=600&q=70" alt="Salmon grain bowl">
+          <button class="icon-btn fav" aria-label="Save">♡</button>
+          <button class="icon-btn add" aria-label="Add to a day">＋</button>
+        </div>
+        <div class="body">
+          <span class="cat">Budget-friendly</span>
+          <h3 class="title">Miso salmon grain bowl</h3>
+          <div class="meta"><span class="badge">⏱ 25 min</span><span class="badge badge-basil">38 g</span></div>
+        </div>
+      </article>
+      <article class="recipe-card">
+        <div class="photo">
+          <img src="https://images.unsplash.com/photo-1473093295043-cdd812d0e601?auto=format&fit=crop&w=600&q=70" alt="Pesto pasta">
+          <button class="icon-btn fav" aria-label="Save">♥</button>
+          <button class="icon-btn add" aria-label="Add to a day">＋</button>
+        </div>
+        <div class="body">
+          <span class="cat">Quick &amp; easy</span>
+          <h3 class="title">Greens &amp; pesto orzo</h3>
+          <div class="meta"><span class="badge">⏱ 15 min</span><span class="badge badge-tomato">480 kcal</span></div>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <!-- FEEDBACK: toasts, empty, skeleton -->
+  <section class="block">
+    <h2>Feedback &amp; loading</h2>
+    <p class="sub">Toasts confirm. Empty states charm. Skeletons shimmer while a week generates.</p>
+    <div class="label">Toasts</div>
+    <div class="row" style="margin-bottom:24px">
+      <div class="toast"><span class="dot"></span>Added to Tuesday · dinner</div>
+      <div class="toast" style="background:var(--basil)"><span class="dot" style="background:#fff"></span>Week saved</div>
+    </div>
+    <div class="label">Empty state</div>
+    <div class="card card-pad" style="max-width:420px;margin-bottom:24px">
+      <div class="empty"><div class="em">🍀</div><b style="color:var(--ink)">Nothing planned for Thursday yet</b><div>— lucky Thursday. Tap a dish to fill it.</div></div>
+    </div>
+    <div class="label">Skeleton (recipe card loading)</div>
+    <div class="grid-cards">
+      <article class="recipe-card" aria-hidden="true">
+        <div class="skeleton" style="aspect-ratio:4/3;border-radius:0"></div>
+        <div class="body">
+          <div class="skeleton" style="height:11px;width:44%"></div>
+          <div class="skeleton" style="height:18px;width:82%"></div>
+          <div class="skeleton" style="height:22px;width:56%;border-radius:999px;margin-top:6px"></div>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <!-- DRAWER + progress -->
+  <section class="block">
+    <h2>Drawer &amp; progress</h2>
+    <p class="sub">Right slide-over (desktop) / bottom sheet (mobile). Onboarding step dots.</p>
+    <div class="label">Progress dots</div>
+    <div class="dots" style="margin-bottom:26px"><i class="done"></i><i class="done"></i><i class="on"></i><i></i><i></i><i></i><i></i><i></i></div>
+    <div class="label">Feature card (in drawer)</div>
+    <div class="card card-pad" style="max-width:440px;display:flex;gap:14px;align-items:flex-start">
+      <div style="width:44px;height:44px;border-radius:12px;background:var(--basil-wash);display:grid;place-items:center;font-size:22px;flex:none">📅</div>
+      <div style="flex:1">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:10px">
+          <b>Google Calendar</b><span class="badge badge-basil">Connected ✓</span>
+        </div>
+        <p class="muted" style="font-size:var(--fs-sm);margin-top:2px">Your dinners &amp; shopping reminders, right in your calendar.</p>
+      </div>
+    </div>
+  </section>
+
+</body>
+</html>

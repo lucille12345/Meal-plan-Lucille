@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Table — Cook mode</title>
+<link rel="stylesheet" href="tokens.css">
+<style>
+  html, body { height: 100%; }
+  body.cook-dark { display: flex; flex-direction: column; min-height: 100vh; overflow: hidden; }
+
+  .cook-top { display: flex; align-items: center; gap: 16px; padding: 18px 24px; }
+  .cook-top .close { width: 42px; height: 42px; border-radius: 50%; border: 1px solid var(--hairline-2); background: var(--surface); color: var(--ink); font-size: 18px; cursor: pointer; display: grid; place-items: center; }
+  .cook-top .title { font-family: var(--font-display); font-weight: 600; font-size: var(--fs-lg); }
+  .cook-top .spacer { flex: 1; }
+  .cook-top .stepcount { font-size: var(--fs-sm); color: var(--muted); font-variant-numeric: tabular-nums; }
+
+  .progress { height: 6px; background: var(--surface-2); margin: 0 24px; border-radius: 999px; overflow: hidden; }
+  .progress i { display: block; height: 100%; width: 60%; background: linear-gradient(90deg, var(--tomato), var(--honey)); border-radius: 999px; transition: width .3s var(--ease); }
+
+  .stage { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 24px 28px; }
+  .stage .kicker { font-size: var(--fs-sm); letter-spacing: .14em; text-transform: uppercase; color: var(--honey); font-weight: 700; }
+  .stage .step-num { font-family: var(--font-display); font-weight: 700; font-size: 15px; color: var(--muted); margin: 24px 0 12px; }
+  .stage .step-text { font-family: var(--font-display); font-weight: 600; font-size: clamp(28px, 5vw, 52px); line-height: 1.18; max-width: 18ch; letter-spacing: -.01em; }
+  .stage .timer-chip { margin-top: 30px; display: inline-flex; align-items: center; gap: 9px; padding: 12px 20px; border-radius: 999px; background: var(--surface); border: 1px solid var(--hairline-2); font-weight: 600; }
+
+  .read { margin-top: 26px; display: inline-flex; align-items: center; gap: 10px; padding: 13px 22px; border-radius: 999px; background: var(--surface); border: 1px solid var(--hairline-2); color: var(--ink); font-weight: 600; cursor: pointer; }
+  .read.on { background: var(--honey-wash); border-color: var(--honey); color: var(--honey-deep); }
+
+  .cook-foot { display: flex; align-items: center; gap: 14px; padding: 20px 24px 28px; }
+  .cook-foot .ing-btn { display: inline-flex; align-items: center; gap: 8px; padding: 13px 20px; border-radius: 999px; background: var(--surface); border: 1px solid var(--hairline-2); color: var(--ink); font-weight: 600; cursor: pointer; }
+  .cook-foot .spacer { flex: 1; }
+  .nav-btn { width: 56px; height: 56px; border-radius: 50%; border: 1px solid var(--hairline-2); background: var(--surface); color: var(--ink); font-size: 22px; cursor: pointer; }
+  .nav-btn.next { background: var(--tomato); border-color: transparent; color: #fff; width: auto; padding: 0 28px; border-radius: 999px; font-weight: 700; font-size: var(--fs-body); }
+
+  /* ingredients drawer */
+  .scrim { position: fixed; inset: 0; background: rgba(0,0,0,.5); opacity: 0; pointer-events: none; transition: opacity var(--dur) var(--ease); z-index: 60; }
+  .scrim.on { opacity: 1; pointer-events: auto; }
+  .ing-drawer { position: fixed; left: 0; right: 0; bottom: 0; background: var(--surface); border-radius: 22px 22px 0 0; padding: 12px 24px 30px; transform: translateY(100%); transition: transform .3s var(--ease); z-index: 61; max-height: 70vh; overflow-y: auto; }
+  .ing-drawer.on { transform: none; }
+  .ing-drawer .grab { width: 40px; height: 4px; border-radius: 999px; background: var(--hairline-2); margin: 4px auto 16px; }
+  .ing-drawer h3 { font-size: var(--fs-h3); margin-bottom: 8px; }
+  .ing-drawer ul { list-style: none; padding: 0; margin: 8px 0 0; }
+  .ing-drawer li { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px dashed var(--hairline); font-size: var(--fs-sm); }
+  .ing-drawer .q { color: var(--muted); }
+</style>
+</head>
+<body class="cook-dark">
+  <div class="cook-top">
+    <button class="close" aria-label="Close" onclick="location.href='05-recipe.html'">✕</button>
+    <span class="title">Miso salmon grain bowl</span>
+    <span class="spacer"></span>
+    <span class="stepcount">Step 3 of 5</span>
+  </div>
+  <div class="progress"><i></i></div>
+
+  <div class="stage">
+    <div class="kicker">Now</div>
+    <div class="step-num">Step 3</div>
+    <p class="step-text">Brush the salmon with glaze and sear skin-side down for 4 minutes, basting as it caramelizes.</p>
+    <div class="timer-chip">⏱ Tap to start a 4:00 timer</div>
+    <button class="read on" id="read" aria-pressed="true" onclick="this.classList.toggle('on');this.setAttribute('aria-pressed', this.classList.contains('on'))">🔊 Reading step aloud</button>
+  </div>
+
+  <div class="cook-foot">
+    <button class="ing-btn" onclick="openDrawer(true)">🧺 Ingredients</button>
+    <span class="spacer"></span>
+    <button class="nav-btn" aria-label="Previous step">←</button>
+    <button class="nav-btn next">Next step →</button>
+  </div>
+
+  <!-- ingredients drawer -->
+  <div class="scrim" id="scrim" onclick="openDrawer(false)"></div>
+  <div class="ing-drawer" id="drawer">
+    <div class="grab"></div>
+    <h3>Ingredients</h3>
+    <p class="muted" style="font-size:var(--fs-sm)">For 2 servings</p>
+    <ul>
+      <li><span>Salmon fillets</span><span class="q">2 × 140 g</span></li>
+      <li><span>Brown rice or farro</span><span class="q">160 g</span></li>
+      <li><span>White miso paste</span><span class="q">2 tbsp</span></li>
+      <li><span>Honey</span><span class="q">1 tbsp</span></li>
+      <li><span>Cucumber</span><span class="q">½</span></li>
+      <li><span>Edamame</span><span class="q">100 g</span></li>
+      <li><span>Sesame seeds</span><span class="q">1 tsp</span></li>
+    </ul>
+  </div>
+
+  <script>
+    function openDrawer(open){
+      document.getElementById('drawer').classList.toggle('on', open);
+      document.getElementById('scrim').classList.toggle('on', open);
+    }
+  </script>
+</body>
+</html>

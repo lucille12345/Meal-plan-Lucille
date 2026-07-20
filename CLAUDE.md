@@ -1,6 +1,185 @@
 # Meal Planner — Project Memory (CLAUDE.md)
 
-_Last updated: 2026-07-18. This file is auto-loaded by Claude Code every session._
+_Last updated: 2026-07-20. This file is auto-loaded by Claude Code every session._
+
+> **FOLDER STRUCTURE (tidied 2026-07-20).** Root holds only what must run or deploy from
+> there; everything reference-only lives in `docs/`.
+> ```
+> Meal plan Lucille/
+> ├── CLAUDE.md          ← this file (must stay at root — auto-loaded)
+> ├── README.md          ← plain-English "what is this / how do I run it"
+> ├── server.js          ← backend. MUST stay at root (package.json + render.yaml run it)
+> ├── package.json       ← "start": node server.js
+> ├── render.yaml        ← Render deploy blueprint
+> ├── .gitignore
+> ├── gemini-key.txt     ← 🔑 SECRET, git-ignored, NEVER delete/commit. server.js reads it
+> │                        from the project root (__dirname). Irreplaceable if lost.
+> ├── Open Live Website.webloc   ← one-click shortcut to the live Render site
+> ├── public/            ← THE APP (served statically by server.js)
+> │   ├── index.html  app.js  styles.css  app-screens.css
+> │   ├── config.js   ← Supabase URL + publishable key (public-safe by design)
+> │   ├── cloud.js    ← Supabase client
+> │   ├── manifest.json  sw.js  icons/   ← PWA (Phase 9)
+> ├── supabase/schema.sql        ← tables + RLS + storage bucket
+> └── docs/              ← reference only, nothing here is served or executed
+>     ├── DESIGN-BRIEF.md  OPUS-BUILD-BRIEF.md  ← the two authoritative briefs
+>     ├── RESEARCH.md  STORM-RESEARCH.md        ← background research
+>     ├── SUPABASE-SETUP.md                     ← Lucille's setup steps
+>     └── design/        ← the 9 screen mockups + tokens.css (visual source of truth)
+> ```
+> **Do not move** `server.js`, `public/`, `package.json`, `render.yaml`, `gemini-key.txt`, or
+> `CLAUDE.md` — each is load-bearing at the root.
+
+> **DESIGN SESSION — DONE (2026-07-19).** The `docs/DESIGN-BRIEF.md` "Table" design session is
+> complete. A new **`docs/design/`** folder now exists in the repo with every deliverable from the
+> brief §0, all self-contained (link `tokens.css`; system/Google fonts + Unsplash CDN images
+> only; no build step). Contents:
+> - `docs/design/tokens.css` — **the visual source of truth.** All colors, Fraunces/Inter type,
+>   radii, warm shadows, spacing, motion as CSS variables, PLUS every reusable component class
+>   (`.btn .chip .card .recipe-card .badge .input .stepper .slider .toggle .toast .skeleton
+>   .carousel .dots`). Cook-mode's warm-dark palette is the `.cook-dark` scope at the bottom.
+> - `docs/design/components.html` — every component in every state.
+> - `docs/design/01-landing.html` … `09-profile.html` — the nine screens (landing, sign-up,
+>   onboarding, planner (Woolworths rail + carousels), recipe, cook-mode, shopping, features
+>   drawer, profile). Static; light demo JS only.
+> - `docs/design/index.html` — navigation index of all deliverables · `docs/design/README.md` — rationale
+>   + exact "how Opus should lift this" instructions.
+> Direction realised: "Apple's restraint, Mob's appetite" — warm paper `#FDFBF7`, tomato/basil/
+> honey accents (no blue near food), big Fraunces display. Checked at 375px + 1280px, AA
+> contrast (deep accent variants for small text), `:focus-visible` + reduced-motion honored.
+>
+> **NEXT STEP → the Opus build session.** Nothing in the live app (`meal-planner.html`,
+> `server.js`) was changed by the design session — those get rewritten during the build.
+> Opus now starts at **`docs/OPUS-BUILD-BRIEF.md` phase 1** (restructure to a `/public` multi-file
+> app-shell), then phase 2 lifts `docs/design/tokens.css` + markup 1:1 into the real screens. The
+> current single-file app stays live on Render until the rebuilt app is ready to deploy.
+
+> **BUILD SESSION — Phases 1–4 DONE (2026-07-19, Opus).** All work is on branch
+> **`v2-rebuild`** (NOT `main`) and **not deployed** — the live Render site is untouched.
+> Product renamed to **"Table"** (header + title). Removed v1 `meal-planner.html` + the brief zip.
+> **Supabase is LIVE + verified** — Lucille created the project, filled `public/config.js`
+> (real URL + publishable key, committed — publishable key is public-safe by design), ran
+> `supabase/schema.sql`. Magic-link sign-in + cloud sync confirmed working end-to-end
+> (favorite survived sign-out→sign-in). Phase 4 landing page built + verified.
+> - **Phase 1 (restructure):** `meal-planner.html` split verbatim into `public/index.html`,
+>   `public/styles.css`, `public/app.js`. `server.js` now serves `/public` statically (pure
+>   Node, content-type map + path-traversal guard); `/generate-week` + `/generate-meal`
+>   unchanged. Old `meal-planner.html` KEPT as a rollback (not deleted).
+> - **Phase 2 (design lift):** `public/styles.css` = `docs/design/tokens.css` verbatim (design
+>   source of truth); new `public/app-screens.css` re-tints every app screen to the Table
+>   tokens; `index.html` links both. Cook mode uses the `.cook-dark` warm-dark scope.
+> - **Verified in-browser, AI OFF:** questionnaire, week/review, recipes-by-day, shopping,
+>   cook mode + read-aloud, target banner, leftovers, pantry hiding, favorites, persistence —
+>   all intact. Zero console errors. Checked at 375px + 1280px.
+> - **Phase 3 (Supabase) SCAFFOLDED — needs Lucille to connect her project:** `public/config.js`
+>   (empty creds = local mode by default), `public/cloud.js` (ESM Supabase client, graceful
+>   fallback), sign-in screen (magic link + Google), auth gate + per-user cloud sync + v1
+>   migration wired into `app.js`, `supabase/schema.sql` (4 tables + RLS + private `dish-photos`
+>   bucket), and **`docs/SUPABASE-SETUP.md`** (her step-by-step). **Verified:** local-mode has zero
+>   regression (no external calls, boots to saved week), sign-in screen renders, form
+>   validation + offline-guard work. **UNVERIFIED until she connects Supabase:** real magic-link
+>   round-trip, Google OAuth, RLS, cloud sync/migration — test together once config.js is filled
+>   + schema.sql is run. Phase-3 sync stores the whole app blob in `profiles.state` (simple/robust);
+>   `weeks`/`favorites`/`photos` tables exist for later phases to normalize into.
+> - **Phase 4 (landing) DONE:** full-bleed marketing page (`renderLanding()` in app.js,
+>   styles in app-screens.css) — glass nav, hero, how-it-works, planner preview, quote band,
+>   stat band, FAQ, footer, parallax doodads. Signed-out visitors land here → CTAs → sign-in.
+>   Shell split: app screens in `#app-shell` (narrow), landing in `#landing-root` (full width).
+> - **To view locally:** `node server.js` → open `http://localhost:8787/`.
+> - **NEXT (in order):** meals v3 = 3 courses + no-repeat + real links +
+>   photo/image mapping (6), Woolworths planner rail+carousels+DnD (7), per-day pricing (8),
+>   PWA (9), integrations incl. Google OAuth (10), Tauri desktop (11).
+>   Merge `v2-rebuild` → `main` + deploy only on Lucille's word.
+
+> **BUILD SESSION — Phase 5 DONE (2026-07-19, Opus). Not committed yet — awaiting Lucille's OK.**
+> Questionnaire v2 (§6) + targets engine wiring, on branch `v2-rebuild`, verified in-browser AI OFF.
+> - **8-step onboarding wizard** replaces the old single-page form (`renderProfile` in `public/app.js`),
+>   lifting `docs/design/03-onboarding.html` markup onto the shared tokens: Welcome (name) · You
+>   (age/household steppers, weight/height, gender) · Rhythm (life stage, activity, times/week) ·
+>   Goal (Feel light/Stay balanced/Get stronger cards → stable internal `lose/maintain/gain` keys) ·
+>   Tastes (sweet/savory breakfast single-select, cuisine chips, dislikes, allergies, free-text) ·
+>   Kitchen (cooking confidence + time-per-meal sliders, cook-once-eat-twice, pantry) · Numbers
+>   (live calorie target + per-meal kcal split sliders + budget €/day + city) · Connect (skippable;
+>   Calendar/reminders shown as "Coming soon" — real wiring is Phase 10). Own progress dots; the
+>   1·2·3 bar is hidden during the wizard. **Persists to state on every step** (so cloud sync + resume work).
+> - **Targets engine:** `computeMealTargets()` splits the daily kcal 25/40/35 (user-adjustable,
+>   normalized); shown live in the Numbers step and on the review banner
+>   ("roughly 590 / 950 / 830 kcal across breakfast, lunch & dinner"). `goalWord()` keeps UI wording
+>   friendly. New profile fields: `name`, `breakfastPref`, `cuisines[]`, `timePerMeal`, `mealSplit`,
+>   `budgetPerDay`. **Budget is now €/day**; `migrateProfile()` derives it from an old weekly value
+>   (÷7) and sets `budget = budgetPerDay×7` so the current (weekly) shopping-list pill keeps working
+>   until Phase 8 reworks pricing to per-day. `timePerMeal` now feeds the recipe time filter.
+> - **Verified:** all 8 steps render + navigate, per-step persistence, single/multi chip logic, goal
+>   mapping, live target math (~2,370 kcal / 128 g for the test profile — Mifflin check passed),
+>   dislikes+allergies excluded from the generated week, pantry hiding on the shopping list, zero
+>   `/generate-week` calls with AI off, zero console errors, 375px + 1280px. Edit-profile re-enters
+>   the wizard pre-filled.
+> - **Known (NOT a Phase-5 bug):** the small offline pool + time/difficulty filter can repeat dish
+>   names across the week when AI is off. The **hard no-repeat rule + expanded pool + 3-course
+>   structure is Phase 6 (Meals v3)** — the "no doubles" QA item lands there, not here.
+> - **Files touched:** `public/app.js` (wizard + targets), `public/app-screens.css` (wizard styles).
+
+> **BUILD SESSION — Phase 6 DONE (2026-07-19, Opus). Committed to `v2-rebuild`.**
+> Meals v3 (§3, §7), verified in-browser AI OFF. Two commits: 6a (no-repeat + links +
+> images) and 6b (3-course structure + AI prompt v3).
+> - **Hard no-repeat (§3):** `pickMeal` tracks used dish NAMES across the whole week (all
+>   courses); `enforceNoRepeat()` post-validates and swaps any duplicate for an unused eligible
+>   dish; applied to AI weeks too; swap avoids every other dish. **Verified 0 duplicates** for
+>   gain/maintain/lose, with & without leftovers.
+> - **Real recipe links (§3):** `recipeSearchUrl()` → deterministic Google search
+>   ("<dish> recette"), "See full recipe ↗" on each recipe card. Never an AI URL.
+> - **Dish images (§3):** curated `DISH_IMG` Unsplash map + `dishImageUrl()`, keyword-matched,
+>   with an onerror fallback to the emoji tile so nothing breaks. Photo banner on recipe cards.
+> - **3 courses (§3.1):** lunch & dinner are multi-course by goal — Get stronger =
+>   starter+main+dessert, Stay balanced = main+side, Feel light = main+light dessert; breakfast
+>   single. Week is now a flat list of `{type,course,recipe,rejected}` slots. Added **14 starters
+>   + 14 desserts** to the offline pool so a full 3-course week stays unique. Course-aware:
+>   generateWeek, enforceNoRepeat, swapMeal, applyLeftovers (doubles dinner MAIN → one reheated
+>   next-day lunch), review + recipes show "Lunch · Starter" labels, shopping sums all courses.
+> - **AI prompt v3 (server.js §7):** courses object for lunch/dinner w/ per-course kcal, per-meal
+>   kcal targets from mealSplit (±10%), breakfast sweet/savory, unique names, budget/day, cuisines,
+>   no invented URLs. `requestWeekAI` flattens the courses object into slots.
+>   **UNVERIFIED until Lucille runs it with AI ON** (AI off by default; don't burn the 20/day quota).
+> - **Then 9 PWA, 10 integrations, 11 Tauri desktop.**
+
+> **BUILD SESSION — Phases 7 & 8 DONE (2026-07-19, Opus). Committed to `v2-rebuild`.**
+> Verified in-browser AI OFF.
+> - **Phase 7 Planner v2 (design 04):** the week screen (`renderReview`) is now a two-mode
+>   planner. Sticky **Mon–Sun rail** (each day = B/L/D photo thumbnails + day kcal; empty slot =
+>   ＋). **Mode toggle:** "Plan for me" (generated week, swap/fav as before) and "Browse & add"
+>   (5 recipe carousels: favorites, quick & easy, breakfasts, lunch mains, dinner mains — token
+>   `.recipe-card` markup, ⊕ add + ♥ fav, photos w/ emoji fallback). **Add a dish two ways:** tap
+>   ⊕ → day-picker popover, or **drag a card onto a rail day** (HTML5 DnD). Dish lands at its
+>   natural meal main; persists immediately. Rail+main stack under 780px. `state.plannerMode`.
+>   Deferred sources (need later phases): "past AI weeks" (weeks-table normalization) and "your
+>   photo" dishes (photo upload).
+> - **Phase 8 Shopping v2 (§4):** total reframed **per day** — big "€X / day" (week avg), week
+>   total secondary, budget pill vs `budgetPerDay`. Each section shows a € chip: the buy-at-start
+>   bulk total + a per-buy-day total on every fresh-day header. Prices still per-ingredient from
+>   AI; chips only show when prices exist (AI on).
+> - **Files:** `public/app.js`, `public/app-screens.css`.
+> - Next was Phase 9 (below).
+
+> **BUILD SESSION — Phases 9 & 10a DONE (2026-07-19, Opus). Committed to `v2-rebuild`.**
+> - **Phase 9 PWA (Target A):** `public/manifest.json` (standalone, theme/bg colour, SVG icons
+>   incl. maskable), `public/sw.js` service worker, `public/icons/icon.svg` + `icon-maskable.svg`
+>   (tomato place-setting mark), install wiring in `index.html` (manifest link, apple-touch-icon,
+>   web-app-capable metas, SW registration, `beforeinstallprompt` → "Install Table" button).
+>   **SW strategy: network-first for the app's own html/js/css/json** (so updates always reach
+>   users; offline falls back to the cached shell), cache-first for icons. **Bump `CACHE` in sw.js
+>   on every shell change** or users get stale code. Verified: SW registers + controls page,
+>   manifest valid, shell cached (offline fallback works), installable.
+> - **Phase 10a integrations (§5, zero-setup):** `buildICS()` → "📅 Add to calendar" on the
+>   shopping screen downloads a `.ics` for the **upcoming** Mon–Sun (dinners 19:00 w/ recipe link,
+>   shopping reminders 17:00 per buy-day). `openFeedback()` → "💬 Tell Lucille" modal POSTs to
+>   FormSubmit.co AJAX for lucillemonamie@icloud.com (honeypot; she must click their one-time
+>   confirmation email on first real submit). Verified in-browser (not actually submitted).
+> - **STILL TODO (need Lucille's free accounts / tooling — good handoff point):**
+>   Phase 10b: web-push + Resend email reminders via a Supabase Edge Function on cron; Google
+>   Calendar OAuth Tier 2 (needs a Google Cloud project). Phase 11: Tauri desktop wrapper over
+>   `/public` (needs Rust + Tauri CLI installed on her Mac) → `.dmg`/`.exe` via GitHub Releases.
+>   Also: whole `v2-rebuild` branch is still unmerged/undeployed — merge → `main` only on her word.
+>   And the AI-ON path (Phase 6b course JSON) is still unverified until she tests with AI on.
 
 Source of truth for the meal-planner project. **Phases 1–4 are all DONE.** The app is live on
 the public internet (Render free tier) — frontend + backend + AI generation all verified working.
@@ -14,14 +193,14 @@ the public internet (Render free tier) — frontend + backend + AI generation al
 > to that repo → Render redeploys automatically.
 > Always show proposed edits before applying them — Lucille prefers to approve each change.
 
-> **Phase 5 (2026-07-18): full redesign after market research.** See **`RESEARCH.md`** for the
+> **Phase 5 (2026-07-18): full redesign after market research.** See **`docs/RESEARCH.md`** for the
 > competitor research (Mealime, Jow, Eat This Much, Samsung Food…), the quality criteria, the
 > exact list of changes (cook mode, kcal/protein, household scaling, persistent shopping-list
 > ticks, favorites, copy/print, new warm design system), and the roadmap. Read it before
 > touching the frontend — it is the design source of truth now. Changes are local, not yet
 > pushed/deployed.
 >
-> **Deep research (2026-07-18): `STORM-RESEARCH.md`** — a broader, multi-perspective research
+> **Deep research (2026-07-18): `docs/STORM-RESEARCH.md`** — a broader, multi-perspective research
 > report (nutrition/TDEE engine, monetization, retention, food-waste/leftovers, onboarding,
 > dietary frameworks, accessibility/EU law, free data APIs) with a ranked, zero-cost feature
 > backlog in its §10.
@@ -56,19 +235,20 @@ the public internet (Render free tier) — frontend + backend + AI generation al
 > (never "maintain/lose/gain" in UI), real recipe links, user dish photos, Google Calendar
 > (.ics first, OAuth later), push/email reminders (SMS = paid, deferred, her call),
 > feedback form to lucillemonamie@icloud.com. Two authoritative briefs, division of labor:
-> - **`DESIGN-BRIEF.md`** → a dedicated Claude *design* session produces a `design/` folder
+> - **`docs/DESIGN-BRIEF.md`** → a dedicated Claude *design* session produces a `docs/design/` folder
 >   (tokens.css, components.html, 9 screen mockups). Design direction: "Apple's restraint,
 >   Mob's appetite" + the exact structural references Lucille chose.
-> - **`OPUS-BUILD-BRIEF.md`** → the Opus build session implements the app in 11 phases,
+> - **`docs/OPUS-BUILD-BRIEF.md`** → the Opus build session implements the app in 11 phases,
 >   lifting the design 1:1. Includes the Supabase/Google/Resend/FormSubmit setup steps
 >   Lucille must do (all free) and the "no doubles" QA checklist.
-> Run the design session FIRST; Opus starts at its phase 1 only once `design/` exists.
+> Run the design session FIRST; Opus starts at its phase 1 only once `docs/design/` exists.
+> (Design session is now DONE — see the status block at the very top; Opus is cleared for phase 1.)
 >
 > **Packaging decided 2026-07-19:** ship BOTH an installable **PWA** (phone + web) AND a
 > free **desktop download** (`.dmg`/`.exe` via **Tauri**, Electron fallback) from ONE web
 > codebase — Lucille wants it great on phone and computer equally, at zero spend. Desktop
 > files distribute via GitHub Releases; App Store (paid) is out of scope. See
-> `OPUS-BUILD-BRIEF.md` §0 (dual-target architecture) + phase 11.
+> `docs/OPUS-BUILD-BRIEF.md` §0 (dual-target architecture) + phase 11.
 
 ---
 

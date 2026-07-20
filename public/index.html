@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#FDFBF7">
+<title>#Foodie — Weekly Meal Planner</title>
+<!-- PWA (Phase 9): installable on phone home-screen + desktop, offline app-shell -->
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icons/icon.svg">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="#Foodie">
+<meta name="mobile-web-app-capable" content="yes">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<!-- styles.css = docs/design/tokens.css (design source of truth); app-screens.css = app screen layouts -->
+<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="app-screens.css">
+</head>
+<body>
+<!-- full-bleed marketing landing renders here (signed-out visitors) -->
+<div id="landing-root" style="display:none"></div>
+
+<!-- the app itself (narrow, gated) -->
+<div class="app-shell" id="app-shell">
+  <header class="app">
+    <h1><span class="mark" aria-hidden="true">🍽</span> #Foodie</h1>
+    <p>A week of meals made for you — with recipes, prices and one shopping list.</p>
+  </header>
+  <div class="steps">
+    <div class="step" data-step="profile">1 · Your profile</div>
+    <div class="step" data-step="review">2 · Your week</div>
+    <div class="step" data-step="shopping">3 · Shopping list</div>
+  </div>
+  <div id="app"></div>
+</div>
+
+<script src="config.js"></script>
+<script type="module" src="cloud.js"></script>
+<script src="app.js"></script>
+
+<!-- PWA: register the service worker + gentle install prompt -->
+<script>
+  if ('serviceWorker' in navigator && location.protocol !== 'file:') {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('sw.js').catch((e) => console.warn('SW registration failed:', e && e.message));
+    });
+  }
+  // Custom install prompt (Chromium): stash the event, show a small button, prompt on click.
+  let deferredInstall = null;
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredInstall = e;
+    if (document.getElementById('installBtn')) return;
+    const b = document.createElement('button');
+    b.id = 'installBtn';
+    b.textContent = '⬇︎ Install #Foodie';
+    b.className = 'install-fab';
+    b.onclick = async () => {
+      if (!deferredInstall) return;
+      deferredInstall.prompt();
+      await deferredInstall.userChoice;
+      deferredInstall = null;
+      b.remove();
+    };
+    document.body.appendChild(b);
+  });
+  window.addEventListener('appinstalled', () => { const b = document.getElementById('installBtn'); if (b) b.remove(); });
+</script>
+</body>
+</html>

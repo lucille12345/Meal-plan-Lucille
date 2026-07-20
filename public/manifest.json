@@ -1,0 +1,16 @@
+{
+  "name": "#Foodie — Weekly Meal Planner",
+  "short_name": "#Foodie",
+  "description": "A week of meals made for you — with recipes, prices and one shopping list.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#FDFBF7",
+  "theme_color": "#FDFBF7",
+  "categories": ["food", "lifestyle", "health"],
+  "icons": [
+    { "src": "icons/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "icons/icon-maskable.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "maskable" }
+  ]
+}
