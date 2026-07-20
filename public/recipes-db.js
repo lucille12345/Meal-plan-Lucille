@@ -200,6 +200,114 @@ const RECIPES_DB = [
     'Scoop onto hot toast, mash roughly with a fork and finish with flaky salt.']
 },
 
+/* --- 6. HOMEMADE GRANOLA ------------------------------------------------ */
+{
+  id:'db-b6', type:'breakfast', types:['breakfast'],
+  name:'Homemade granola', desc:'Oats, walnuts, maple, coconut',
+  sourceUrl:'https://www.loveandlemons.com/granola/',
+  sourceName:'Love & Lemons',
+  photo:'https://cdn.loveandlemons.com/wp-content/uploads/opengraph/2020/01/granola.jpg',
+  emoji:'🥣', img:'oatmeal',
+  prepTime:10, cookTime:30, time:40,
+  difficulty:1, servings:5, kcal:320, protein:8, nutrition:'estimated',
+  tags:['vegetarian','vegan'],
+  contains:['nuts'],
+  ingredients:[
+    {name:'Rolled oats',qty:32,unit:'g',category:'Pantry',buyDayBefore:false},
+    {name:'Walnuts',qty:10,unit:'g',category:'Pantry',buyDayBefore:false},
+    {name:'Coconut flakes',qty:8,unit:'g',category:'Pantry',buyDayBefore:false},
+    {name:'Cinnamon',qty:0.4,unit:'tsp',category:'Pantry',buyDayBefore:false},
+    {name:'Coconut oil',qty:0.4,unit:'tbsp',category:'Pantry',buyDayBefore:false},
+    {name:'Maple syrup',qty:0.8,unit:'tbsp',category:'Pantry',buyDayBefore:false},
+    {name:'Almond butter',qty:6,unit:'g',category:'Pantry',buyDayBefore:false},
+    {name:'Dried cranberries',qty:8,unit:'g',category:'Pantry',buyDayBefore:false}],
+  steps:[
+    'Heat the oven to 150°C and line a baking sheet.',
+    'Stir the oats, walnuts, coconut flakes, cinnamon and salt together, then work in the melted coconut oil, maple syrup and almond butter.',
+    'Spread on the sheet and bake 15 minutes, break it up a little, then bake 15 minutes more until golden.',
+    'Scatter over the cranberries once cool.']
+},
+
+/* --- 7. BREAKFAST EGG MUFFINS ------------------------------------------- */
+{
+  id:'db-b7', type:'breakfast', types:['breakfast'],
+  name:'Breakfast egg muffins', desc:'Pepper, feta, scallion, oven-baked',
+  sourceUrl:'https://www.loveandlemons.com/egg-muffins/',
+  sourceName:'Love & Lemons',
+  photo:'https://cdn.loveandlemons.com/wp-content/uploads/opengraph/2023/01/egg-muffins-1.jpg',
+  emoji:'🍳', img:'egg',
+  prepTime:15, cookTime:25, time:40,
+  difficulty:2, servings:4, kcal:230, protein:16, nutrition:'estimated',
+  tags:['vegetarian'],
+  contains:['eggs','dairy','gluten'],
+  ingredients:[
+    {name:'Red bell pepper',qty:0.6,unit:'piece',category:'Produce',buyDayBefore:true},
+    {name:'Spring onions',qty:1.2,unit:'piece',category:'Produce',buyDayBefore:true},
+    {name:'Eggs',qty:2.25,unit:'piece',category:'Dairy',buyDayBefore:false},
+    {name:'Garlic',qty:0.25,unit:'clove',category:'Produce',buyDayBefore:false},
+    {name:'Plain flour',qty:0.75,unit:'tbsp',category:'Pantry',buyDayBefore:false},
+    {name:'Baking powder',qty:0.19,unit:'tsp',category:'Pantry',buyDayBefore:false},
+    {name:'Feta',qty:13,unit:'g',category:'Dairy',buyDayBefore:false}],
+  steps:[
+    'Heat the oven to 175°C and grease a muffin tin. Divide the pepper and spring onion between the cups.',
+    'Whisk the eggs with the garlic, salt and pepper, then whisk in the flour and baking powder.',
+    'Pour the egg mixture over the vegetables and top with feta.',
+    'Bake 22–24 minutes until set. Cool slightly before turning out.']
+},
+
+/* --- 8. FRENCH TOAST ----------------------------------------------------- */
+{
+  id:'db-b8', type:'breakfast', types:['breakfast'],
+  name:'French toast', desc:'Cinnamon, vanilla, maple syrup',
+  sourceUrl:'https://www.loveandlemons.com/french-toast/',
+  sourceName:'Love & Lemons',
+  photo:'https://cdn.loveandlemons.com/wp-content/uploads/opengraph/2024/08/french-toast.jpg',
+  emoji:'🍞', img:'toast',
+  prepTime:10, cookTime:10, time:20,
+  difficulty:1, servings:4, kcal:380, protein:13, nutrition:'estimated',
+  tags:['vegetarian'],
+  contains:['gluten','dairy','eggs'],
+  ingredients:[
+    {name:'Eggs',qty:1,unit:'piece',category:'Dairy',buyDayBefore:false},
+    {name:'Milk',qty:40,unit:'ml',category:'Dairy',buyDayBefore:false},
+    {name:'Vanilla extract',qty:0.25,unit:'tsp',category:'Pantry',buyDayBefore:false},
+    {name:'Cinnamon',qty:0.12,unit:'tsp',category:'Pantry',buyDayBefore:false},
+    {name:'Butter',qty:5,unit:'g',category:'Dairy',buyDayBefore:false},
+    {name:'Crusty bread',qty:70,unit:'g',category:'Bakery',buyDayBefore:true},
+    {name:'Maple syrup',qty:1,unit:'tbsp',category:'Pantry',buyDayBefore:false}],
+  steps:[
+    'Whisk the eggs, milk, vanilla, cinnamon and a pinch of salt in a shallow dish.',
+    'Heat a buttered skillet or griddle over medium heat.',
+    'Dip each slice of bread in the egg mixture, coating both sides, and cook 2 minutes a side until golden.',
+    'Serve with maple syrup.']
+},
+
+/* --- 9. BREAKFAST POTATOES ----------------------------------------------- */
+{
+  id:'db-b9', type:'breakfast', types:['breakfast'],
+  name:'Breakfast potatoes', desc:'Crispy, smoked paprika, garlic',
+  sourceUrl:'https://www.loveandlemons.com/breakfast-potatoes/',
+  sourceName:'Love & Lemons',
+  photo:'https://cdn.loveandlemons.com/wp-content/uploads/2026/03/344_LLBlogMarch_BreakfastPotatoes_28529-social.jpg',
+  emoji:'🥔', img:'potato',
+  prepTime:10, cookTime:35, time:45,
+  difficulty:1, servings:6, kcal:160, protein:3, nutrition:'source',
+  tags:['vegetarian','vegan'],
+  contains:[],
+  ingredients:[
+    {name:'Yukon gold potatoes',qty:151,unit:'g',category:'Produce',buyDayBefore:true},
+    {name:'Olive oil',qty:0.3,unit:'tbsp',category:'Pantry',buyDayBefore:false},
+    {name:'Smoked paprika',qty:0.17,unit:'tsp',category:'Pantry',buyDayBefore:false},
+    {name:'Garlic powder',qty:0.08,unit:'tsp',category:'Pantry',buyDayBefore:false},
+    {name:'Onion powder',qty:0.04,unit:'tsp',category:'Pantry',buyDayBefore:false},
+    {name:'Fresh parsley',qty:0.5,unit:'tbsp',category:'Produce',buyDayBefore:true}],
+  steps:[
+    'Heat the oven to 220°C and line a large baking sheet.',
+    'Toss the diced potatoes with oil, paprika, garlic powder, onion powder, salt and pepper.',
+    'Spread evenly and roast 25–35 minutes until golden and crisp at the edges.',
+    'Season to taste and scatter with parsley.']
+},
+
 /* ==========================================================================
    STARTERS & SMALL PLATES
    ========================================================================== */
@@ -360,6 +468,293 @@ const RECIPES_DB = [
     'Whisk the oil, vinegar, minced garlic, oregano, a little Dijon, salt and pepper into a dressing.',
     'Lay out the cucumber, pepper, tomatoes, feta, onion and olives on a platter.',
     'Drizzle over the dressing, toss very gently and finish with oregano and mint.']
+},
+
+/* --- 7. DEVILED EGGS ----------------------------------------------------- */
+{
+  id:'db-s7', type:'starter', types:['starter'],
+  name:'Deviled eggs', desc:'Creamy yolk, mustard, paprika',
+  sourceUrl:'https://www.loveandlemons.com/deviled-eggs/',
+  sourceName:'Love & Lemons',
+  photo:'https://cdn.loveandlemons.com/wp-content/uploads/opengraph/2024/03/deviled-eggs-recipe.jpg',
+  emoji:'🥚', img:'egg',
+  prepTime:10, cookTime:15, time:25, passiveTime:20,
+  difficulty:2, servings:6, kcal:111, protein:6, nutrition:'source',
+  tags:['vegetarian'],
+  contains:['eggs'],
+  ingredients:[
+    {name:'Eggs',qty:1,unit:'piece',category:'Dairy',buyDayBefore:false},
+    {name:'Mayonnaise',qty:0.5,unit:'tbsp',category:'Pantry',buyDayBefore:false},
+    {name:'Dijon mustard',qty:0.17,unit:'tsp',category:'Pantry',buyDayBefore:false},
+    {name:'Balsamic vinegar',qty:0.17,unit:'tsp',category:'Pantry',buyDayBefore:false},
+    {name:'Paprika',qty:0.1,unit:'tsp',category:'Pantry',buyDayBefore:false}],
+  steps:[
+    'Boil the eggs, then cover and let sit off the heat 10–12 minutes.',
+    'Chill in ice water, then peel and halve lengthwise.',
+    'Mash the yolks with mayonnaise, mustard and a dash of vinegar until creamy; season.',
+    'Pipe or spoon back into the whites and dust with paprika.']
+},
+
+/* --- 8. PEANUT SUMMER ROLLS ---------------------------------------------- */
+{
+  id:'db-s8', type:'starter', types:['starter','lunch'],
+  name:'Peanut summer rolls', desc:'Rice paper, avocado, herbs, peanut sauce',
+  sourceUrl:'https://www.loveandlemons.com/spring-rolls/',
+  sourceName:'Love & Lemons',
+  photo:'https://cdn.loveandlemons.com/wp-content/uploads/opengraph/2013/10/spring-rolls.jpg',
+  emoji:'🥢', img:'spring roll',
+  prepTime:10, cookTime:5, time:15,
+  difficulty:3, servings:2, kcal:320, protein:9, nutrition:'estimated',
+  tags:['vegetarian','vegan'],
+  contains:['nuts','soy'],
+  ingredients:[
+    {name:'Mushrooms',qty:35,unit:'g',category:'Produce',buyDayBefore:true},
+    {name:'Soy sauce',qty:0.25,unit:'tsp',category:'Pantry',buyDayBefore:false},
+    {name:'Rice noodles',qty:57,unit:'g',category:'Pantry',buyDayBefore:false},
+    {name:'Peanut sauce',qty:1,unit:'tbsp',category:'Pantry',buyDayBefore:false},
+    {name:'Rice paper wrappers',qty:2,unit:'piece',category:'Pantry',buyDayBefore:false},
+    {name:'Avocado',qty:0.5,unit:'piece',category:'Produce',buyDayBefore:true},
+    {name:'Fresh basil',qty:0.5,unit:'tbsp',category:'Produce',buyDayBefore:true}],
+  steps:[
+    'Brown the mushrooms in a little oil, then toss with soy sauce.',
+    'Toss the cooked noodles with a spoonful of peanut sauce.',
+    'Dip a rice paper wrapper in warm water 5 seconds and lay it on a clean towel.',
+    'Fill with noodles, mushrooms, avocado and herbs, fold in the sides and roll up tightly.',
+    'Serve with extra peanut sauce for dipping.']
+},
+
+/* --- 9. FRENCH ONION SOUP -------------------------------------------------- */
+{
+  id:'db-s9', type:'starter', types:['starter','lunch'],
+  name:'French onion soup', desc:'Caramelised onion, Gruyère, baguette',
+  sourceUrl:'https://www.loveandlemons.com/french-onion-soup/',
+  sourceName:'Love & Lemons',
+  photo:'https://cdn.loveandlemons.com/wp-content/uploads/opengraph/2019/12/french-onion-soup-recipe.jpg',
+  emoji:'🧅', img:'soup',
+  prepTime:10, cookTime:90, time:100,
+  difficulty:3, servings:5, kcal:380, protein:14, nutrition:'estimated',
+  tags:['vegetarian'],
+  contains:['gluten','dairy'],
+  ingredients:[
+    {name:'Olive oil',qty:1.2,unit:'tbsp',category:'Pantry',buyDayBefore:false},
+    {name:'Yellow onion',qty:1.8,unit:'piece',category:'Produce',buyDayBefore:false},
+    {name:'Balsamic vinegar',qty:0.3,unit:'tbsp',category:'Pantry',buyDayBefore:false},
+    {name:'Soy sauce',qty:0.3,unit:'tbsp',category:'Pantry',buyDayBefore:false},
+    {name:'Fresh thyme',qty:0.3,unit:'tbsp',category:'Produce',buyDayBefore:true},
+    {name:'Garlic',qty:0.6,unit:'clove',category:'Produce',buyDayBefore:false},
+    {name:'Plain flour',qty:0.6,unit:'tbsp',category:'Pantry',buyDayBefore:false},
+    {name:'White wine',qty:48,unit:'ml',category:'Pantry',buyDayBefore:false},
+    {name:'Vegetable broth',qty:288,unit:'ml',category:'Pantry',buyDayBefore:false},
+    {name:'Baguette',qty:30,unit:'g',category:'Bakery',buyDayBefore:true},
+    {name:'Gruyère',qty:20,unit:'g',category:'Dairy',buyDayBefore:false}],
+  steps:[
+    'Cook the sliced onions in oil with salt over low heat, stirring often, about 40 minutes until deeply caramelised.',
+    'Stir in the balsamic, soy sauce, thyme and garlic, then the flour, then the wine, and simmer.',
+    'Add the broth and simmer to develop the flavour.',
+    'Toast baguette slices topped with cheese under the grill until melted and golden.',
+    'Ladle the soup into bowls and top each with a cheesy toast.']
+},
+
+/* --- 10. MINESTRONE SOUP --------------------------------------------------- */
+{
+  id:'db-s10', type:'starter', types:['starter','lunch'],
+  name:'Minestrone soup', desc:'White beans, vegetables, small pasta',
+  sourceUrl:'https://www.loveandlemons.com/minestrone-soup/',
+  sourceName:'Love & Lemons',
+  photo:'https://cdn.loveandlemons.com/wp-content/uploads/opengraph/2021/11/minestrone-soup-1.jpg',
+  emoji:'🍲', img:'soup',
+  prepTime:15, cookTime:30, time:45,
+  difficulty:2, servings:5, kcal:220, protein:9, nutrition:'estimated',
+  tags:['vegetarian','vegan'],
+  contains:['gluten'],
+  ingredients:[
+    {name:'Olive oil',qty:0.4,unit:'tbsp',category:'Pantry',buyDayBefore:false},
+    {name:'Onion',qty:0.2,unit:'piece',category:'Produce',buyDayBefore:false},
+    {name:'Carrots',qty:0.4,unit:'piece',category:'Produce',buyDayBefore:false},
+    {name:'Celery',qty:0.4,unit:'stalk',category:'Produce',buyDayBefore:true},
+    {name:'Garlic',qty:0.6,unit:'clove',category:'Produce',buyDayBefore:false},
+    {name:'Diced tomatoes',qty:160,unit:'g',category:'Pantry',buyDayBefore:false},
+    {name:'Cannellini beans',qty:50,unit:'g',category:'Pantry',buyDayBefore:false},
+    {name:'Green beans',qty:20,unit:'g',category:'Produce',buyDayBefore:true},
+    {name:'Vegetable broth',qty:192,unit:'ml',category:'Pantry',buyDayBefore:false},
+    {name:'Dried oregano',qty:0.2,unit:'tsp',category:'Pantry',buyDayBefore:false},
+    {name:'Dried thyme',qty:0.2,unit:'tsp',category:'Pantry',buyDayBefore:false},
+    {name:'Ditalini pasta',qty:15,unit:'g',category:'Pantry',buyDayBefore:false},
+    {name:'Fresh parsley',qty:5,unit:'g',category:'Produce',buyDayBefore:true}],
+  steps:[
+    'Soften the onion, carrot and celery in oil with salt and pepper, about 8 minutes.',
+    'Add the garlic, tomatoes, beans, green beans, broth, bay leaves, oregano and thyme. Cover and simmer 20 minutes.',
+    'Stir in the pasta and cook uncovered 10 minutes more until tender.',
+    'Season to taste and serve with parsley.']
+},
+
+/* --- 11. BABA GANOUSH ------------------------------------------------------ */
+{
+  id:'db-s11', type:'starter', types:['starter'],
+  name:'Baba ganoush', desc:'Smoky roasted eggplant, tahini, lemon',
+  sourceUrl:'https://www.loveandlemons.com/baba-ganoush/',
+  sourceName:'Love & Lemons',
+  photo:'https://cdn.loveandlemons.com/wp-content/uploads/opengraph/2019/08/baba-ganoush.jpg',
+  emoji:'🍆', img:'eggplant',
+  prepTime:30, cookTime:60, time:90,
+  difficulty:2, servings:4, kcal:140, protein:4, nutrition:'estimated',
+  tags:['vegetarian','vegan'],
+  contains:['sesame'],
+  ingredients:[
+    {name:'Eggplant',qty:0.5,unit:'piece',category:'Produce',buyDayBefore:true},
+    {name:'Tahini',qty:15,unit:'g',category:'Pantry',buyDayBefore:false},
+    {name:'Lemon',qty:0.12,unit:'piece',category:'Produce',buyDayBefore:false},
+    {name:'Olive oil',qty:0.5,unit:'tbsp',category:'Pantry',buyDayBefore:false},
+    {name:'Garlic',qty:0.5,unit:'clove',category:'Produce',buyDayBefore:false},
+    {name:'Fresh parsley',qty:0.5,unit:'tbsp',category:'Produce',buyDayBefore:true},
+    {name:'Pita bread',qty:30,unit:'g',category:'Bakery',buyDayBefore:true}],
+  steps:[
+    'Roast the whole eggplants wrapped in foil at 200°C for 50–60 minutes until soft and collapsed.',
+    'Once cool, peel and drain the flesh in a strainer for 20 minutes to remove excess water.',
+    'Blend the eggplant flesh with tahini, lemon juice, olive oil, garlic and salt until smooth.',
+    'Sprinkle with parsley and serve with warm pita.']
+},
+
+/* --- 12. CAESAR SALAD ------------------------------------------------------- */
+{
+  id:'db-s12', type:'starter', types:['starter','lunch'],
+  name:'Caesar salad', desc:'Romaine, parmesan, croutons, dressing',
+  sourceUrl:'https://www.loveandlemons.com/caesar-salad/',
+  sourceName:'Love & Lemons',
+  photo:'https://cdn.loveandlemons.com/wp-content/uploads/2024/12/caesar-salad-opengraph.jpg',
+  emoji:'🥗', img:'salad',
+  prepTime:20, cookTime:10, time:30,
+  difficulty:2, servings:6, kcal:280, protein:8, nutrition:'estimated',
+  tags:['vegetarian'],
+  contains:['gluten','dairy','eggs'],
+  ingredients:[
+    {name:'Crusty bread',qty:27,unit:'g',category:'Bakery',buyDayBefore:true},
+    {name:'Olive oil',qty:0.83,unit:'tbsp',category:'Pantry',buyDayBefore:false},
+    {name:'Mayonnaise',qty:38,unit:'g',category:'Pantry',buyDayBefore:false},
+    {name:'Lemon',qty:0.1,unit:'piece',category:'Produce',buyDayBefore:false},
+    {name:'Dijon mustard',qty:0.33,unit:'tsp',category:'Pantry',buyDayBefore:false},
+    {name:'Garlic',qty:0.17,unit:'clove',category:'Produce',buyDayBefore:false},
+    {name:'Worcestershire sauce',qty:0.17,unit:'tsp',category:'Pantry',buyDayBefore:false},
+    {name:'Parmesan',qty:17,unit:'g',category:'Dairy',buyDayBefore:false},
+    {name:'Romaine lettuce',qty:76,unit:'g',category:'Produce',buyDayBefore:true}],
+  steps:[
+    'Toss cubed bread with oil and salt and bake at 175°C until golden, for the croutons.',
+    'Whisk the mayonnaise, oil, lemon juice, mustard, garlic and Worcestershire into a dressing; stir in half the parmesan.',
+    'Toss the lettuce with the dressing, croutons and remaining parmesan. Season and serve.']
+},
+
+/* --- 13. CREAMY TOMATO SOUP -------------------------------------------------- */
+{
+  id:'db-s13', type:'starter', types:['starter','lunch'],
+  name:'Creamy tomato soup', desc:'Roasted tomato, garlic, croutons',
+  sourceUrl:'https://www.loveandlemons.com/tomato-soup/',
+  sourceName:'Love & Lemons',
+  photo:'https://cdn.loveandlemons.com/wp-content/uploads/opengraph/2018/01/tomato-soup.jpg',
+  emoji:'🍅', img:'soup,carrot',
+  prepTime:15, cookTime:30, time:45,
+  difficulty:2, servings:4, kcal:210, protein:6, nutrition:'estimated',
+  tags:['vegetarian'],
+  contains:['gluten','dairy'],
+  ingredients:[
+    {name:'Garlic',qty:0.86,unit:'clove',category:'Produce',buyDayBefore:false},
+    {name:'Ripe tomatoes',qty:171,unit:'g',category:'Produce',buyDayBefore:true},
+    {name:'Onion',qty:0.29,unit:'piece',category:'Produce',buyDayBefore:false},
+    {name:'Diced tomatoes',qty:114,unit:'g',category:'Pantry',buyDayBefore:false},
+    {name:'Chickpeas',qty:16,unit:'g',category:'Pantry',buyDayBefore:false},
+    {name:'Balsamic vinegar',qty:0.29,unit:'tbsp',category:'Pantry',buyDayBefore:false},
+    {name:'Maple syrup',qty:0.14,unit:'tsp',category:'Pantry',buyDayBefore:false},
+    {name:'Olive oil',qty:0.57,unit:'tbsp',category:'Pantry',buyDayBefore:false},
+    {name:'Crusty bread',qty:60,unit:'g',category:'Bakery',buyDayBefore:true},
+    {name:'Parmesan',qty:15,unit:'g',category:'Dairy',buyDayBefore:false}],
+  steps:[
+    'Roast the garlic, whole tomatoes and onion wedges at 230°C for 20–25 minutes until soft and blistered.',
+    'Blend with the canned tomatoes, chickpeas, balsamic, maple syrup, thyme, olive oil and seasoning until creamy.',
+    'Toast the bread with a little parmesan for croutons.',
+    'Serve the soup hot with the croutons.']
+},
+
+/* --- 14. CAULIFLOWER SOUP ---------------------------------------------------- */
+{
+  id:'db-s14', type:'starter', types:['starter','lunch'],
+  name:'Cauliflower soup', desc:'Roasted cauliflower, miso, lemon',
+  sourceUrl:'https://www.loveandlemons.com/cauliflower-soup/',
+  sourceName:'Love & Lemons',
+  photo:'https://cdn.loveandlemons.com/wp-content/uploads/opengraph/2021/01/cauliflower-soup-2.jpg',
+  emoji:'🥣', img:'soup',
+  prepTime:15, cookTime:45, time:60,
+  difficulty:2, servings:6, kcal:150, protein:5, nutrition:'estimated',
+  tags:['vegetarian','vegan'],
+  contains:['soy'],
+  ingredients:[
+    {name:'Cauliflower',qty:0.19,unit:'piece',category:'Produce',buyDayBefore:true},
+    {name:'Shallots',qty:0.33,unit:'piece',category:'Produce',buyDayBefore:false},
+    {name:'Garlic',qty:0.67,unit:'clove',category:'Produce',buyDayBefore:false},
+    {name:'Vegetable broth',qty:160,unit:'ml',category:'Pantry',buyDayBefore:false},
+    {name:'Fresh thyme',qty:0.5,unit:'tsp',category:'Produce',buyDayBefore:true},
+    {name:'Olive oil',qty:0.5,unit:'tbsp',category:'Pantry',buyDayBefore:false},
+    {name:'Miso paste',qty:0.08,unit:'tbsp',category:'Pantry',buyDayBefore:false},
+    {name:'Dijon mustard',qty:0.08,unit:'tsp',category:'Pantry',buyDayBefore:false},
+    {name:'Lemon',qty:0.1,unit:'piece',category:'Produce',buyDayBefore:false}],
+  steps:[
+    'Roast the chopped cauliflower with oil, salt and pepper at 200°C until browned; wrap and roast the shallot and garlic alongside.',
+    'Simmer the broth with the roasted cauliflower, shallot, garlic and thyme, covered, 15 minutes.',
+    'Blend until smooth, then stir in the miso, mustard and lemon juice. Season to taste.']
+},
+
+/* --- 15. BUTTERNUT SQUASH SOUP ----------------------------------------------- */
+{
+  id:'db-s15', type:'starter', types:['starter','lunch'],
+  name:'Butternut squash soup', desc:'Sage, rosemary, roasted squash',
+  sourceUrl:'https://www.loveandlemons.com/butternut-squash-soup/',
+  sourceName:'Love & Lemons',
+  photo:'https://cdn.loveandlemons.com/wp-content/uploads/opengraph/2019/10/butternut-squash-soup.jpg',
+  emoji:'🎃', img:'soup',
+  prepTime:10, cookTime:35, time:45,
+  difficulty:2, servings:6, kcal:180, protein:3, nutrition:'estimated',
+  tags:['vegetarian','vegan'],
+  contains:[],
+  ingredients:[
+    {name:'Olive oil',qty:0.33,unit:'tbsp',category:'Pantry',buyDayBefore:false},
+    {name:'Yellow onion',qty:0.17,unit:'piece',category:'Produce',buyDayBefore:false},
+    {name:'Butternut squash',qty:227,unit:'g',category:'Produce',buyDayBefore:true},
+    {name:'Garlic',qty:0.5,unit:'clove',category:'Produce',buyDayBefore:false},
+    {name:'Fresh ginger',qty:0.17,unit:'tsp',category:'Produce',buyDayBefore:false},
+    {name:'Vegetable broth',qty:140,unit:'ml',category:'Pantry',buyDayBefore:false}],
+  steps:[
+    'Soften the onion in oil with salt, then add the squash and cook until it starts to soften.',
+    'Add the garlic and ginger, cook until fragrant, then pour in the broth.',
+    'Simmer covered until the squash is tender, 20–25 minutes.',
+    'Blend until smooth, thinning with more broth if needed, and season to taste.']
+},
+
+/* --- 16. BROCCOLI CHEDDAR SOUP ----------------------------------------------- */
+{
+  id:'db-s16', type:'starter', types:['starter','lunch'],
+  name:'Broccoli cheddar soup', desc:'Creamy, sharp cheddar, carrot',
+  sourceUrl:'https://www.loveandlemons.com/broccoli-cheddar-soup/',
+  sourceName:'Love & Lemons',
+  photo:'https://cdn.loveandlemons.com/wp-content/uploads/opengraph/2022/11/broccoli-cheddar-soup-1.jpg',
+  emoji:'🥦', img:'soup',
+  prepTime:10, cookTime:25, time:35,
+  difficulty:2, servings:4, kcal:320, protein:13, nutrition:'estimated',
+  tags:['vegetarian'],
+  contains:['dairy','gluten'],
+  ingredients:[
+    {name:'Butter',qty:14,unit:'g',category:'Dairy',buyDayBefore:false},
+    {name:'Onion',qty:0.25,unit:'piece',category:'Produce',buyDayBefore:false},
+    {name:'Garlic',qty:0.75,unit:'clove',category:'Produce',buyDayBefore:false},
+    {name:'Plain flour',qty:7.5,unit:'g',category:'Pantry',buyDayBefore:false},
+    {name:'Milk',qty:120,unit:'ml',category:'Dairy',buyDayBefore:false},
+    {name:'Vegetable broth',qty:120,unit:'ml',category:'Pantry',buyDayBefore:false},
+    {name:'Broccoli',qty:68,unit:'g',category:'Produce',buyDayBefore:true},
+    {name:'Carrots',qty:0.25,unit:'piece',category:'Produce',buyDayBefore:false},
+    {name:'Dijon mustard',qty:0.13,unit:'tsp',category:'Pantry',buyDayBefore:false},
+    {name:'Cheddar',qty:56,unit:'g',category:'Dairy',buyDayBefore:false}],
+  steps:[
+    'Soften the onion in butter with salt and pepper, then stir in the garlic and flour.',
+    'Whisk in the milk and broth until smooth.',
+    'Add the broccoli, carrot and mustard, and simmer 15–20 minutes until the broccoli is tender.',
+    'Stir in the cheese gradually until melted and creamy. Season and serve.']
 },
 
 /* ==========================================================================
@@ -731,6 +1126,333 @@ const RECIPES_DB = [
     'Season with soy sauce, sugar and lime juice and serve over the rice.']
 },
 
+/* --- 13. EASY COCONUT CURRY -------------------------------------------- */
+{
+  id:'db-m13', type:'dinner', types:['lunch','dinner'],
+  name:'Easy coconut curry', desc:'Squash, cauliflower, spinach, rice',
+  sourceUrl:'https://www.loveandlemons.com/vegetable-curry/',
+  sourceName:'Love & Lemons',
+  photo:'https://cdn.loveandlemons.com/wp-content/uploads/opengraph/2018/10/curry.jpg',
+  emoji:'🍛', img:'curry',
+  prepTime:15, cookTime:35, time:50,
+  difficulty:2, servings:4, kcal:409, protein:8, nutrition:'source',
+  tags:['vegetarian','vegan'],
+  contains:[],
+  ingredients:[
+    {name:'Coconut oil',qty:0.25,unit:'tbsp',category:'Pantry',buyDayBefore:false},
+    {name:'Onion',qty:0.27,unit:'piece',category:'Produce',buyDayBefore:false},
+    {name:'Garlic',qty:0.5,unit:'clove',category:'Produce',buyDayBefore:false},
+    {name:'Fresh ginger',qty:0.125,unit:'tsp',category:'Produce',buyDayBefore:false},
+    {name:'Ground cumin',qty:0.125,unit:'tsp',category:'Pantry',buyDayBefore:false},
+    {name:'Ground coriander',qty:0.06,unit:'tsp',category:'Pantry',buyDayBefore:false},
+    {name:'Turmeric',qty:0.06,unit:'tsp',category:'Pantry',buyDayBefore:false},
+    {name:'Butternut squash',qty:70,unit:'g',category:'Produce',buyDayBefore:true},
+    {name:'Cauliflower',qty:0.06,unit:'piece',category:'Produce',buyDayBefore:true},
+    {name:'Coconut milk',qty:100,unit:'ml',category:'Pantry',buyDayBefore:false},
+    {name:'Lime',qty:0.25,unit:'piece',category:'Produce',buyDayBefore:false},
+    {name:'Spinach',qty:30,unit:'g',category:'Produce',buyDayBefore:true},
+    {name:'Peas',qty:19,unit:'g',category:'Frozen',buyDayBefore:false},
+    {name:'Jasmine rice',qty:88,unit:'g',category:'Pantry',buyDayBefore:false}],
+  steps:[
+    'Cook the onion in coconut oil until soft and well browned, about 10 minutes.',
+    'Stir together the garlic, ginger, cumin, coriander, turmeric and salt, then add to the pot.',
+    'Add the squash and cook 5 minutes, then the cauliflower, coconut milk and spice mix. Cover and simmer 20 minutes.',
+    'Stir in the lemon and lime juice, spinach and peas. Season to taste.',
+    'Serve over the rice.']
+},
+
+/* --- 14. CHANA MASALA --------------------------------------------------- */
+{
+  id:'db-m14', type:'dinner', types:['lunch','dinner'],
+  name:'Chana masala', desc:'Chickpea, tomato, garam masala, rice',
+  sourceUrl:'https://www.loveandlemons.com/chana-masala/',
+  sourceName:'Love & Lemons',
+  photo:'https://cdn.loveandlemons.com/wp-content/uploads/opengraph/2023/07/chana-masala-recipe.jpg',
+  emoji:'🍛', img:'curry',
+  prepTime:15, cookTime:40, time:55,
+  difficulty:2, servings:4, kcal:380, protein:14, nutrition:'estimated',
+  tags:['vegetarian'],
+  contains:['dairy'],
+  ingredients:[
+    {name:'Olive oil',qty:0.5,unit:'tbsp',category:'Pantry',buyDayBefore:false},
+    {name:'Onion',qty:0.25,unit:'piece',category:'Produce',buyDayBefore:false},
+    {name:'Cumin seeds',qty:0.25,unit:'tsp',category:'Pantry',buyDayBefore:false},
+    {name:'Garam masala',qty:0.25,unit:'tsp',category:'Pantry',buyDayBefore:false},
+    {name:'Ground coriander',qty:0.125,unit:'tsp',category:'Pantry',buyDayBefore:false},
+    {name:'Turmeric',qty:0.125,unit:'tsp',category:'Pantry',buyDayBefore:false},
+    {name:'Garlic',qty:0.5,unit:'clove',category:'Produce',buyDayBefore:false},
+    {name:'Fresh ginger',qty:0.125,unit:'tsp',category:'Produce',buyDayBefore:false},
+    {name:'Diced tomatoes',qty:200,unit:'g',category:'Pantry',buyDayBefore:false},
+    {name:'Chickpeas',qty:125,unit:'g',category:'Pantry',buyDayBefore:false},
+    {name:'Fresh coriander',qty:5,unit:'g',category:'Produce',buyDayBefore:true},
+    {name:'Jasmine rice',qty:44,unit:'g',category:'Pantry',buyDayBefore:false},
+    {name:'Greek yogurt',qty:7.5,unit:'g',category:'Dairy',buyDayBefore:false}],
+  steps:[
+    'Cook the onion in oil until soft and well browned, about 8 minutes.',
+    'Add the cumin seeds, garam masala, coriander, turmeric and a pinch of cayenne; cook until fragrant.',
+    'Stir in the garlic, ginger, salt and a splash of water, then the tomatoes, breaking them apart as you go.',
+    'Simmer 8–10 minutes until thickened, then add the chickpeas and warm through.',
+    'Serve over rice with a dollop of yogurt and fresh coriander.']
+},
+
+/* --- 15. BLACK BEAN TACOS ------------------------------------------------ */
+{
+  id:'db-m15', type:'dinner', types:['lunch','dinner'],
+  name:'Black bean tacos', desc:'Spiced beans, lime, cotija, tortillas',
+  sourceUrl:'https://www.loveandlemons.com/black-bean-tacos/',
+  sourceName:'Love & Lemons',
+  photo:'https://cdn.loveandlemons.com/wp-content/uploads/2025/03/black-bean-tacos-social.jpg',
+  emoji:'🌮', img:'chili',
+  prepTime:15, cookTime:15, time:30,
+  difficulty:2, servings:4, kcal:362, protein:15, nutrition:'source',
+  tags:['vegetarian'],
+  contains:['dairy'],
+  ingredients:[
+    {name:'Avocado oil',qty:0.5,unit:'tbsp',category:'Pantry',buyDayBefore:false},
+    {name:'White onion',qty:0.125,unit:'piece',category:'Produce',buyDayBefore:false},
+    {name:'Jalapeno pepper',qty:0.25,unit:'piece',category:'Produce',buyDayBefore:true},
+    {name:'Garlic',qty:0.75,unit:'clove',category:'Produce',buyDayBefore:false},
+    {name:'Taco seasoning',qty:0.375,unit:'tbsp',category:'Pantry',buyDayBefore:false},
+    {name:'Black beans',qty:125,unit:'g',category:'Pantry',buyDayBefore:false},
+    {name:'Lime',qty:0.25,unit:'piece',category:'Produce',buyDayBefore:false},
+    {name:'Small tortillas',qty:2,unit:'piece',category:'Bakery',buyDayBefore:false},
+    {name:'Cotija cheese',qty:7.5,unit:'g',category:'Dairy',buyDayBefore:false},
+    {name:'Fresh coriander',qty:3,unit:'g',category:'Produce',buyDayBefore:true}],
+  steps:[
+    'Soften the onion, jalapeño, garlic and salt in oil, about 8 minutes.',
+    'Stir in the taco seasoning, then the beans and a splash of their liquid; cook until thick.',
+    'Mash some of the beans for a creamy texture and stir in the lime juice.',
+    'Assemble in warm tortillas with cotija, coriander and extra jalapeño.']
+},
+
+/* --- 16. BUTTER CHICKEN --------------------------------------------------- */
+{
+  id:'db-m16', type:'dinner', types:['lunch','dinner'],
+  name:'Butter chicken', desc:'Marinated chicken, tomato cream sauce',
+  sourceUrl:'https://www.budgetbytes.com/butter-chicken/',
+  sourceName:'Budget Bytes',
+  photo:'https://www.budgetbytes.com/wp-content/uploads/2025/04/Butter_Chicken_Fork.jpg',
+  emoji:'🍛', img:'chicken,curry',
+  prepTime:10, cookTime:25, time:35, passiveTime:60,
+  difficulty:3, servings:4, kcal:468, protein:42, nutrition:'source',
+  tags:[],
+  contains:['dairy'],
+  ingredients:[
+    {name:'Chicken breast',qty:170,unit:'g',category:'Meat & Fish',buyDayBefore:false},
+    {name:'Greek yogurt',qty:30,unit:'g',category:'Dairy',buyDayBefore:false},
+    {name:'Lemon',qty:0.25,unit:'piece',category:'Produce',buyDayBefore:false},
+    {name:'Fresh ginger',qty:0.5,unit:'tsp',category:'Produce',buyDayBefore:false},
+    {name:'Garlic',qty:1,unit:'clove',category:'Produce',buyDayBefore:false},
+    {name:'Garam masala',qty:1,unit:'tsp',category:'Pantry',buyDayBefore:false},
+    {name:'Smoked paprika',qty:0.25,unit:'tsp',category:'Pantry',buyDayBefore:false},
+    {name:'Turmeric',qty:0.19,unit:'tsp',category:'Pantry',buyDayBefore:false},
+    {name:'Cooking oil',qty:0.5,unit:'tbsp',category:'Pantry',buyDayBefore:false},
+    {name:'Butter',qty:10.5,unit:'g',category:'Dairy',buyDayBefore:false},
+    {name:'Onion',qty:0.25,unit:'piece',category:'Produce',buyDayBefore:false},
+    {name:'Ground cumin',qty:0.125,unit:'tsp',category:'Pantry',buyDayBefore:false},
+    {name:'Tomato sauce',qty:106,unit:'g',category:'Pantry',buyDayBefore:false},
+    {name:'Heavy cream',qty:20,unit:'ml',category:'Dairy',buyDayBefore:false}],
+  steps:[
+    'Mix the yogurt, lemon juice, ginger, garlic, garam masala, paprika, turmeric and salt into a marinade; coat the cubed chicken and chill at least 1 hour.',
+    'Sear the chicken in hot oil until browned and cooked through; set aside.',
+    'Melt the butter in the same pan, soften the onion, then add the garlic, ginger and remaining spices.',
+    'Add the tomato sauce and water, simmer 7–8 minutes, then stir in the cream.',
+    'Return the chicken to the sauce, simmer 2–3 minutes and serve with rice or naan.']
+},
+
+/* --- 17. CHICKEN PARMESAN -------------------------------------------------- */
+{
+  id:'db-m17', type:'dinner', types:['lunch','dinner'],
+  name:'Chicken parmesan', desc:'Breaded cutlet, marinara, mozzarella',
+  sourceUrl:'https://www.budgetbytes.com/chicken-parmesan/',
+  sourceName:'Budget Bytes',
+  photo:'https://www.budgetbytes.com/wp-content/uploads/2024/04/Chicken-Parmesan-Overhead.jpg',
+  emoji:'🍗', img:'chicken',
+  prepTime:10, cookTime:12, time:22,
+  difficulty:2, servings:4, kcal:570, protein:41, nutrition:'source',
+  tags:[],
+  contains:['gluten','dairy','eggs'],
+  ingredients:[
+    {name:'Chicken breast',qty:170,unit:'g',category:'Meat & Fish',buyDayBefore:false},
+    {name:'Plain breadcrumbs',qty:30,unit:'g',category:'Pantry',buyDayBefore:false},
+    {name:'Parmesan',qty:8,unit:'g',category:'Dairy',buyDayBefore:false},
+    {name:'Garlic powder',qty:0.25,unit:'tsp',category:'Pantry',buyDayBefore:false},
+    {name:'Italian seasoning',qty:0.25,unit:'tsp',category:'Pantry',buyDayBefore:false},
+    {name:'Eggs',qty:0.25,unit:'piece',category:'Dairy',buyDayBefore:false},
+    {name:'Plain flour',qty:15,unit:'g',category:'Pantry',buyDayBefore:false},
+    {name:'Cooking oil',qty:15,unit:'ml',category:'Pantry',buyDayBefore:false},
+    {name:'Marinara sauce',qty:30,unit:'g',category:'Pantry',buyDayBefore:false},
+    {name:'Fresh mozzarella',qty:28,unit:'g',category:'Dairy',buyDayBefore:false}],
+  steps:[
+    'Fillet the chicken breasts into thin cutlets and season with salt, pepper, Italian seasoning and garlic powder.',
+    'Set up three dishes: seasoned breadcrumbs with parmesan, beaten egg, and flour.',
+    'Dredge each cutlet in flour, then egg, then the breadcrumb mix.',
+    'Fry in hot oil until golden on the first side, about 5 minutes.',
+    'Flip, top with marinara and mozzarella, cover and cook until the cheese melts.']
+},
+
+/* --- 18. HOMEMADE CHICKEN NOODLE SOUP -------------------------------------- */
+{
+  id:'db-m18', type:'dinner', types:['lunch','dinner'],
+  name:'Chicken noodle soup', desc:'Shredded chicken, egg noodles, herbs',
+  sourceUrl:'https://www.budgetbytes.com/chicken-noodle-soup/',
+  sourceName:'Budget Bytes',
+  photo:'https://www.budgetbytes.com/wp-content/uploads/2017/02/Chicken-Noodle-Soup-Front-Bowl.jpg',
+  emoji:'🍲', img:'soup',
+  prepTime:15, cookTime:90, time:105,
+  difficulty:2, servings:8, kcal:213, protein:17, nutrition:'source',
+  tags:[],
+  contains:['gluten','eggs'],
+  ingredients:[
+    {name:'Onion',qty:0.125,unit:'piece',category:'Produce',buyDayBefore:false},
+    {name:'Garlic',qty:0.375,unit:'clove',category:'Produce',buyDayBefore:false},
+    {name:'Carrots',qty:0.5,unit:'piece',category:'Produce',buyDayBefore:false},
+    {name:'Celery',qty:0.25,unit:'stalk',category:'Produce',buyDayBefore:true},
+    {name:'Fresh parsley',qty:0.125,unit:'tbsp',category:'Produce',buyDayBefore:true},
+    {name:'Olive oil',qty:0.25,unit:'tbsp',category:'Pantry',buyDayBefore:false},
+    {name:'Dried basil',qty:0.125,unit:'tsp',category:'Pantry',buyDayBefore:false},
+    {name:'Dried thyme',qty:0.06,unit:'tsp',category:'Pantry',buyDayBefore:false},
+    {name:'Chicken breast',qty:85,unit:'g',category:'Meat & Fish',buyDayBefore:false},
+    {name:'Chicken broth',qty:240,unit:'ml',category:'Pantry',buyDayBefore:false},
+    {name:'Egg noodles',qty:21,unit:'g',category:'Pantry',buyDayBefore:false}],
+  steps:[
+    'Dice the onion, carrots and celery, and cook in olive oil until softened, about 6 minutes.',
+    'Add the garlic, basil, thyme, bay leaf and pepper; cook 5 minutes more.',
+    'Add the chicken breasts and cover with the broth. Bring to a boil, then simmer gently, covered, for 1 hour.',
+    'Remove the chicken, shred it, and season the broth to taste.',
+    'Add the noodles and boil until tender, about 7 minutes, then return the chicken and finish with parsley.']
+},
+
+/* --- 19. CHICKEN FRIED RICE ------------------------------------------------ */
+{
+  id:'db-m19', type:'dinner', types:['lunch','dinner'],
+  name:'Chicken fried rice', desc:'Egg, vegetables, soy, sesame oil',
+  sourceUrl:'https://www.budgetbytes.com/chicken-fried-rice/',
+  sourceName:'Budget Bytes',
+  photo:'https://www.budgetbytes.com/wp-content/uploads/2024/02/Chicken-Fried-Rice-Plated.jpg',
+  emoji:'🍚', img:'rice',
+  prepTime:15, cookTime:20, time:35,
+  difficulty:2, servings:4, kcal:500, protein:23, nutrition:'source',
+  tags:[],
+  contains:['eggs','soy'],
+  ingredients:[
+    {name:'Garlic',qty:0.5,unit:'clove',category:'Produce',buyDayBefore:false},
+    {name:'Fresh ginger',qty:0.25,unit:'tsp',category:'Produce',buyDayBefore:false},
+    {name:'Spring onions',qty:0.75,unit:'piece',category:'Produce',buyDayBefore:true},
+    {name:'Carrots',qty:0.25,unit:'piece',category:'Produce',buyDayBefore:false},
+    {name:'Red bell pepper',qty:0.25,unit:'piece',category:'Produce',buyDayBefore:true},
+    {name:'Peas',qty:38,unit:'g',category:'Frozen',buyDayBefore:false},
+    {name:'Chicken breast',qty:50,unit:'g',category:'Meat & Fish',buyDayBefore:false},
+    {name:'Eggs',qty:0.5,unit:'piece',category:'Dairy',buyDayBefore:false},
+    {name:'Cooking oil',qty:0.75,unit:'tbsp',category:'Pantry',buyDayBefore:false},
+    {name:'Toasted sesame oil',qty:0.75,unit:'tbsp',category:'Pantry',buyDayBefore:false},
+    {name:'Soy sauce',qty:0.75,unit:'tbsp',category:'Pantry',buyDayBefore:false},
+    {name:'Jasmine rice',qty:131,unit:'g',category:'Pantry',buyDayBefore:false}],
+  steps:[
+    'Prep and dice all the vegetables and the chicken before starting.',
+    'Scramble the eggs in a little oil, then set aside.',
+    'Stir-fry the carrot, then the pepper and white parts of the spring onion, then the peas.',
+    'Add more oil and cook the chicken through, about 4 minutes.',
+    'Add the cooked rice, then the soy sauce and sesame oil, stirring to coat.',
+    'Return the egg and vegetables, toss together and top with the green spring onion.']
+},
+
+/* --- 20. QUINOA SALAD ------------------------------------------------------ */
+{
+  id:'db-m20', type:'lunch', types:['lunch','dinner'],
+  name:'Quinoa salad', desc:'Feta, olives, roasted tomato, pine nuts',
+  sourceUrl:'https://www.loveandlemons.com/quinoa-salad/',
+  sourceName:'Love & Lemons',
+  photo:'https://cdn.loveandlemons.com/wp-content/uploads/opengraph/2020/08/quinoa-salad.jpg',
+  emoji:'🥗', img:'quinoa,bowl',
+  prepTime:20, cookTime:20, time:40,
+  difficulty:2, servings:6, kcal:340, protein:10, nutrition:'estimated',
+  tags:['vegetarian'],
+  contains:['dairy','nuts'],
+  ingredients:[
+    {name:'Jasmine rice',qty:93,unit:'g',category:'Pantry',buyDayBefore:false},
+    {name:'Cherry tomatoes',qty:38,unit:'g',category:'Produce',buyDayBefore:true},
+    {name:'Arugula',qty:7,unit:'g',category:'Produce',buyDayBefore:true},
+    {name:'Cucumber',qty:0.07,unit:'piece',category:'Produce',buyDayBefore:true},
+    {name:'Fresh basil',qty:3,unit:'g',category:'Produce',buyDayBefore:true},
+    {name:'Feta',qty:19,unit:'g',category:'Dairy',buyDayBefore:false},
+    {name:'Kalamata olives',qty:19,unit:'g',category:'Pantry',buyDayBefore:false},
+    {name:'Red onion',qty:0.08,unit:'piece',category:'Produce',buyDayBefore:false},
+    {name:'Pine nuts',qty:7.5,unit:'g',category:'Pantry',buyDayBefore:false},
+    {name:'Olive oil',qty:0.5,unit:'tbsp',category:'Pantry',buyDayBefore:false},
+    {name:'Lemon',qty:0.05,unit:'piece',category:'Produce',buyDayBefore:false}],
+  steps:[
+    'Cook the quinoa (or rice) and roast the tomatoes ahead of time.',
+    'Combine the quinoa, roasted tomatoes, arugula, cucumber, herbs, feta, olives, onion and pine nuts.',
+    'Drizzle with the dressing and toss, seasoning to taste.']
+},
+
+/* --- 21. ORZO SALAD --------------------------------------------------------- */
+{
+  id:'db-m21', type:'lunch', types:['lunch','dinner'],
+  name:'Orzo salad', desc:'Cherry tomato, feta, olives, herbs',
+  sourceUrl:'https://www.loveandlemons.com/orzo-salad/',
+  sourceName:'Love & Lemons',
+  photo:'https://cdn.loveandlemons.com/wp-content/uploads/opengraph/2021/05/orzo-salad-1.jpg',
+  emoji:'🥗', img:'pasta,salad',
+  prepTime:30, cookTime:8, time:38,
+  difficulty:1, servings:6, kcal:310, protein:10, nutrition:'estimated',
+  tags:['vegetarian'],
+  contains:['gluten','dairy'],
+  ingredients:[
+    {name:'Orzo pasta',qty:50,unit:'g',category:'Pantry',buyDayBefore:false},
+    {name:'Olive oil',qty:0.67,unit:'tbsp',category:'Pantry',buyDayBefore:false},
+    {name:'Red wine vinegar',qty:0.17,unit:'tbsp',category:'Pantry',buyDayBefore:false},
+    {name:'Lemon',qty:0.05,unit:'piece',category:'Produce',buyDayBefore:false},
+    {name:'Dried oregano',qty:0.08,unit:'tsp',category:'Pantry',buyDayBefore:false},
+    {name:'Cucumber',qty:0.33,unit:'piece',category:'Produce',buyDayBefore:true},
+    {name:'Cherry tomatoes',qty:50,unit:'g',category:'Produce',buyDayBefore:true},
+    {name:'Chickpeas',qty:28,unit:'g',category:'Pantry',buyDayBefore:false},
+    {name:'Feta',qty:19,unit:'g',category:'Dairy',buyDayBefore:false},
+    {name:'Red onion',qty:0.06,unit:'piece',category:'Produce',buyDayBefore:false},
+    {name:'Kalamata olives',qty:13,unit:'g',category:'Pantry',buyDayBefore:false},
+    {name:'Fresh basil',qty:3,unit:'g',category:'Produce',buyDayBefore:true}],
+  steps:[
+    'Cook the orzo until just past al dente, drain and toss with a little oil so it doesn’t stick.',
+    'Whisk together the dressing with vinegar, lemon juice, oregano and salt.',
+    'Toss the orzo with cucumber, tomatoes, chickpeas, feta, onion and olives.',
+    'Drizzle with dressing, add the herbs, season and toss again.']
+},
+
+/* --- 22. LENTIL SALAD ------------------------------------------------------- */
+{
+  id:'db-m22', type:'lunch', types:['lunch','dinner'],
+  name:'Lentil salad', desc:'Kale, feta, radish, herby dressing',
+  sourceUrl:'https://www.loveandlemons.com/lentil-salad/',
+  sourceName:'Love & Lemons',
+  photo:'https://cdn.loveandlemons.com/wp-content/uploads/opengraph/2022/08/lentil-salad-1.jpg',
+  emoji:'🥗', img:'lentil',
+  prepTime:20, cookTime:20, time:40,
+  difficulty:2, servings:5, kcal:330, protein:14, nutrition:'estimated',
+  tags:['vegetarian'],
+  contains:['dairy'],
+  ingredients:[
+    {name:'Olive oil',qty:12,unit:'ml',category:'Pantry',buyDayBefore:false},
+    {name:'Lemon',qty:0.3,unit:'piece',category:'Produce',buyDayBefore:false},
+    {name:'Garlic',qty:0.6,unit:'clove',category:'Produce',buyDayBefore:false},
+    {name:'Dijon mustard',qty:0.2,unit:'tsp',category:'Pantry',buyDayBefore:false},
+    {name:'Italian seasoning',qty:0.2,unit:'tsp',category:'Pantry',buyDayBefore:false},
+    {name:'Ground cumin',qty:0.05,unit:'tsp',category:'Pantry',buyDayBefore:false},
+    {name:'Green lentils',qty:100,unit:'g',category:'Pantry',buyDayBefore:false},
+    {name:'Cucumber',qty:0.6,unit:'piece',category:'Produce',buyDayBefore:true},
+    {name:'Cherry tomatoes',qty:22,unit:'g',category:'Produce',buyDayBefore:true},
+    {name:'Red onion',qty:0.1,unit:'piece',category:'Produce',buyDayBefore:false},
+    {name:'Kale',qty:16,unit:'g',category:'Produce',buyDayBefore:true},
+    {name:'Radishes',qty:12,unit:'g',category:'Produce',buyDayBefore:true},
+    {name:'Feta',qty:18,unit:'g',category:'Dairy',buyDayBefore:false},
+    {name:'Fresh parsley',qty:4,unit:'g',category:'Produce',buyDayBefore:true}],
+  steps:[
+    'Whisk the olive oil, lemon juice, garlic, mustard, Italian seasoning, cumin and pepper into a dressing.',
+    'Cook the lentils until tender but not mushy.',
+    'Toss the lentils, cucumber, tomatoes, onion, kale and radishes with the dressing.',
+    'Add the feta, parsley and mint, toss again and season to taste.']
+},
+
 /* ==========================================================================
    DESSERTS — sweet endings
    ========================================================================== */
@@ -877,6 +1599,159 @@ const RECIPES_DB = [
     'Fold in the flour until only just combined — over-mixing makes it dense.',
     'Bake 55–60 minutes until a skewer comes out clean, then cool before slicing.']
 },
+
+/* --- 6. LEMON BARS ------------------------------------------------------- */
+{
+  id:'db-x6', type:'dessert', types:['dessert'],
+  name:'Lemon bars', desc:'Shortbread crust, tangy lemon filling',
+  sourceUrl:'https://www.loveandlemons.com/lemon-bars/',
+  sourceName:'Love & Lemons',
+  photo:'https://cdn.loveandlemons.com/wp-content/uploads/opengraph/2024/05/lemon-bars-recipe.jpg',
+  emoji:'🍋', img:'dessert',
+  prepTime:20, cookTime:40, time:60, passiveTime:180,
+  difficulty:2, servings:16, kcal:180, protein:3, nutrition:'estimated',
+  tags:['vegetarian'],
+  contains:['gluten','dairy','eggs'],
+  ingredients:[
+    {name:'Plain flour',qty:9,unit:'g',category:'Pantry',buyDayBefore:false},
+    {name:'Powdered sugar',qty:2.5,unit:'g',category:'Pantry',buyDayBefore:false},
+    {name:'Butter',qty:7,unit:'g',category:'Dairy',buyDayBefore:false},
+    {name:'Vanilla extract',qty:0.03,unit:'tsp',category:'Pantry',buyDayBefore:false},
+    {name:'Caster sugar',qty:12.5,unit:'g',category:'Pantry',buyDayBefore:false},
+    {name:'Eggs',qty:0.25,unit:'piece',category:'Dairy',buyDayBefore:false},
+    {name:'Lemon',qty:0.19,unit:'piece',category:'Produce',buyDayBefore:false}],
+  steps:[
+    'Heat the oven to 175°C and line an 8x8-inch tin, leaving an overhang.',
+    'Mix flour, powdered sugar and salt, add melted butter and vanilla, and press into the tin.',
+    'Bake the crust 18–20 minutes until lightly browned.',
+    'Whisk the sugar, flour, eggs and lemon juice together and pour over the hot crust.',
+    'Bake 20–25 minutes until just set, then cool 1 hour and chill 2 hours before slicing.']
+},
+
+/* --- 7. EASY APPLE CRISP -------------------------------------------------- */
+{
+  id:'db-x7', type:'dessert', types:['dessert'],
+  name:'Easy apple crisp', desc:'Cinnamon apples, oat crumble topping',
+  sourceUrl:'https://www.loveandlemons.com/apple-crisp/',
+  sourceName:'Love & Lemons',
+  photo:'https://cdn.loveandlemons.com/wp-content/uploads/opengraph/2024/08/apple-crisp.jpg',
+  emoji:'🍎', img:'dessert',
+  prepTime:15, cookTime:55, time:70,
+  difficulty:2, servings:6, kcal:320, protein:3, nutrition:'estimated',
+  tags:['vegetarian'],
+  contains:['gluten','dairy'],
+  ingredients:[
+    {name:'Apple',qty:1.05,unit:'piece',category:'Produce',buyDayBefore:false},
+    {name:'Plain flour',qty:12.5,unit:'g',category:'Pantry',buyDayBefore:false},
+    {name:'Brown sugar',qty:23,unit:'g',category:'Pantry',buyDayBefore:false},
+    {name:'Lemon',qty:0.05,unit:'piece',category:'Produce',buyDayBefore:false},
+    {name:'Vanilla extract',qty:0.17,unit:'tsp',category:'Pantry',buyDayBefore:false},
+    {name:'Cinnamon',qty:0.25,unit:'tsp',category:'Pantry',buyDayBefore:false},
+    {name:'Nutmeg',qty:0.08,unit:'tsp',category:'Pantry',buyDayBefore:false},
+    {name:'Rolled oats',qty:10,unit:'g',category:'Pantry',buyDayBefore:false},
+    {name:'Butter',qty:19,unit:'g',category:'Dairy',buyDayBefore:false}],
+  steps:[
+    'Heat the oven to 190°C and grease an 8x8-inch dish.',
+    'Toss the chopped apples with flour, brown sugar, lemon juice, vanilla, cinnamon and nutmeg; spread in the dish.',
+    'Rub the oats, flour, brown sugar, cinnamon and cold butter together into a crumbly topping and sprinkle over.',
+    'Cover and bake 35–40 minutes until bubbling, then uncover for 10–15 minutes until golden.',
+    'Cool at least 10 minutes before serving.']
+},
+
+/* --- 8. EASY CARROT CAKE -------------------------------------------------- */
+{
+  id:'db-x8', type:'dessert', types:['dessert'],
+  name:'Carrot cake', desc:'Spiced, walnuts, cream cheese frosting',
+  sourceUrl:'https://www.loveandlemons.com/carrot-cake/',
+  sourceName:'Love & Lemons',
+  photo:'https://cdn.loveandlemons.com/wp-content/uploads/2025/03/carrot-cake-social.jpg',
+  emoji:'🥕', img:'dessert',
+  prepTime:30, cookTime:30, time:60,
+  difficulty:3, servings:14, kcal:380, protein:5, nutrition:'estimated',
+  tags:['vegetarian'],
+  contains:['gluten','dairy','eggs','nuts'],
+  ingredients:[
+    {name:'Plain flour',qty:21,unit:'g',category:'Pantry',buyDayBefore:false},
+    {name:'Baking powder',qty:0.14,unit:'tsp',category:'Pantry',buyDayBefore:false},
+    {name:'Baking soda',qty:0.07,unit:'tsp',category:'Pantry',buyDayBefore:false},
+    {name:'Cinnamon',qty:0.14,unit:'tsp',category:'Pantry',buyDayBefore:false},
+    {name:'Ground ginger',qty:0.07,unit:'tsp',category:'Pantry',buyDayBefore:false},
+    {name:'Nutmeg',qty:0.04,unit:'tsp',category:'Pantry',buyDayBefore:false},
+    {name:'Brown sugar',qty:16,unit:'g',category:'Pantry',buyDayBefore:false},
+    {name:'Caster sugar',qty:7,unit:'g',category:'Pantry',buyDayBefore:false},
+    {name:'Vegetable oil',qty:13,unit:'ml',category:'Pantry',buyDayBefore:false},
+    {name:'Eggs',qty:0.29,unit:'piece',category:'Dairy',buyDayBefore:false},
+    {name:'Apple sauce',qty:17,unit:'g',category:'Pantry',buyDayBefore:false},
+    {name:'Vanilla extract',qty:0.14,unit:'tsp',category:'Pantry',buyDayBefore:false},
+    {name:'Carrots',qty:0.33,unit:'piece',category:'Produce',buyDayBefore:false},
+    {name:'Walnuts',qty:8,unit:'g',category:'Pantry',buyDayBefore:false},
+    {name:'Cream cheese',qty:7,unit:'g',category:'Dairy',buyDayBefore:false}],
+  steps:[
+    'Heat the oven to 175°C and grease two 9-inch round tins.',
+    'Whisk the flour, baking powder, baking soda, cinnamon, ginger and nutmeg together.',
+    'Whisk the sugars and oil, then the eggs, then the applesauce and vanilla.',
+    'Fold in the dry ingredients, then the carrots and walnuts.',
+    'Divide between the tins and bake 30–35 minutes until a skewer comes out clean.',
+    'Cool completely, then frost with cream cheese frosting.']
+},
+
+/* --- 9. PEANUT BUTTER COOKIES --------------------------------------------- */
+{
+  id:'db-x9', type:'dessert', types:['dessert'],
+  name:'Peanut butter cookies', desc:'Classic crosshatch, soft centre',
+  sourceUrl:'https://www.loveandlemons.com/peanut-butter-cookies/',
+  sourceName:'Love & Lemons',
+  photo:'https://cdn.loveandlemons.com/wp-content/uploads/opengraph/2023/10/peanut-butter-cookie-recipe.jpg',
+  emoji:'🍪', img:'cookie',
+  prepTime:30, cookTime:20, time:50,
+  difficulty:2, servings:30, kcal:116, protein:3, nutrition:'source',
+  tags:['vegetarian'],
+  contains:['gluten','dairy','eggs','nuts'],
+  ingredients:[
+    {name:'Plain flour',qty:4,unit:'g',category:'Pantry',buyDayBefore:false},
+    {name:'Baking soda',qty:0.02,unit:'tsp',category:'Pantry',buyDayBefore:false},
+    {name:'Butter',qty:4,unit:'g',category:'Dairy',buyDayBefore:false},
+    {name:'Brown sugar',qty:4,unit:'g',category:'Pantry',buyDayBefore:false},
+    {name:'Caster sugar',qty:2,unit:'g',category:'Pantry',buyDayBefore:false},
+    {name:'Peanut butter',qty:9,unit:'g',category:'Pantry',buyDayBefore:false},
+    {name:'Eggs',qty:0.03,unit:'piece',category:'Dairy',buyDayBefore:false},
+    {name:'Vanilla extract',qty:0.03,unit:'tsp',category:'Pantry',buyDayBefore:false}],
+  steps:[
+    'Heat the oven to 175°C and line two baking sheets.',
+    'Whisk the flour, baking soda and salt together.',
+    'Beat the butter and both sugars until fluffy, then mix in the peanut butter, egg and vanilla.',
+    'Gradually add the dry ingredients until just combined.',
+    'Roll into balls, coat in sugar, flatten with a fork crosshatch, and bake 10–12 minutes.']
+},
+
+/* --- 10. BAKED APPLES ------------------------------------------------------ */
+{
+  id:'db-x10', type:'dessert', types:['dessert'],
+  name:'Baked apples', desc:'Oat crumble filling, warm spices',
+  sourceUrl:'https://www.loveandlemons.com/baked-apples/',
+  sourceName:'Love & Lemons',
+  photo:'https://cdn.loveandlemons.com/wp-content/uploads/opengraph/2021/09/baked-apples-1.jpg',
+  emoji:'🍎', img:'dessert',
+  prepTime:20, cookTime:30, time:50,
+  difficulty:2, servings:4, kcal:340, protein:4, nutrition:'estimated',
+  tags:['vegetarian','vegan'],
+  contains:['nuts'],
+  ingredients:[
+    {name:'Rolled oats',qty:12.5,unit:'g',category:'Pantry',buyDayBefore:false},
+    {name:'Almond flour',qty:14,unit:'g',category:'Pantry',buyDayBefore:false},
+    {name:'Brown sugar',qty:18,unit:'g',category:'Pantry',buyDayBefore:false},
+    {name:'Walnuts',qty:7.5,unit:'g',category:'Pantry',buyDayBefore:false},
+    {name:'Cinnamon',qty:0.125,unit:'tsp',category:'Pantry',buyDayBefore:false},
+    {name:'Coconut oil',qty:14,unit:'g',category:'Pantry',buyDayBefore:false},
+    {name:'Apple',qty:1,unit:'piece',category:'Produce',buyDayBefore:false}],
+  steps:[
+    'Heat the oven to 190°C.',
+    'Combine the oats, almond flour, brown sugar, walnuts, cinnamon and salt, then work in the firm coconut oil until crumbly.',
+    'Scoop a little out of the centre of each apple half and set in a baking dish.',
+    'Fill with the crumble, drizzle with melted coconut oil, cover with foil and bake about 30 minutes until tender.',
+    'Serve warm.']
+},
+
 
 ];
 

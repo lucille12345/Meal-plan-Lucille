@@ -4,15 +4,15 @@
 > The source of truth is [`public/recipes-db.js`](../public/recipes-db.js).
 > Add or change a dish there, then run `node tools/build-recipe-md.js` to rebuild this page.
 
-**28 dishes** · every link, photo, calorie and protein figure was read from the
+**57 dishes** · every link, photo, calorie and protein figure was read from the
 recipe site's own structured data — nothing here is invented by AI.
 
 | Course | Dishes |
 |---|---|
-| Breakfast | 5 |
-| Starter | 6 |
-| Main (lunch / dinner) | 12 |
-| Dessert | 5 |
+| Breakfast | 9 |
+| Starter | 16 |
+| Main (lunch / dinner) | 22 |
+| Dessert | 10 |
 
 `Nutrition: source` = the figure published by the recipe site. `estimated` = worked out here
 from the ingredient list, so treat it as a good approximation rather than a measured value.
@@ -247,12 +247,188 @@ from the ingredient list, so treat it as a good approximation rather than a meas
 1. Halve the avocado, remove the stone and dice the flesh in its skin. Squeeze over lemon and season.
 2. Scoop onto hot toast, mash roughly with a fork and finish with flaky salt.
 
+---
+
+## 6. Homemade granola
+
+*Oats, walnuts, maple, coconut*
+
+<img src="https://cdn.loveandlemons.com/wp-content/uploads/opengraph/2020/01/granola.jpg" alt="Homemade granola" width="420">
+
+**Recipe:** [Love & Lemons ↗](https://www.loveandlemons.com/granola/)
+
+| | |
+|---|---|
+| **Calories** | 320 kcal per serving |
+| **Protein** | 8 g per serving |
+| **Time** | 40 min active |
+| **Prep / cook** | 10 min prep · 30 min cook |
+| **Difficulty** | ●○○○ Very easy |
+| **Serves** | 5 |
+| **Course** | breakfast |
+| **Diet tags** | vegetarian, vegan |
+| **Contains** | nuts |
+| **Nutrition** | estimated |
+
+**Ingredients** *(per serving — the app multiplies these by household size)*
+
+| Ingredient | Amount | Aisle |
+|---|---|---|
+| Rolled oats | 32 g | Pantry |
+| Walnuts | 10 g | Pantry |
+| Coconut flakes | 8 g | Pantry |
+| Cinnamon | 0.4 tsp | Pantry |
+| Coconut oil | 0.4 tbsp | Pantry |
+| Maple syrup | 0.8 tbsp | Pantry |
+| Almond butter | 6 g | Pantry |
+| Dried cranberries | 8 g | Pantry |
+
+🥬 = buy fresh, close to the day you cook it.
+
+**Method**
+
+1. Heat the oven to 150°C and line a baking sheet.
+2. Stir the oats, walnuts, coconut flakes, cinnamon and salt together, then work in the melted coconut oil, maple syrup and almond butter.
+3. Spread on the sheet and bake 15 minutes, break it up a little, then bake 15 minutes more until golden.
+4. Scatter over the cranberries once cool.
+
+---
+
+## 7. Breakfast egg muffins
+
+*Pepper, feta, scallion, oven-baked*
+
+<img src="https://cdn.loveandlemons.com/wp-content/uploads/opengraph/2023/01/egg-muffins-1.jpg" alt="Breakfast egg muffins" width="420">
+
+**Recipe:** [Love & Lemons ↗](https://www.loveandlemons.com/egg-muffins/)
+
+| | |
+|---|---|
+| **Calories** | 230 kcal per serving |
+| **Protein** | 16 g per serving |
+| **Time** | 40 min active |
+| **Prep / cook** | 15 min prep · 25 min cook |
+| **Difficulty** | ●●○○ Easy |
+| **Serves** | 4 |
+| **Course** | breakfast |
+| **Diet tags** | vegetarian |
+| **Contains** | eggs, dairy, gluten |
+| **Nutrition** | estimated |
+
+**Ingredients** *(per serving — the app multiplies these by household size)*
+
+| Ingredient | Amount | Aisle |
+|---|---|---|
+| Red bell pepper 🥬 | 0.6 | Produce |
+| Spring onions 🥬 | 1.2 | Produce |
+| Eggs | 2.25 | Dairy |
+| Garlic | 0.25 clove | Produce |
+| Plain flour | 0.75 tbsp | Pantry |
+| Baking powder | 0.19 tsp | Pantry |
+| Feta | 13 g | Dairy |
+
+🥬 = buy fresh, close to the day you cook it.
+
+**Method**
+
+1. Heat the oven to 175°C and grease a muffin tin. Divide the pepper and spring onion between the cups.
+2. Whisk the eggs with the garlic, salt and pepper, then whisk in the flour and baking powder.
+3. Pour the egg mixture over the vegetables and top with feta.
+4. Bake 22–24 minutes until set. Cool slightly before turning out.
+
+---
+
+## 8. French toast
+
+*Cinnamon, vanilla, maple syrup*
+
+<img src="https://cdn.loveandlemons.com/wp-content/uploads/opengraph/2024/08/french-toast.jpg" alt="French toast" width="420">
+
+**Recipe:** [Love & Lemons ↗](https://www.loveandlemons.com/french-toast/)
+
+| | |
+|---|---|
+| **Calories** | 380 kcal per serving |
+| **Protein** | 13 g per serving |
+| **Time** | 20 min active |
+| **Prep / cook** | 10 min prep · 10 min cook |
+| **Difficulty** | ●○○○ Very easy |
+| **Serves** | 4 |
+| **Course** | breakfast |
+| **Diet tags** | vegetarian |
+| **Contains** | gluten, dairy, eggs |
+| **Nutrition** | estimated |
+
+**Ingredients** *(per serving — the app multiplies these by household size)*
+
+| Ingredient | Amount | Aisle |
+|---|---|---|
+| Eggs | 1 | Dairy |
+| Milk | 40 ml | Dairy |
+| Vanilla extract | 0.25 tsp | Pantry |
+| Cinnamon | 0.12 tsp | Pantry |
+| Butter | 5 g | Dairy |
+| Crusty bread 🥬 | 70 g | Bakery |
+| Maple syrup | 1 tbsp | Pantry |
+
+🥬 = buy fresh, close to the day you cook it.
+
+**Method**
+
+1. Whisk the eggs, milk, vanilla, cinnamon and a pinch of salt in a shallow dish.
+2. Heat a buttered skillet or griddle over medium heat.
+3. Dip each slice of bread in the egg mixture, coating both sides, and cook 2 minutes a side until golden.
+4. Serve with maple syrup.
+
+---
+
+## 9. Breakfast potatoes
+
+*Crispy, smoked paprika, garlic*
+
+<img src="https://cdn.loveandlemons.com/wp-content/uploads/2026/03/344_LLBlogMarch_BreakfastPotatoes_28529-social.jpg" alt="Breakfast potatoes" width="420">
+
+**Recipe:** [Love & Lemons ↗](https://www.loveandlemons.com/breakfast-potatoes/)
+
+| | |
+|---|---|
+| **Calories** | 160 kcal per serving |
+| **Protein** | 3 g per serving |
+| **Time** | 45 min active |
+| **Prep / cook** | 10 min prep · 35 min cook |
+| **Difficulty** | ●○○○ Very easy |
+| **Serves** | 6 |
+| **Course** | breakfast |
+| **Diet tags** | vegetarian, vegan |
+| **Contains** | none of the tracked allergens |
+| **Nutrition** | source |
+
+**Ingredients** *(per serving — the app multiplies these by household size)*
+
+| Ingredient | Amount | Aisle |
+|---|---|---|
+| Yukon gold potatoes 🥬 | 151 g | Produce |
+| Olive oil | 0.3 tbsp | Pantry |
+| Smoked paprika | 0.17 tsp | Pantry |
+| Garlic powder | 0.08 tsp | Pantry |
+| Onion powder | 0.04 tsp | Pantry |
+| Fresh parsley 🥬 | 0.5 tbsp | Produce |
+
+🥬 = buy fresh, close to the day you cook it.
+
+**Method**
+
+1. Heat the oven to 220°C and line a large baking sheet.
+2. Toss the diced potatoes with oil, paprika, garlic powder, onion powder, salt and pepper.
+3. Spread evenly and roast 25–35 minutes until golden and crisp at the edges.
+4. Season to taste and scatter with parsley.
+
 
 # Starters & small plates
 
 ---
 
-## 6. Silky hummus
+## 10. Silky hummus
 
 *Chickpea, tahini, lemon, cumin*
 
@@ -295,7 +471,7 @@ from the ingredient list, so treat it as a good approximation rather than a meas
 
 ---
 
-## 7. Tomato bruschetta
+## 11. Tomato bruschetta
 
 *Ripe tomato, basil, toasted baguette*
 
@@ -337,7 +513,7 @@ from the ingredient list, so treat it as a good approximation rather than a meas
 
 ---
 
-## 8. Caprese salad
+## 12. Caprese salad
 
 *Tomato, mozzarella, basil, balsamic*
 
@@ -377,7 +553,7 @@ from the ingredient list, so treat it as a good approximation rather than a meas
 
 ---
 
-## 9. Chilled gazpacho
+## 13. Chilled gazpacho
 
 *Tomato, cucumber, sherry vinegar*
 
@@ -421,7 +597,7 @@ from the ingredient list, so treat it as a good approximation rather than a meas
 
 ---
 
-## 10. Stuffed mushrooms
+## 14. Stuffed mushrooms
 
 *Pecorino, pine nut, sun-dried tomato*
 
@@ -466,7 +642,7 @@ from the ingredient list, so treat it as a good approximation rather than a meas
 
 ---
 
-## 11. Greek salad
+## 15. Greek salad
 
 *Feta, cucumber, olives, oregano*
 
@@ -510,12 +686,469 @@ from the ingredient list, so treat it as a good approximation rather than a meas
 2. Lay out the cucumber, pepper, tomatoes, feta, onion and olives on a platter.
 3. Drizzle over the dressing, toss very gently and finish with oregano and mint.
 
+---
+
+## 16. Deviled eggs
+
+*Creamy yolk, mustard, paprika*
+
+<img src="https://cdn.loveandlemons.com/wp-content/uploads/opengraph/2024/03/deviled-eggs-recipe.jpg" alt="Deviled eggs" width="420">
+
+**Recipe:** [Love & Lemons ↗](https://www.loveandlemons.com/deviled-eggs/)
+
+| | |
+|---|---|
+| **Calories** | 111 kcal per serving |
+| **Protein** | 6 g per serving |
+| **Time** | 25 min active · plus 20 min chilling / marinating |
+| **Prep / cook** | 10 min prep · 15 min cook |
+| **Difficulty** | ●●○○ Easy |
+| **Serves** | 6 |
+| **Course** | starter |
+| **Diet tags** | vegetarian |
+| **Contains** | eggs |
+| **Nutrition** | source |
+
+**Ingredients** *(per serving — the app multiplies these by household size)*
+
+| Ingredient | Amount | Aisle |
+|---|---|---|
+| Eggs | 1 | Dairy |
+| Mayonnaise | 0.5 tbsp | Pantry |
+| Dijon mustard | 0.17 tsp | Pantry |
+| Balsamic vinegar | 0.17 tsp | Pantry |
+| Paprika | 0.1 tsp | Pantry |
+
+🥬 = buy fresh, close to the day you cook it.
+
+**Method**
+
+1. Boil the eggs, then cover and let sit off the heat 10–12 minutes.
+2. Chill in ice water, then peel and halve lengthwise.
+3. Mash the yolks with mayonnaise, mustard and a dash of vinegar until creamy; season.
+4. Pipe or spoon back into the whites and dust with paprika.
+
+---
+
+## 17. Peanut summer rolls
+
+*Rice paper, avocado, herbs, peanut sauce*
+
+<img src="https://cdn.loveandlemons.com/wp-content/uploads/opengraph/2013/10/spring-rolls.jpg" alt="Peanut summer rolls" width="420">
+
+**Recipe:** [Love & Lemons ↗](https://www.loveandlemons.com/spring-rolls/)
+
+| | |
+|---|---|
+| **Calories** | 320 kcal per serving |
+| **Protein** | 9 g per serving |
+| **Time** | 15 min active |
+| **Prep / cook** | 10 min prep · 5 min cook |
+| **Difficulty** | ●●●○ Needs a bit of care |
+| **Serves** | 2 |
+| **Course** | starter, lunch |
+| **Diet tags** | vegetarian, vegan |
+| **Contains** | nuts, soy |
+| **Nutrition** | estimated |
+
+**Ingredients** *(per serving — the app multiplies these by household size)*
+
+| Ingredient | Amount | Aisle |
+|---|---|---|
+| Mushrooms 🥬 | 35 g | Produce |
+| Soy sauce | 0.25 tsp | Pantry |
+| Rice noodles | 57 g | Pantry |
+| Peanut sauce | 1 tbsp | Pantry |
+| Rice paper wrappers | 2 | Pantry |
+| Avocado 🥬 | 0.5 | Produce |
+| Fresh basil 🥬 | 0.5 tbsp | Produce |
+
+🥬 = buy fresh, close to the day you cook it.
+
+**Method**
+
+1. Brown the mushrooms in a little oil, then toss with soy sauce.
+2. Toss the cooked noodles with a spoonful of peanut sauce.
+3. Dip a rice paper wrapper in warm water 5 seconds and lay it on a clean towel.
+4. Fill with noodles, mushrooms, avocado and herbs, fold in the sides and roll up tightly.
+5. Serve with extra peanut sauce for dipping.
+
+---
+
+## 18. French onion soup
+
+*Caramelised onion, Gruyère, baguette*
+
+<img src="https://cdn.loveandlemons.com/wp-content/uploads/opengraph/2019/12/french-onion-soup-recipe.jpg" alt="French onion soup" width="420">
+
+**Recipe:** [Love & Lemons ↗](https://www.loveandlemons.com/french-onion-soup/)
+
+| | |
+|---|---|
+| **Calories** | 380 kcal per serving |
+| **Protein** | 14 g per serving |
+| **Time** | 1 h 40 min active |
+| **Prep / cook** | 10 min prep · 1 h 30 min cook |
+| **Difficulty** | ●●●○ Needs a bit of care |
+| **Serves** | 5 |
+| **Course** | starter, lunch |
+| **Diet tags** | vegetarian |
+| **Contains** | gluten, dairy |
+| **Nutrition** | estimated |
+
+**Ingredients** *(per serving — the app multiplies these by household size)*
+
+| Ingredient | Amount | Aisle |
+|---|---|---|
+| Olive oil | 1.2 tbsp | Pantry |
+| Yellow onion | 1.8 | Produce |
+| Balsamic vinegar | 0.3 tbsp | Pantry |
+| Soy sauce | 0.3 tbsp | Pantry |
+| Fresh thyme 🥬 | 0.3 tbsp | Produce |
+| Garlic | 0.6 clove | Produce |
+| Plain flour | 0.6 tbsp | Pantry |
+| White wine | 48 ml | Pantry |
+| Vegetable broth | 288 ml | Pantry |
+| Baguette 🥬 | 30 g | Bakery |
+| Gruyère | 20 g | Dairy |
+
+🥬 = buy fresh, close to the day you cook it.
+
+**Method**
+
+1. Cook the sliced onions in oil with salt over low heat, stirring often, about 40 minutes until deeply caramelised.
+2. Stir in the balsamic, soy sauce, thyme and garlic, then the flour, then the wine, and simmer.
+3. Add the broth and simmer to develop the flavour.
+4. Toast baguette slices topped with cheese under the grill until melted and golden.
+5. Ladle the soup into bowls and top each with a cheesy toast.
+
+---
+
+## 19. Minestrone soup
+
+*White beans, vegetables, small pasta*
+
+<img src="https://cdn.loveandlemons.com/wp-content/uploads/opengraph/2021/11/minestrone-soup-1.jpg" alt="Minestrone soup" width="420">
+
+**Recipe:** [Love & Lemons ↗](https://www.loveandlemons.com/minestrone-soup/)
+
+| | |
+|---|---|
+| **Calories** | 220 kcal per serving |
+| **Protein** | 9 g per serving |
+| **Time** | 45 min active |
+| **Prep / cook** | 15 min prep · 30 min cook |
+| **Difficulty** | ●●○○ Easy |
+| **Serves** | 5 |
+| **Course** | starter, lunch |
+| **Diet tags** | vegetarian, vegan |
+| **Contains** | gluten |
+| **Nutrition** | estimated |
+
+**Ingredients** *(per serving — the app multiplies these by household size)*
+
+| Ingredient | Amount | Aisle |
+|---|---|---|
+| Olive oil | 0.4 tbsp | Pantry |
+| Onion | 0.2 | Produce |
+| Carrots | 0.4 | Produce |
+| Celery 🥬 | 0.4 stalk | Produce |
+| Garlic | 0.6 clove | Produce |
+| Diced tomatoes | 160 g | Pantry |
+| Cannellini beans | 50 g | Pantry |
+| Green beans 🥬 | 20 g | Produce |
+| Vegetable broth | 192 ml | Pantry |
+| Dried oregano | 0.2 tsp | Pantry |
+| Dried thyme | 0.2 tsp | Pantry |
+| Ditalini pasta | 15 g | Pantry |
+| Fresh parsley 🥬 | 5 g | Produce |
+
+🥬 = buy fresh, close to the day you cook it.
+
+**Method**
+
+1. Soften the onion, carrot and celery in oil with salt and pepper, about 8 minutes.
+2. Add the garlic, tomatoes, beans, green beans, broth, bay leaves, oregano and thyme. Cover and simmer 20 minutes.
+3. Stir in the pasta and cook uncovered 10 minutes more until tender.
+4. Season to taste and serve with parsley.
+
+---
+
+## 20. Baba ganoush
+
+*Smoky roasted eggplant, tahini, lemon*
+
+<img src="https://cdn.loveandlemons.com/wp-content/uploads/opengraph/2019/08/baba-ganoush.jpg" alt="Baba ganoush" width="420">
+
+**Recipe:** [Love & Lemons ↗](https://www.loveandlemons.com/baba-ganoush/)
+
+| | |
+|---|---|
+| **Calories** | 140 kcal per serving |
+| **Protein** | 4 g per serving |
+| **Time** | 1 h 30 min active |
+| **Prep / cook** | 30 min prep · 1 h cook |
+| **Difficulty** | ●●○○ Easy |
+| **Serves** | 4 |
+| **Course** | starter |
+| **Diet tags** | vegetarian, vegan |
+| **Contains** | sesame |
+| **Nutrition** | estimated |
+
+**Ingredients** *(per serving — the app multiplies these by household size)*
+
+| Ingredient | Amount | Aisle |
+|---|---|---|
+| Eggplant 🥬 | 0.5 | Produce |
+| Tahini | 15 g | Pantry |
+| Lemon | 0.12 | Produce |
+| Olive oil | 0.5 tbsp | Pantry |
+| Garlic | 0.5 clove | Produce |
+| Fresh parsley 🥬 | 0.5 tbsp | Produce |
+| Pita bread 🥬 | 30 g | Bakery |
+
+🥬 = buy fresh, close to the day you cook it.
+
+**Method**
+
+1. Roast the whole eggplants wrapped in foil at 200°C for 50–60 minutes until soft and collapsed.
+2. Once cool, peel and drain the flesh in a strainer for 20 minutes to remove excess water.
+3. Blend the eggplant flesh with tahini, lemon juice, olive oil, garlic and salt until smooth.
+4. Sprinkle with parsley and serve with warm pita.
+
+---
+
+## 21. Caesar salad
+
+*Romaine, parmesan, croutons, dressing*
+
+<img src="https://cdn.loveandlemons.com/wp-content/uploads/2024/12/caesar-salad-opengraph.jpg" alt="Caesar salad" width="420">
+
+**Recipe:** [Love & Lemons ↗](https://www.loveandlemons.com/caesar-salad/)
+
+| | |
+|---|---|
+| **Calories** | 280 kcal per serving |
+| **Protein** | 8 g per serving |
+| **Time** | 30 min active |
+| **Prep / cook** | 20 min prep · 10 min cook |
+| **Difficulty** | ●●○○ Easy |
+| **Serves** | 6 |
+| **Course** | starter, lunch |
+| **Diet tags** | vegetarian |
+| **Contains** | gluten, dairy, eggs |
+| **Nutrition** | estimated |
+
+**Ingredients** *(per serving — the app multiplies these by household size)*
+
+| Ingredient | Amount | Aisle |
+|---|---|---|
+| Crusty bread 🥬 | 27 g | Bakery |
+| Olive oil | 0.83 tbsp | Pantry |
+| Mayonnaise | 38 g | Pantry |
+| Lemon | 0.1 | Produce |
+| Dijon mustard | 0.33 tsp | Pantry |
+| Garlic | 0.17 clove | Produce |
+| Worcestershire sauce | 0.17 tsp | Pantry |
+| Parmesan | 17 g | Dairy |
+| Romaine lettuce 🥬 | 76 g | Produce |
+
+🥬 = buy fresh, close to the day you cook it.
+
+**Method**
+
+1. Toss cubed bread with oil and salt and bake at 175°C until golden, for the croutons.
+2. Whisk the mayonnaise, oil, lemon juice, mustard, garlic and Worcestershire into a dressing; stir in half the parmesan.
+3. Toss the lettuce with the dressing, croutons and remaining parmesan. Season and serve.
+
+---
+
+## 22. Creamy tomato soup
+
+*Roasted tomato, garlic, croutons*
+
+<img src="https://cdn.loveandlemons.com/wp-content/uploads/opengraph/2018/01/tomato-soup.jpg" alt="Creamy tomato soup" width="420">
+
+**Recipe:** [Love & Lemons ↗](https://www.loveandlemons.com/tomato-soup/)
+
+| | |
+|---|---|
+| **Calories** | 210 kcal per serving |
+| **Protein** | 6 g per serving |
+| **Time** | 45 min active |
+| **Prep / cook** | 15 min prep · 30 min cook |
+| **Difficulty** | ●●○○ Easy |
+| **Serves** | 4 |
+| **Course** | starter, lunch |
+| **Diet tags** | vegetarian |
+| **Contains** | gluten, dairy |
+| **Nutrition** | estimated |
+
+**Ingredients** *(per serving — the app multiplies these by household size)*
+
+| Ingredient | Amount | Aisle |
+|---|---|---|
+| Garlic | 0.86 clove | Produce |
+| Ripe tomatoes 🥬 | 171 g | Produce |
+| Onion | 0.29 | Produce |
+| Diced tomatoes | 114 g | Pantry |
+| Chickpeas | 16 g | Pantry |
+| Balsamic vinegar | 0.29 tbsp | Pantry |
+| Maple syrup | 0.14 tsp | Pantry |
+| Olive oil | 0.57 tbsp | Pantry |
+| Crusty bread 🥬 | 60 g | Bakery |
+| Parmesan | 15 g | Dairy |
+
+🥬 = buy fresh, close to the day you cook it.
+
+**Method**
+
+1. Roast the garlic, whole tomatoes and onion wedges at 230°C for 20–25 minutes until soft and blistered.
+2. Blend with the canned tomatoes, chickpeas, balsamic, maple syrup, thyme, olive oil and seasoning until creamy.
+3. Toast the bread with a little parmesan for croutons.
+4. Serve the soup hot with the croutons.
+
+---
+
+## 23. Cauliflower soup
+
+*Roasted cauliflower, miso, lemon*
+
+<img src="https://cdn.loveandlemons.com/wp-content/uploads/opengraph/2021/01/cauliflower-soup-2.jpg" alt="Cauliflower soup" width="420">
+
+**Recipe:** [Love & Lemons ↗](https://www.loveandlemons.com/cauliflower-soup/)
+
+| | |
+|---|---|
+| **Calories** | 150 kcal per serving |
+| **Protein** | 5 g per serving |
+| **Time** | 1 h active |
+| **Prep / cook** | 15 min prep · 45 min cook |
+| **Difficulty** | ●●○○ Easy |
+| **Serves** | 6 |
+| **Course** | starter, lunch |
+| **Diet tags** | vegetarian, vegan |
+| **Contains** | soy |
+| **Nutrition** | estimated |
+
+**Ingredients** *(per serving — the app multiplies these by household size)*
+
+| Ingredient | Amount | Aisle |
+|---|---|---|
+| Cauliflower 🥬 | 0.19 | Produce |
+| Shallots | 0.33 | Produce |
+| Garlic | 0.67 clove | Produce |
+| Vegetable broth | 160 ml | Pantry |
+| Fresh thyme 🥬 | 0.5 tsp | Produce |
+| Olive oil | 0.5 tbsp | Pantry |
+| Miso paste | 0.08 tbsp | Pantry |
+| Dijon mustard | 0.08 tsp | Pantry |
+| Lemon | 0.1 | Produce |
+
+🥬 = buy fresh, close to the day you cook it.
+
+**Method**
+
+1. Roast the chopped cauliflower with oil, salt and pepper at 200°C until browned; wrap and roast the shallot and garlic alongside.
+2. Simmer the broth with the roasted cauliflower, shallot, garlic and thyme, covered, 15 minutes.
+3. Blend until smooth, then stir in the miso, mustard and lemon juice. Season to taste.
+
+---
+
+## 24. Butternut squash soup
+
+*Sage, rosemary, roasted squash*
+
+<img src="https://cdn.loveandlemons.com/wp-content/uploads/opengraph/2019/10/butternut-squash-soup.jpg" alt="Butternut squash soup" width="420">
+
+**Recipe:** [Love & Lemons ↗](https://www.loveandlemons.com/butternut-squash-soup/)
+
+| | |
+|---|---|
+| **Calories** | 180 kcal per serving |
+| **Protein** | 3 g per serving |
+| **Time** | 45 min active |
+| **Prep / cook** | 10 min prep · 35 min cook |
+| **Difficulty** | ●●○○ Easy |
+| **Serves** | 6 |
+| **Course** | starter, lunch |
+| **Diet tags** | vegetarian, vegan |
+| **Contains** | none of the tracked allergens |
+| **Nutrition** | estimated |
+
+**Ingredients** *(per serving — the app multiplies these by household size)*
+
+| Ingredient | Amount | Aisle |
+|---|---|---|
+| Olive oil | 0.33 tbsp | Pantry |
+| Yellow onion | 0.17 | Produce |
+| Butternut squash 🥬 | 227 g | Produce |
+| Garlic | 0.5 clove | Produce |
+| Fresh ginger | 0.17 tsp | Produce |
+| Vegetable broth | 140 ml | Pantry |
+
+🥬 = buy fresh, close to the day you cook it.
+
+**Method**
+
+1. Soften the onion in oil with salt, then add the squash and cook until it starts to soften.
+2. Add the garlic and ginger, cook until fragrant, then pour in the broth.
+3. Simmer covered until the squash is tender, 20–25 minutes.
+4. Blend until smooth, thinning with more broth if needed, and season to taste.
+
+---
+
+## 25. Broccoli cheddar soup
+
+*Creamy, sharp cheddar, carrot*
+
+<img src="https://cdn.loveandlemons.com/wp-content/uploads/opengraph/2022/11/broccoli-cheddar-soup-1.jpg" alt="Broccoli cheddar soup" width="420">
+
+**Recipe:** [Love & Lemons ↗](https://www.loveandlemons.com/broccoli-cheddar-soup/)
+
+| | |
+|---|---|
+| **Calories** | 320 kcal per serving |
+| **Protein** | 13 g per serving |
+| **Time** | 35 min active |
+| **Prep / cook** | 10 min prep · 25 min cook |
+| **Difficulty** | ●●○○ Easy |
+| **Serves** | 4 |
+| **Course** | starter, lunch |
+| **Diet tags** | vegetarian |
+| **Contains** | dairy, gluten |
+| **Nutrition** | estimated |
+
+**Ingredients** *(per serving — the app multiplies these by household size)*
+
+| Ingredient | Amount | Aisle |
+|---|---|---|
+| Butter | 14 g | Dairy |
+| Onion | 0.25 | Produce |
+| Garlic | 0.75 clove | Produce |
+| Plain flour | 7.5 g | Pantry |
+| Milk | 120 ml | Dairy |
+| Vegetable broth | 120 ml | Pantry |
+| Broccoli 🥬 | 68 g | Produce |
+| Carrots | 0.25 | Produce |
+| Dijon mustard | 0.13 tsp | Pantry |
+| Cheddar | 56 g | Dairy |
+
+🥬 = buy fresh, close to the day you cook it.
+
+**Method**
+
+1. Soften the onion in butter with salt and pepper, then stir in the garlic and flour.
+2. Whisk in the milk and broth until smooth.
+3. Add the broccoli, carrot and mustard, and simmer 15–20 minutes until the broccoli is tender.
+4. Stir in the cheese gradually until melted and creamy. Season and serve.
+
 
 # Mains
 
 ---
 
-## 12. Best lentil soup
+## 26. Best lentil soup
 
 *Lentils, cumin, tomato, greens*
 
@@ -565,7 +1198,7 @@ from the ingredient list, so treat it as a good approximation rather than a meas
 
 ---
 
-## 13. Sheet pan chicken fajitas
+## 27. Sheet pan chicken fajitas
 
 *Chicken, peppers, lime, tortillas*
 
@@ -613,7 +1246,7 @@ from the ingredient list, so treat it as a good approximation rather than a meas
 
 ---
 
-## 14. Pasta e fagioli
+## 28. Pasta e fagioli
 
 *White beans, tomato, ditalini, bacon*
 
@@ -664,7 +1297,7 @@ from the ingredient list, so treat it as a good approximation rather than a meas
 
 ---
 
-## 15. Creamy cajun chicken pasta
+## 29. Creamy cajun chicken pasta
 
 *One pot, smoky, tomato cream*
 
@@ -714,7 +1347,7 @@ from the ingredient list, so treat it as a good approximation rather than a meas
 
 ---
 
-## 16. Teriyaki salmon
+## 30. Teriyaki salmon
 
 *Sticky glaze, sriracha mayo*
 
@@ -761,7 +1394,7 @@ from the ingredient list, so treat it as a good approximation rather than a meas
 
 ---
 
-## 17. Turkey meatballs
+## 31. Turkey meatballs
 
 *Parmesan, herbs, oven-baked*
 
@@ -805,7 +1438,7 @@ from the ingredient list, so treat it as a good approximation rather than a meas
 
 ---
 
-## 18. Weeknight spaghetti bolognese
+## 32. Weeknight spaghetti bolognese
 
 *Beef, butter, crushed tomato*
 
@@ -849,7 +1482,7 @@ from the ingredient list, so treat it as a good approximation rather than a meas
 
 ---
 
-## 19. Shrimp scampi
+## 33. Shrimp scampi
 
 *Garlic, butter, lemon, white wine*
 
@@ -895,7 +1528,7 @@ from the ingredient list, so treat it as a good approximation rather than a meas
 
 ---
 
-## 20. Honey sriracha chicken
+## 34. Honey sriracha chicken
 
 *Sticky, spicy, roasted thighs*
 
@@ -941,7 +1574,7 @@ from the ingredient list, so treat it as a good approximation rather than a meas
 
 ---
 
-## 21. Easy pesto pasta
+## 35. Easy pesto pasta
 
 *Basil pesto, parmesan, pine nuts*
 
@@ -984,7 +1617,7 @@ from the ingredient list, so treat it as a good approximation rather than a meas
 
 ---
 
-## 22. Vegetarian chili
+## 36. Vegetarian chili
 
 *Beans, tomato, peppers, smoky spice*
 
@@ -1034,7 +1667,7 @@ from the ingredient list, so treat it as a good approximation rather than a meas
 
 ---
 
-## 23. Thai red curry
+## 37. Thai red curry
 
 *Coconut, vegetables, basil, rice*
 
@@ -1082,12 +1715,509 @@ from the ingredient list, so treat it as a good approximation rather than a meas
 4. Simmer until the vegetables are tender, then wilt in the spinach.
 5. Season with soy sauce, sugar and lime juice and serve over the rice.
 
+---
+
+## 38. Easy coconut curry
+
+*Squash, cauliflower, spinach, rice*
+
+<img src="https://cdn.loveandlemons.com/wp-content/uploads/opengraph/2018/10/curry.jpg" alt="Easy coconut curry" width="420">
+
+**Recipe:** [Love & Lemons ↗](https://www.loveandlemons.com/vegetable-curry/)
+
+| | |
+|---|---|
+| **Calories** | 409 kcal per serving |
+| **Protein** | 8 g per serving |
+| **Time** | 50 min active |
+| **Prep / cook** | 15 min prep · 35 min cook |
+| **Difficulty** | ●●○○ Easy |
+| **Serves** | 4 |
+| **Course** | lunch, dinner |
+| **Diet tags** | vegetarian, vegan |
+| **Contains** | none of the tracked allergens |
+| **Nutrition** | source |
+
+**Ingredients** *(per serving — the app multiplies these by household size)*
+
+| Ingredient | Amount | Aisle |
+|---|---|---|
+| Coconut oil | 0.25 tbsp | Pantry |
+| Onion | 0.27 | Produce |
+| Garlic | 0.5 clove | Produce |
+| Fresh ginger | 0.125 tsp | Produce |
+| Ground cumin | 0.125 tsp | Pantry |
+| Ground coriander | 0.06 tsp | Pantry |
+| Turmeric | 0.06 tsp | Pantry |
+| Butternut squash 🥬 | 70 g | Produce |
+| Cauliflower 🥬 | 0.06 | Produce |
+| Coconut milk | 100 ml | Pantry |
+| Lime | 0.25 | Produce |
+| Spinach 🥬 | 30 g | Produce |
+| Peas | 19 g | Frozen |
+| Jasmine rice | 88 g | Pantry |
+
+🥬 = buy fresh, close to the day you cook it.
+
+**Method**
+
+1. Cook the onion in coconut oil until soft and well browned, about 10 minutes.
+2. Stir together the garlic, ginger, cumin, coriander, turmeric and salt, then add to the pot.
+3. Add the squash and cook 5 minutes, then the cauliflower, coconut milk and spice mix. Cover and simmer 20 minutes.
+4. Stir in the lemon and lime juice, spinach and peas. Season to taste.
+5. Serve over the rice.
+
+---
+
+## 39. Chana masala
+
+*Chickpea, tomato, garam masala, rice*
+
+<img src="https://cdn.loveandlemons.com/wp-content/uploads/opengraph/2023/07/chana-masala-recipe.jpg" alt="Chana masala" width="420">
+
+**Recipe:** [Love & Lemons ↗](https://www.loveandlemons.com/chana-masala/)
+
+| | |
+|---|---|
+| **Calories** | 380 kcal per serving |
+| **Protein** | 14 g per serving |
+| **Time** | 55 min active |
+| **Prep / cook** | 15 min prep · 40 min cook |
+| **Difficulty** | ●●○○ Easy |
+| **Serves** | 4 |
+| **Course** | lunch, dinner |
+| **Diet tags** | vegetarian |
+| **Contains** | dairy |
+| **Nutrition** | estimated |
+
+**Ingredients** *(per serving — the app multiplies these by household size)*
+
+| Ingredient | Amount | Aisle |
+|---|---|---|
+| Olive oil | 0.5 tbsp | Pantry |
+| Onion | 0.25 | Produce |
+| Cumin seeds | 0.25 tsp | Pantry |
+| Garam masala | 0.25 tsp | Pantry |
+| Ground coriander | 0.125 tsp | Pantry |
+| Turmeric | 0.125 tsp | Pantry |
+| Garlic | 0.5 clove | Produce |
+| Fresh ginger | 0.125 tsp | Produce |
+| Diced tomatoes | 200 g | Pantry |
+| Chickpeas | 125 g | Pantry |
+| Fresh coriander 🥬 | 5 g | Produce |
+| Jasmine rice | 44 g | Pantry |
+| Greek yogurt | 7.5 g | Dairy |
+
+🥬 = buy fresh, close to the day you cook it.
+
+**Method**
+
+1. Cook the onion in oil until soft and well browned, about 8 minutes.
+2. Add the cumin seeds, garam masala, coriander, turmeric and a pinch of cayenne; cook until fragrant.
+3. Stir in the garlic, ginger, salt and a splash of water, then the tomatoes, breaking them apart as you go.
+4. Simmer 8–10 minutes until thickened, then add the chickpeas and warm through.
+5. Serve over rice with a dollop of yogurt and fresh coriander.
+
+---
+
+## 40. Black bean tacos
+
+*Spiced beans, lime, cotija, tortillas*
+
+<img src="https://cdn.loveandlemons.com/wp-content/uploads/2025/03/black-bean-tacos-social.jpg" alt="Black bean tacos" width="420">
+
+**Recipe:** [Love & Lemons ↗](https://www.loveandlemons.com/black-bean-tacos/)
+
+| | |
+|---|---|
+| **Calories** | 362 kcal per serving |
+| **Protein** | 15 g per serving |
+| **Time** | 30 min active |
+| **Prep / cook** | 15 min prep · 15 min cook |
+| **Difficulty** | ●●○○ Easy |
+| **Serves** | 4 |
+| **Course** | lunch, dinner |
+| **Diet tags** | vegetarian |
+| **Contains** | dairy |
+| **Nutrition** | source |
+
+**Ingredients** *(per serving — the app multiplies these by household size)*
+
+| Ingredient | Amount | Aisle |
+|---|---|---|
+| Avocado oil | 0.5 tbsp | Pantry |
+| White onion | 0.125 | Produce |
+| Jalapeno pepper 🥬 | 0.25 | Produce |
+| Garlic | 0.75 clove | Produce |
+| Taco seasoning | 0.375 tbsp | Pantry |
+| Black beans | 125 g | Pantry |
+| Lime | 0.25 | Produce |
+| Small tortillas | 2 | Bakery |
+| Cotija cheese | 7.5 g | Dairy |
+| Fresh coriander 🥬 | 3 g | Produce |
+
+🥬 = buy fresh, close to the day you cook it.
+
+**Method**
+
+1. Soften the onion, jalapeño, garlic and salt in oil, about 8 minutes.
+2. Stir in the taco seasoning, then the beans and a splash of their liquid; cook until thick.
+3. Mash some of the beans for a creamy texture and stir in the lime juice.
+4. Assemble in warm tortillas with cotija, coriander and extra jalapeño.
+
+---
+
+## 41. Butter chicken
+
+*Marinated chicken, tomato cream sauce*
+
+<img src="https://www.budgetbytes.com/wp-content/uploads/2025/04/Butter_Chicken_Fork.jpg" alt="Butter chicken" width="420">
+
+**Recipe:** [Budget Bytes ↗](https://www.budgetbytes.com/butter-chicken/)
+
+| | |
+|---|---|
+| **Calories** | 468 kcal per serving |
+| **Protein** | 42 g per serving |
+| **Time** | 35 min active · plus 1 h chilling / marinating |
+| **Prep / cook** | 10 min prep · 25 min cook |
+| **Difficulty** | ●●●○ Needs a bit of care |
+| **Serves** | 4 |
+| **Course** | lunch, dinner |
+| **Diet tags** | — |
+| **Contains** | dairy |
+| **Nutrition** | source |
+
+**Ingredients** *(per serving — the app multiplies these by household size)*
+
+| Ingredient | Amount | Aisle |
+|---|---|---|
+| Chicken breast | 170 g | Meat & Fish |
+| Greek yogurt | 30 g | Dairy |
+| Lemon | 0.25 | Produce |
+| Fresh ginger | 0.5 tsp | Produce |
+| Garlic | 1 clove | Produce |
+| Garam masala | 1 tsp | Pantry |
+| Smoked paprika | 0.25 tsp | Pantry |
+| Turmeric | 0.19 tsp | Pantry |
+| Cooking oil | 0.5 tbsp | Pantry |
+| Butter | 10.5 g | Dairy |
+| Onion | 0.25 | Produce |
+| Ground cumin | 0.125 tsp | Pantry |
+| Tomato sauce | 106 g | Pantry |
+| Heavy cream | 20 ml | Dairy |
+
+🥬 = buy fresh, close to the day you cook it.
+
+**Method**
+
+1. Mix the yogurt, lemon juice, ginger, garlic, garam masala, paprika, turmeric and salt into a marinade; coat the cubed chicken and chill at least 1 hour.
+2. Sear the chicken in hot oil until browned and cooked through; set aside.
+3. Melt the butter in the same pan, soften the onion, then add the garlic, ginger and remaining spices.
+4. Add the tomato sauce and water, simmer 7–8 minutes, then stir in the cream.
+5. Return the chicken to the sauce, simmer 2–3 minutes and serve with rice or naan.
+
+---
+
+## 42. Chicken parmesan
+
+*Breaded cutlet, marinara, mozzarella*
+
+<img src="https://www.budgetbytes.com/wp-content/uploads/2024/04/Chicken-Parmesan-Overhead.jpg" alt="Chicken parmesan" width="420">
+
+**Recipe:** [Budget Bytes ↗](https://www.budgetbytes.com/chicken-parmesan/)
+
+| | |
+|---|---|
+| **Calories** | 570 kcal per serving |
+| **Protein** | 41 g per serving |
+| **Time** | 22 min active |
+| **Prep / cook** | 10 min prep · 12 min cook |
+| **Difficulty** | ●●○○ Easy |
+| **Serves** | 4 |
+| **Course** | lunch, dinner |
+| **Diet tags** | — |
+| **Contains** | gluten, dairy, eggs |
+| **Nutrition** | source |
+
+**Ingredients** *(per serving — the app multiplies these by household size)*
+
+| Ingredient | Amount | Aisle |
+|---|---|---|
+| Chicken breast | 170 g | Meat & Fish |
+| Plain breadcrumbs | 30 g | Pantry |
+| Parmesan | 8 g | Dairy |
+| Garlic powder | 0.25 tsp | Pantry |
+| Italian seasoning | 0.25 tsp | Pantry |
+| Eggs | 0.25 | Dairy |
+| Plain flour | 15 g | Pantry |
+| Cooking oil | 15 ml | Pantry |
+| Marinara sauce | 30 g | Pantry |
+| Fresh mozzarella | 28 g | Dairy |
+
+🥬 = buy fresh, close to the day you cook it.
+
+**Method**
+
+1. Fillet the chicken breasts into thin cutlets and season with salt, pepper, Italian seasoning and garlic powder.
+2. Set up three dishes: seasoned breadcrumbs with parmesan, beaten egg, and flour.
+3. Dredge each cutlet in flour, then egg, then the breadcrumb mix.
+4. Fry in hot oil until golden on the first side, about 5 minutes.
+5. Flip, top with marinara and mozzarella, cover and cook until the cheese melts.
+
+---
+
+## 43. Chicken noodle soup
+
+*Shredded chicken, egg noodles, herbs*
+
+<img src="https://www.budgetbytes.com/wp-content/uploads/2017/02/Chicken-Noodle-Soup-Front-Bowl.jpg" alt="Chicken noodle soup" width="420">
+
+**Recipe:** [Budget Bytes ↗](https://www.budgetbytes.com/chicken-noodle-soup/)
+
+| | |
+|---|---|
+| **Calories** | 213 kcal per serving |
+| **Protein** | 17 g per serving |
+| **Time** | 1 h 45 min active |
+| **Prep / cook** | 15 min prep · 1 h 30 min cook |
+| **Difficulty** | ●●○○ Easy |
+| **Serves** | 8 |
+| **Course** | lunch, dinner |
+| **Diet tags** | — |
+| **Contains** | gluten, eggs |
+| **Nutrition** | source |
+
+**Ingredients** *(per serving — the app multiplies these by household size)*
+
+| Ingredient | Amount | Aisle |
+|---|---|---|
+| Onion | 0.125 | Produce |
+| Garlic | 0.375 clove | Produce |
+| Carrots | 0.5 | Produce |
+| Celery 🥬 | 0.25 stalk | Produce |
+| Fresh parsley 🥬 | 0.125 tbsp | Produce |
+| Olive oil | 0.25 tbsp | Pantry |
+| Dried basil | 0.125 tsp | Pantry |
+| Dried thyme | 0.06 tsp | Pantry |
+| Chicken breast | 85 g | Meat & Fish |
+| Chicken broth | 240 ml | Pantry |
+| Egg noodles | 21 g | Pantry |
+
+🥬 = buy fresh, close to the day you cook it.
+
+**Method**
+
+1. Dice the onion, carrots and celery, and cook in olive oil until softened, about 6 minutes.
+2. Add the garlic, basil, thyme, bay leaf and pepper; cook 5 minutes more.
+3. Add the chicken breasts and cover with the broth. Bring to a boil, then simmer gently, covered, for 1 hour.
+4. Remove the chicken, shred it, and season the broth to taste.
+5. Add the noodles and boil until tender, about 7 minutes, then return the chicken and finish with parsley.
+
+---
+
+## 44. Chicken fried rice
+
+*Egg, vegetables, soy, sesame oil*
+
+<img src="https://www.budgetbytes.com/wp-content/uploads/2024/02/Chicken-Fried-Rice-Plated.jpg" alt="Chicken fried rice" width="420">
+
+**Recipe:** [Budget Bytes ↗](https://www.budgetbytes.com/chicken-fried-rice/)
+
+| | |
+|---|---|
+| **Calories** | 500 kcal per serving |
+| **Protein** | 23 g per serving |
+| **Time** | 35 min active |
+| **Prep / cook** | 15 min prep · 20 min cook |
+| **Difficulty** | ●●○○ Easy |
+| **Serves** | 4 |
+| **Course** | lunch, dinner |
+| **Diet tags** | — |
+| **Contains** | eggs, soy |
+| **Nutrition** | source |
+
+**Ingredients** *(per serving — the app multiplies these by household size)*
+
+| Ingredient | Amount | Aisle |
+|---|---|---|
+| Garlic | 0.5 clove | Produce |
+| Fresh ginger | 0.25 tsp | Produce |
+| Spring onions 🥬 | 0.75 | Produce |
+| Carrots | 0.25 | Produce |
+| Red bell pepper 🥬 | 0.25 | Produce |
+| Peas | 38 g | Frozen |
+| Chicken breast | 50 g | Meat & Fish |
+| Eggs | 0.5 | Dairy |
+| Cooking oil | 0.75 tbsp | Pantry |
+| Toasted sesame oil | 0.75 tbsp | Pantry |
+| Soy sauce | 0.75 tbsp | Pantry |
+| Jasmine rice | 131 g | Pantry |
+
+🥬 = buy fresh, close to the day you cook it.
+
+**Method**
+
+1. Prep and dice all the vegetables and the chicken before starting.
+2. Scramble the eggs in a little oil, then set aside.
+3. Stir-fry the carrot, then the pepper and white parts of the spring onion, then the peas.
+4. Add more oil and cook the chicken through, about 4 minutes.
+5. Add the cooked rice, then the soy sauce and sesame oil, stirring to coat.
+6. Return the egg and vegetables, toss together and top with the green spring onion.
+
+---
+
+## 45. Quinoa salad
+
+*Feta, olives, roasted tomato, pine nuts*
+
+<img src="https://cdn.loveandlemons.com/wp-content/uploads/opengraph/2020/08/quinoa-salad.jpg" alt="Quinoa salad" width="420">
+
+**Recipe:** [Love & Lemons ↗](https://www.loveandlemons.com/quinoa-salad/)
+
+| | |
+|---|---|
+| **Calories** | 340 kcal per serving |
+| **Protein** | 10 g per serving |
+| **Time** | 40 min active |
+| **Prep / cook** | 20 min prep · 20 min cook |
+| **Difficulty** | ●●○○ Easy |
+| **Serves** | 6 |
+| **Course** | lunch, dinner |
+| **Diet tags** | vegetarian |
+| **Contains** | dairy, nuts |
+| **Nutrition** | estimated |
+
+**Ingredients** *(per serving — the app multiplies these by household size)*
+
+| Ingredient | Amount | Aisle |
+|---|---|---|
+| Jasmine rice | 93 g | Pantry |
+| Cherry tomatoes 🥬 | 38 g | Produce |
+| Arugula 🥬 | 7 g | Produce |
+| Cucumber 🥬 | 0.07 | Produce |
+| Fresh basil 🥬 | 3 g | Produce |
+| Feta | 19 g | Dairy |
+| Kalamata olives | 19 g | Pantry |
+| Red onion | 0.08 | Produce |
+| Pine nuts | 7.5 g | Pantry |
+| Olive oil | 0.5 tbsp | Pantry |
+| Lemon | 0.05 | Produce |
+
+🥬 = buy fresh, close to the day you cook it.
+
+**Method**
+
+1. Cook the quinoa (or rice) and roast the tomatoes ahead of time.
+2. Combine the quinoa, roasted tomatoes, arugula, cucumber, herbs, feta, olives, onion and pine nuts.
+3. Drizzle with the dressing and toss, seasoning to taste.
+
+---
+
+## 46. Orzo salad
+
+*Cherry tomato, feta, olives, herbs*
+
+<img src="https://cdn.loveandlemons.com/wp-content/uploads/opengraph/2021/05/orzo-salad-1.jpg" alt="Orzo salad" width="420">
+
+**Recipe:** [Love & Lemons ↗](https://www.loveandlemons.com/orzo-salad/)
+
+| | |
+|---|---|
+| **Calories** | 310 kcal per serving |
+| **Protein** | 10 g per serving |
+| **Time** | 38 min active |
+| **Prep / cook** | 30 min prep · 8 min cook |
+| **Difficulty** | ●○○○ Very easy |
+| **Serves** | 6 |
+| **Course** | lunch, dinner |
+| **Diet tags** | vegetarian |
+| **Contains** | gluten, dairy |
+| **Nutrition** | estimated |
+
+**Ingredients** *(per serving — the app multiplies these by household size)*
+
+| Ingredient | Amount | Aisle |
+|---|---|---|
+| Orzo pasta | 50 g | Pantry |
+| Olive oil | 0.67 tbsp | Pantry |
+| Red wine vinegar | 0.17 tbsp | Pantry |
+| Lemon | 0.05 | Produce |
+| Dried oregano | 0.08 tsp | Pantry |
+| Cucumber 🥬 | 0.33 | Produce |
+| Cherry tomatoes 🥬 | 50 g | Produce |
+| Chickpeas | 28 g | Pantry |
+| Feta | 19 g | Dairy |
+| Red onion | 0.06 | Produce |
+| Kalamata olives | 13 g | Pantry |
+| Fresh basil 🥬 | 3 g | Produce |
+
+🥬 = buy fresh, close to the day you cook it.
+
+**Method**
+
+1. Cook the orzo until just past al dente, drain and toss with a little oil so it doesn’t stick.
+2. Whisk together the dressing with vinegar, lemon juice, oregano and salt.
+3. Toss the orzo with cucumber, tomatoes, chickpeas, feta, onion and olives.
+4. Drizzle with dressing, add the herbs, season and toss again.
+
+---
+
+## 47. Lentil salad
+
+*Kale, feta, radish, herby dressing*
+
+<img src="https://cdn.loveandlemons.com/wp-content/uploads/opengraph/2022/08/lentil-salad-1.jpg" alt="Lentil salad" width="420">
+
+**Recipe:** [Love & Lemons ↗](https://www.loveandlemons.com/lentil-salad/)
+
+| | |
+|---|---|
+| **Calories** | 330 kcal per serving |
+| **Protein** | 14 g per serving |
+| **Time** | 40 min active |
+| **Prep / cook** | 20 min prep · 20 min cook |
+| **Difficulty** | ●●○○ Easy |
+| **Serves** | 5 |
+| **Course** | lunch, dinner |
+| **Diet tags** | vegetarian |
+| **Contains** | dairy |
+| **Nutrition** | estimated |
+
+**Ingredients** *(per serving — the app multiplies these by household size)*
+
+| Ingredient | Amount | Aisle |
+|---|---|---|
+| Olive oil | 12 ml | Pantry |
+| Lemon | 0.3 | Produce |
+| Garlic | 0.6 clove | Produce |
+| Dijon mustard | 0.2 tsp | Pantry |
+| Italian seasoning | 0.2 tsp | Pantry |
+| Ground cumin | 0.05 tsp | Pantry |
+| Green lentils | 100 g | Pantry |
+| Cucumber 🥬 | 0.6 | Produce |
+| Cherry tomatoes 🥬 | 22 g | Produce |
+| Red onion | 0.1 | Produce |
+| Kale 🥬 | 16 g | Produce |
+| Radishes 🥬 | 12 g | Produce |
+| Feta | 18 g | Dairy |
+| Fresh parsley 🥬 | 4 g | Produce |
+
+🥬 = buy fresh, close to the day you cook it.
+
+**Method**
+
+1. Whisk the olive oil, lemon juice, garlic, mustard, Italian seasoning, cumin and pepper into a dressing.
+2. Cook the lentils until tender but not mushy.
+3. Toss the lentils, cucumber, tomatoes, onion, kale and radishes with the dressing.
+4. Add the feta, parsley and mint, toss again and season to taste.
+
 
 # Desserts
 
 ---
 
-## 24. Banana bread
+## 48. Banana bread
 
 *Moist, cinnamon, brown sugar*
 
@@ -1133,7 +2263,7 @@ from the ingredient list, so treat it as a good approximation rather than a meas
 
 ---
 
-## 25. Chocolate chip cookies
+## 49. Chocolate chip cookies
 
 *Crisp edge, chewy middle*
 
@@ -1179,7 +2309,7 @@ from the ingredient list, so treat it as a good approximation rather than a meas
 
 ---
 
-## 26. Fudgy brownies
+## 50. Fudgy brownies
 
 *Dark chocolate, crackly top*
 
@@ -1224,7 +2354,7 @@ from the ingredient list, so treat it as a good approximation rather than a meas
 
 ---
 
-## 27. Tiramisu
+## 51. Tiramisu
 
 *Mascarpone, espresso, cocoa*
 
@@ -1269,7 +2399,7 @@ from the ingredient list, so treat it as a good approximation rather than a meas
 
 ---
 
-## 28. Wholewheat banana bread
+## 52. Wholewheat banana bread
 
 *Honey, oats, olive oil*
 
@@ -1312,6 +2442,243 @@ from the ingredient list, so treat it as a good approximation rather than a meas
 3. Whisk in the baking soda, vanilla, cinnamon and salt.
 4. Fold in the flour until only just combined — over-mixing makes it dense.
 5. Bake 55–60 minutes until a skewer comes out clean, then cool before slicing.
+
+---
+
+## 53. Lemon bars
+
+*Shortbread crust, tangy lemon filling*
+
+<img src="https://cdn.loveandlemons.com/wp-content/uploads/opengraph/2024/05/lemon-bars-recipe.jpg" alt="Lemon bars" width="420">
+
+**Recipe:** [Love & Lemons ↗](https://www.loveandlemons.com/lemon-bars/)
+
+| | |
+|---|---|
+| **Calories** | 180 kcal per serving |
+| **Protein** | 3 g per serving |
+| **Time** | 1 h active · plus 3 h chilling / marinating |
+| **Prep / cook** | 20 min prep · 40 min cook |
+| **Difficulty** | ●●○○ Easy |
+| **Serves** | 16 |
+| **Course** | dessert |
+| **Diet tags** | vegetarian |
+| **Contains** | gluten, dairy, eggs |
+| **Nutrition** | estimated |
+
+**Ingredients** *(per serving — the app multiplies these by household size)*
+
+| Ingredient | Amount | Aisle |
+|---|---|---|
+| Plain flour | 9 g | Pantry |
+| Powdered sugar | 2.5 g | Pantry |
+| Butter | 7 g | Dairy |
+| Vanilla extract | 0.03 tsp | Pantry |
+| Caster sugar | 12.5 g | Pantry |
+| Eggs | 0.25 | Dairy |
+| Lemon | 0.19 | Produce |
+
+🥬 = buy fresh, close to the day you cook it.
+
+**Method**
+
+1. Heat the oven to 175°C and line an 8x8-inch tin, leaving an overhang.
+2. Mix flour, powdered sugar and salt, add melted butter and vanilla, and press into the tin.
+3. Bake the crust 18–20 minutes until lightly browned.
+4. Whisk the sugar, flour, eggs and lemon juice together and pour over the hot crust.
+5. Bake 20–25 minutes until just set, then cool 1 hour and chill 2 hours before slicing.
+
+---
+
+## 54. Easy apple crisp
+
+*Cinnamon apples, oat crumble topping*
+
+<img src="https://cdn.loveandlemons.com/wp-content/uploads/opengraph/2024/08/apple-crisp.jpg" alt="Easy apple crisp" width="420">
+
+**Recipe:** [Love & Lemons ↗](https://www.loveandlemons.com/apple-crisp/)
+
+| | |
+|---|---|
+| **Calories** | 320 kcal per serving |
+| **Protein** | 3 g per serving |
+| **Time** | 1 h 10 min active |
+| **Prep / cook** | 15 min prep · 55 min cook |
+| **Difficulty** | ●●○○ Easy |
+| **Serves** | 6 |
+| **Course** | dessert |
+| **Diet tags** | vegetarian |
+| **Contains** | gluten, dairy |
+| **Nutrition** | estimated |
+
+**Ingredients** *(per serving — the app multiplies these by household size)*
+
+| Ingredient | Amount | Aisle |
+|---|---|---|
+| Apple | 1.05 | Produce |
+| Plain flour | 12.5 g | Pantry |
+| Brown sugar | 23 g | Pantry |
+| Lemon | 0.05 | Produce |
+| Vanilla extract | 0.17 tsp | Pantry |
+| Cinnamon | 0.25 tsp | Pantry |
+| Nutmeg | 0.08 tsp | Pantry |
+| Rolled oats | 10 g | Pantry |
+| Butter | 19 g | Dairy |
+
+🥬 = buy fresh, close to the day you cook it.
+
+**Method**
+
+1. Heat the oven to 190°C and grease an 8x8-inch dish.
+2. Toss the chopped apples with flour, brown sugar, lemon juice, vanilla, cinnamon and nutmeg; spread in the dish.
+3. Rub the oats, flour, brown sugar, cinnamon and cold butter together into a crumbly topping and sprinkle over.
+4. Cover and bake 35–40 minutes until bubbling, then uncover for 10–15 minutes until golden.
+5. Cool at least 10 minutes before serving.
+
+---
+
+## 55. Carrot cake
+
+*Spiced, walnuts, cream cheese frosting*
+
+<img src="https://cdn.loveandlemons.com/wp-content/uploads/2025/03/carrot-cake-social.jpg" alt="Carrot cake" width="420">
+
+**Recipe:** [Love & Lemons ↗](https://www.loveandlemons.com/carrot-cake/)
+
+| | |
+|---|---|
+| **Calories** | 380 kcal per serving |
+| **Protein** | 5 g per serving |
+| **Time** | 1 h active |
+| **Prep / cook** | 30 min prep · 30 min cook |
+| **Difficulty** | ●●●○ Needs a bit of care |
+| **Serves** | 14 |
+| **Course** | dessert |
+| **Diet tags** | vegetarian |
+| **Contains** | gluten, dairy, eggs, nuts |
+| **Nutrition** | estimated |
+
+**Ingredients** *(per serving — the app multiplies these by household size)*
+
+| Ingredient | Amount | Aisle |
+|---|---|---|
+| Plain flour | 21 g | Pantry |
+| Baking powder | 0.14 tsp | Pantry |
+| Baking soda | 0.07 tsp | Pantry |
+| Cinnamon | 0.14 tsp | Pantry |
+| Ground ginger | 0.07 tsp | Pantry |
+| Nutmeg | 0.04 tsp | Pantry |
+| Brown sugar | 16 g | Pantry |
+| Caster sugar | 7 g | Pantry |
+| Vegetable oil | 13 ml | Pantry |
+| Eggs | 0.29 | Dairy |
+| Apple sauce | 17 g | Pantry |
+| Vanilla extract | 0.14 tsp | Pantry |
+| Carrots | 0.33 | Produce |
+| Walnuts | 8 g | Pantry |
+| Cream cheese | 7 g | Dairy |
+
+🥬 = buy fresh, close to the day you cook it.
+
+**Method**
+
+1. Heat the oven to 175°C and grease two 9-inch round tins.
+2. Whisk the flour, baking powder, baking soda, cinnamon, ginger and nutmeg together.
+3. Whisk the sugars and oil, then the eggs, then the applesauce and vanilla.
+4. Fold in the dry ingredients, then the carrots and walnuts.
+5. Divide between the tins and bake 30–35 minutes until a skewer comes out clean.
+6. Cool completely, then frost with cream cheese frosting.
+
+---
+
+## 56. Peanut butter cookies
+
+*Classic crosshatch, soft centre*
+
+<img src="https://cdn.loveandlemons.com/wp-content/uploads/opengraph/2023/10/peanut-butter-cookie-recipe.jpg" alt="Peanut butter cookies" width="420">
+
+**Recipe:** [Love & Lemons ↗](https://www.loveandlemons.com/peanut-butter-cookies/)
+
+| | |
+|---|---|
+| **Calories** | 116 kcal per serving |
+| **Protein** | 3 g per serving |
+| **Time** | 50 min active |
+| **Prep / cook** | 30 min prep · 20 min cook |
+| **Difficulty** | ●●○○ Easy |
+| **Serves** | 30 |
+| **Course** | dessert |
+| **Diet tags** | vegetarian |
+| **Contains** | gluten, dairy, eggs, nuts |
+| **Nutrition** | source |
+
+**Ingredients** *(per serving — the app multiplies these by household size)*
+
+| Ingredient | Amount | Aisle |
+|---|---|---|
+| Plain flour | 4 g | Pantry |
+| Baking soda | 0.02 tsp | Pantry |
+| Butter | 4 g | Dairy |
+| Brown sugar | 4 g | Pantry |
+| Caster sugar | 2 g | Pantry |
+| Peanut butter | 9 g | Pantry |
+| Eggs | 0.03 | Dairy |
+| Vanilla extract | 0.03 tsp | Pantry |
+
+🥬 = buy fresh, close to the day you cook it.
+
+**Method**
+
+1. Heat the oven to 175°C and line two baking sheets.
+2. Whisk the flour, baking soda and salt together.
+3. Beat the butter and both sugars until fluffy, then mix in the peanut butter, egg and vanilla.
+4. Gradually add the dry ingredients until just combined.
+5. Roll into balls, coat in sugar, flatten with a fork crosshatch, and bake 10–12 minutes.
+
+---
+
+## 57. Baked apples
+
+*Oat crumble filling, warm spices*
+
+<img src="https://cdn.loveandlemons.com/wp-content/uploads/opengraph/2021/09/baked-apples-1.jpg" alt="Baked apples" width="420">
+
+**Recipe:** [Love & Lemons ↗](https://www.loveandlemons.com/baked-apples/)
+
+| | |
+|---|---|
+| **Calories** | 340 kcal per serving |
+| **Protein** | 4 g per serving |
+| **Time** | 50 min active |
+| **Prep / cook** | 20 min prep · 30 min cook |
+| **Difficulty** | ●●○○ Easy |
+| **Serves** | 4 |
+| **Course** | dessert |
+| **Diet tags** | vegetarian, vegan |
+| **Contains** | nuts |
+| **Nutrition** | estimated |
+
+**Ingredients** *(per serving — the app multiplies these by household size)*
+
+| Ingredient | Amount | Aisle |
+|---|---|---|
+| Rolled oats | 12.5 g | Pantry |
+| Almond flour | 14 g | Pantry |
+| Brown sugar | 18 g | Pantry |
+| Walnuts | 7.5 g | Pantry |
+| Cinnamon | 0.125 tsp | Pantry |
+| Coconut oil | 14 g | Pantry |
+| Apple | 1 | Produce |
+
+🥬 = buy fresh, close to the day you cook it.
+
+**Method**
+
+1. Heat the oven to 190°C.
+2. Combine the oats, almond flour, brown sugar, walnuts, cinnamon and salt, then work in the firm coconut oil until crumbly.
+3. Scoop a little out of the centre of each apple half and set in a baking dish.
+4. Fill with the crumble, drizzle with melted coconut oil, cover with foil and bake about 30 minutes until tender.
+5. Serve warm.
 
 ---
 

@@ -116,50 +116,84 @@ repeated dishes and pointing at AI generation. Don't "fix" that notice by hiding
    the cron job. **Until `send-feedback` is deployed the in-app feedback form fails** (the live app
    already points at that URL).
 3. ~~AI-ON test~~ ✅ **DONE 2026-07-20** — tested, three bugs found and fixed (see above). Deploy the fix by pushing.
-4. **V3 REDESIGN → `docs/V3-REDESIGN-BRIEF.md`** (already written & approved): deep walnut + emerald
-   + gold-spark palette, one-page planner with `My Meal Plan` / `Shop Ingredients` tabs, day sidebar,
-   filter row, image-on-top cards, dessert + starter browse sections, shopping total moved to the
-   bottom and supplied by Gemini, delete the 1·2·3 step bar. **Big job — give it its own session.**
+4. **▶️ V3 REDESIGN → `docs/V3-REDESIGN-BRIEF.md` — READY TO START, this is the next thing to do.**
+   Deep walnut + emerald + gold-spark palette, one-page planner with `My Meal Plan` /
+   `Shop Ingredients` tabs, day sidebar, filter row, image-on-top cards, dessert + starter browse
+   sections, shopping total at the bottom, delete the 1·2·3 step bar — plus the dish database (§0)
+   and "Add a dish I love" (§0.7).
+   - **Start at the brief's `§00. How to run this build`.** It holds the per-phase model plan,
+     session hygiene, and the stop-don't-guess rules. **`§7` is the order to build in — the section
+     numbering is historical, do not work top-to-bottom.**
+   - **10 phases, one per session.** Phases 0,1,2,4,5,6,8 → **Sonnet** (the spec hands over exact
+     code + search anchors). Phases **3 (one-page planner)**, **7 (§0.7)** and **9 (final
+     verification)** → **Opus, thinking high** — those are the three where the spec deliberately
+     stops short and judgment fills the gap.
+   - **No line numbers anywhere in the brief — every reference is a `grep` anchor.** Several cited
+     line numbers had already drifted ~9 lines before the build started, and each edit shifts
+     everything below it. All anchors verified resolving uniquely as of 2026-07-20.
+   - `§9` is a full final verification pass with copy-pasteable check scripts; `§8` is the
+     acceptance checklist.
 5. **Phase 11:** Tauri desktop wrapper over `/public` → `.dmg`/`.exe` via GitHub Releases.
-6. **🟡 CURATED RECIPE DATABASE — DATA BUILT, WIRING NOT DONE (2026-07-20).**
-   - **Built:** `public/recipes-db.js` (`RECIPES_DB`, 28 real dishes — 5 breakfasts, 6 starters,
-     12 mains, 5 desserts), `docs/RECIPE-DATABASE.md` (generated catalogue), and
-     `tools/build-recipe-md.js` (regenerates the .md from the .js — **the .js is the only source of
-     truth; never hand-edit the .md**). Every link, photo, kcal and protein figure was read from the
-     recipe sites' schema.org data; all 28 links + 28 photos verified HTTP 200. Sources: Love &
-     Lemons, Cookie and Kate, Budget Bytes.
+6. **🟡 CURATED RECIPE DATABASE — DATA BUILT, WIRING NOT DONE (2026-07-20, grown same day).**
+   - **Built:** `public/recipes-db.js` (`RECIPES_DB`, **57 real dishes** — 9 breakfasts, 16 starters,
+     22 mains, 10 desserts; grown from an initial 28), `docs/RECIPE-DATABASE.md` (generated
+     catalogue), and `tools/build-recipe-md.js` (regenerates the .md from the .js — **the .js is
+     the only source of truth; never hand-edit the .md**). Every link, photo, kcal and protein
+     figure was read from the recipe sites' schema.org data; all 57 links + 57 photos verified
+     HTTP 200. Sources: Love & Lemons, Cookie and Kate, Budget Bytes.
    - **NOT done: the app doesn't use it yet.** Nothing in `app.js`/`index.html`/`sw.js` was changed,
      so there is zero regression risk from the data landing. The full step-by-step wiring is
      **`docs/V3-REDESIGN-BRIEF.md` §0** (11 steps + a price table) and it is now **step 0 of the
      V3 build order** (§3 and §4 depend on it).
    - **Allergy bug found and fixed in the data:** `passesDietFilters()` guesses allergens by regex
      over ingredient names, and that regex misses `Baguette`, `Spaghetti`, `Savoiardi ladyfingers`
-     (gluten) and every `Soy sauce` — 6 of the 28 dishes would have been served to someone who
-     ticked that allergy. Each dish now carries an explicit `contains:[…]` array, and §0.3 step 3
-     makes it win over the regex. **Verified:** ticking Gluten correctly drops bruschetta, tiramisu
-     and bolognese; ticking Soy drops teriyaki salmon, Thai curry and sriracha chicken.
-   - **Measured coverage** (simulating the §0.3 step-5 picker against the real data): a main-only week
-     fills **20 of 21** slots from the database; a 3-course "Get stronger" week fills 31 of 49,
-     short on starters/desserts (needs 14 each, has 6 and 5). **Add desserts and starters first.**
+     (gluten) and every `Soy sauce` — several dishes would have been served to someone who ticked
+     that allergy. Every dish carries an explicit `contains:[…]` array, and §0.3 step 3 makes it
+     win over the regex. **Verified:** ticking Gluten correctly drops bruschetta, tiramisu and
+     bolognese; ticking Soy drops teriyaki salmon, Thai curry and sriracha chicken.
+   - **Measured coverage** (simulating the §0.3 step-5 picker against the real data, now at 57
+     dishes): a main-only week fills **all 21 of 21** slots from the database; a 3-course "Get
+     stronger" week now fills **all 49 of 49** slots (up from 31/49 at the original 28-dish size) —
+     a few dessert repeats still occur across a week since 10 desserts must stretch across 14
+     dessert slots, but every slot is filled by a real curated dish. **Desserts are still the
+     thinnest category** — add more there first if continuing to grow the database.
    - **🟡 The one real conflict — prices. Data built, not yet wired.** Per-ingredient prices come
      **only from Gemini** today. Making the database primary would blank the shopping total, the
      €/day budget pill, the per-day € chips and §4's "Budget-friendly dinners" — a regression
      against verified-working behaviour. **Built:** `public/ingredient-prices.js`
-     (`INGREDIENT_PRICES` + `estimateIngredientPrice()`, all 126 distinct ingredients used by
+     (`INGREDIENT_PRICES` + `estimateIngredientPrice()`, all **172** distinct ingredients used by
      `recipes-db.js` priced — French supermarket, mid-range own-brand, 2026), plus
      `docs/INGREDIENT-PRICES.md` and `tools/build-prices-md.js` (same generated-doc pattern as the
-     recipe database — never hand-edit the .md). Verified: 0 unpriced ingredients, and a simulated
-     week comes out at €4.79/day (mains only) to €6.17/day (3 courses) per person — believable, and
-     in the same range as the €107/week the real AI-ON test produced for a household. **Not yet
-     wired:** §0.4 has the one-line `priceOf()` change (AI price wins when present, this table is
-     the fallback) — that's steps 1a/1b of §0.3, still to be done in `app.js`.
+     recipe database — never hand-edit the .md). Verified: 0 unpriced ingredients across all 57
+     dishes, 0 priced-but-returning-€0 (a real unit-mismatch bug — several piece-priced vegetables
+     had been given gram quantities — was caught this way and fixed). **Not yet wired:** §0.4 has
+     the one-line `priceOf()` change (AI price wins when present, this table is the fallback) —
+     that's steps 1a/1b of §0.3, still to be done in `app.js`.
    - **🔴 Pre-existing shopping bug found (not caused by the database, but it makes it constant):**
      `pantryHas()` substring-matches both directions, so a ticked pantry `Pepper` hides
      **`Red bell pepper`**, `Rice` hides **`Rice wine`**, `Onion` hides **`Spring onions`** and
-     `Flour` hides **`Large flour tortilla`**. With a full pantry, **28 ingredients you must
-     actually buy vanish from the shopping list.** Fix is §0.3 step 8 (whole-word matching).
+     `Flour` hides **`Large flour tortilla`**. With a full pantry, dozens of ingredients you must
+     actually buy vanish from the shopping list. Fix is §0.3 step 8 (whole-word matching).
    - **Don't build a `/generate-dishes` endpoint** — `requestSwapAI(profile, role, avoidNames)` →
      `/generate-meal` already exists and is exactly the top-up primitive needed.
+   - **`docs/HOW-TO-ADD-A-DISH.md`** is a plain-English, no-coding-required guide for Lucille to add
+     her own dishes directly to `recipes-db.js` — copy-paste template, a worked example, and every
+     fixed-value list spelled out (course types, the 1–4 difficulty scale vs. the emoji field,
+     nutrition/tag/allergen/category/unit values, `buyDayBefore`). Keep it in sync if the schema
+     in `recipes-db.js`'s header comment ever changes.
+   - **🔵 SPEC'D, NOT BUILT — "Add a dish I love" (`V3-REDESIGN-BRIEF.md` §0.7).** User types a dish
+     name, pastes a recipe/URL, or photographs a recipe card → Gemini researches it into a full
+     database row; if it can't do that honestly it refuses and saves nothing. Key decisions already
+     made, don't re-litigate them: **(1)** a browser can't write to `public/recipes-db.js`, so saved
+     dishes live in a new Supabase `user_dishes` table + `localStorage` mirror, and a
+     "Copy as database entry" button is how a good one gets promoted into the shipped file by hand.
+     **(2)** Gemini's reply is untrusted — `validateDish()` rejects rather than repairs, and the
+     **user must confirm the allergen list** before the dish is saved (`verified:true`); a
+     `verified:false` dish never enters generation. This is the most safety-critical thing in V3.
+     **(3)** Photo mode needs `callAIonce()` in `server.js` extended with an `inlineData` part.
+     **(4)** New `/research-dish` endpoint — this one IS new, unlike the §0.3 step-10 top-up which
+     must reuse `requestSwapAI`. **(5)** Quota: one call per add against the 20/day free tier, and
+     check the existing pool for a close name match before spending a call.
 
 > **DESIGN SESSION — DONE (2026-07-19).** The `docs/DESIGN-BRIEF.md` "Table" design session is
 > complete. A new **`docs/design/`** folder now exists in the repo with every deliverable from the

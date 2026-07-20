@@ -1,5 +1,5 @@
 # V3 REDESIGN BRIEF — #Foodie
-### For the next Opus session. This is the decided spec. Execute it in order.
+### The decided spec. Execute it in the order given by §7 — not top to bottom.
 
 **Read first:** `CLAUDE.md` (state, constraints), then this file. Reference screenshots the user
 loves: **woolworths.com.au/shop/meal-plan** — copy its *structure*, not its branding.
@@ -15,10 +15,90 @@ leftovers · pantry hiding · PWA (bump `CACHE` in `sw.js`) · `.ics` export · 
 
 **Files:** `public/styles.css` (tokens) · `public/app-screens.css` (layout) · `public/app.js` (all
 screens) · `public/index.html` · `public/recipes-db.js` (**the dish database — §0**) ·
-`public/sw.js` (bump `CACHE`) · `server.js` (AI prompt only).
+`public/ingredient-prices.js` (**prices — §0.4**) · `public/sw.js` (bump `CACHE`) ·
+`server.js` (AI prompt, plus the `/research-dish` endpoint in §0.7) ·
+`supabase/schema.sql` (the `user_dishes` table in §0.7).
 
-**Order matters:** §0 (data) → §1 (palette) → §3 (card) → §2 (one page) → §4/§5 → §6. The numbering
-is historical; **§7 is the order to actually build in.**
+**Order matters:** §0 (data) → §1 (palette) → §3 (card) → §2 (one page) → §4/§5 → §0.7 → §6. The
+numbering is historical; **§7 is the order to actually build in.**
+
+---
+
+## 00. How to run this build — read this before touching anything
+
+### 00.1 Which model for which phase
+
+This brief is written to be executed by **Sonnet** for most phases, with **Opus** on the two that
+carry real risk plus the final pass. That split isn't about capability in general — it's about
+where this particular spec stops being able to hand you the answer.
+
+| Phase | Model | Why |
+|---|---|---|
+| **§0.3 data wiring** (steps 1–11) | **Sonnet** | Every edit is given as exact code with a search anchor. The thinking is already done on the page. |
+| **§0.4 prices** | **Sonnet** | Literally one line (`priceOf()`), plus a file that already exists. |
+| **§1 palette** | **Sonnet** | A token table to transcribe. Mechanical. Just re-check AA contrast at the end. |
+| **§3 card component** | **Sonnet** | Anatomy is drawn in the spec; fields come straight from §0's data. |
+| **§2 one-page planner** | **🔶 Opus** | **The biggest risk in V3.** Merging three screens into one page with a sticky sidebar, tabs, drag-and-drop and overlays is a layout rebuild, not a transcription. The spec gives structure and intent, not code — so judgment fills the gap. Getting it wrong means redoing §4 and §5 on top of it. |
+| **§4 categories + filters** | **Sonnet** | Category table and filter list are fully enumerated. |
+| **§5 shopping tab** | **Sonnet** | Mostly moving an existing total and reading §0.4's estimate. |
+| **§0.7 "Add a dish I love"** | **🔶 Opus** | New endpoint, untrusted model output, and an **allergen confirmation flow where a subtle bug can reach a real plate**. Well-specified, but the cost of a quiet mistake is the highest in the project. |
+| **§6 copy pass** | **Sonnet** | Taste-dependent, but low blast radius and easy for Lucille to judge herself. |
+| **§9 final verification** | **🔶 Opus** | Whole-system judgment across everything above. Different skill from building any one piece. |
+
+**Thinking effort.** For the Sonnet phases, normal effort is right — the spec *is* the reasoning,
+and long deliberation over a transcription wastes budget. For the three 🔶 Opus phases, turn
+thinking up (`high`): those are the ones where the spec deliberately stops short and expects
+judgment. If a Sonnet phase starts feeling like it needs invention rather than transcription,
+that's the signal to stop and escalate it — see §00.4.
+
+**If you'd rather not switch models at all:** run the whole thing on Opus. You'll get the same
+result and spend more. Running the whole thing on Sonnet is also viable *provided* §9's Opus pass
+actually happens — but expect §2 to need a revision round.
+
+### 00.2 Line numbers are gone on purpose — locate by search
+
+Earlier drafts of this brief cited line numbers in `app.js`. **Several had already drifted by ~9
+lines before the build even started**, and every edit you make shifts everything below it. So every
+reference here is now a **search anchor** — a function name or a distinctive line to `grep` for.
+
+**Never trust a line number. Always locate by:**
+```
+grep -n "function eligibleRecipes" public/app.js
+```
+If an anchor doesn't match, the code changed — stop and re-read the surrounding function rather
+than editing the nearest plausible-looking thing.
+
+### 00.3 Session hygiene
+
+- **One phase per session.** Start fresh at each §7 step. A long session drifts and starts
+  contradicting decisions made earlier in the same file.
+- **Every session starts by reading `CLAUDE.md` + this brief's §00, §0.2, and the phase you're on.**
+  Not the whole file — §0.2 (the regression table) is the part that prevents damage.
+- **Commit at the end of every phase**, with the phase named in the message. Never batch two.
+- **Never commit `gemini-key.txt`.** It's git-ignored; keep it that way.
+- Lucille pushes via **GitHub Desktop** — there are no git credentials in this CLI, so don't try.
+
+### 00.4 When to stop instead of guessing
+
+Stop and ask Lucille — do not improvise — if any of these happen. Each one has burned a session
+before:
+
+- A search anchor from this brief **doesn't exist** in the file.
+- A change would touch anything in the §0.2 "must not break" table in a way the guard doesn't cover.
+- The spec is genuinely ambiguous about **user-visible behaviour** (not styling — styling, pick the
+  option closest to the Woolworths reference and move on).
+- You're about to **delete or rewrite something you didn't write** and can't tell whether it's load-bearing.
+- A Sonnet phase turns out to need real invention rather than transcription → escalate to Opus
+  rather than pushing through.
+- Anything involving **allergens** where the correct answer isn't obvious. Always fail closed:
+  exclude the dish rather than risk serving it.
+
+### 00.5 The three rules that outrank everything else in this file
+
+1. **The database comes before Gemini.** Always. §0 exists for this.
+2. **`contains[]` is the allergen truth.** Never regex an ingredient name to decide safety.
+3. **Verify with AI OFF before moving on.** The free tier is 20 requests/day and the AI-ON path is
+   already verified — burning quota to re-test it proves nothing and costs you the day's budget.
 
 ---
 
@@ -29,19 +109,28 @@ is historical; **§7 is the order to actually build in.**
 §5 (shopping total) needs prices. All three are built on the data layer, so the data layer goes in
 first — otherwise §3 and §4 get built twice.
 
-**The rule this section establishes:** *the curated database is the primary source of dishes.
-Gemini is the top-up, not the author.*
+**THE PRECEDENCE RULE — this section exists to establish it, and nothing later may weaken it:**
+
+> **The database always comes first.** Every meal slot is filled from the curated database (plus the
+> user's own verified dishes, §0.7) before Gemini is consulted at all. Gemini is only ever reached
+> for a slot the database genuinely cannot fill — and it is never asked to author a dish the
+> database could have supplied.
+
+Gemini keeps two legitimate jobs, and both of them *feed* the database rather than bypass it:
+**topping up** the rare slot nothing can fill (§0.3 step 10), and **researching** a dish the user
+asks for so it becomes a permanent database row (§0.7). Read that second one carefully — it means
+every time the user adds a dish they love, the database grows and Gemini's role shrinks.
 
 ### 0.1 What already exists (built 2026-07-20 — do not rebuild)
 
 | File | What it is |
 |---|---|
-| `public/recipes-db.js` | **The database. Single source of truth.** `RECIPES_DB` — 28 real dishes: 5 breakfasts, 6 starters, 12 mains, 5 desserts. Browser global + Node export. |
+| `public/recipes-db.js` | **The database. Single source of truth.** `RECIPES_DB` — 57 real dishes: 9 breakfasts, 16 starters, 22 mains, 10 desserts. Browser global + Node export. |
 | `docs/RECIPE-DATABASE.md` | Human-readable catalogue. **Generated — never hand-edit.** |
 | `tools/build-recipe-md.js` | Rebuilds the `.md` from the `.js`. `node tools/build-recipe-md.js` |
 
 Every link, photo, kcal and protein figure was read from the recipe sites' own schema.org data;
-all 28 links and all 28 photos verified HTTP 200. Sources: Love & Lemons, Cookie and Kate,
+all 57 links and all 57 photos verified HTTP 200. Sources: Love & Lemons, Cookie and Kate,
 Budget Bytes.
 
 **The per-dish shape** (full field reference is in the header comment of `recipes-db.js`):
@@ -78,16 +167,18 @@ the specific way each could break, and the guard. **This table is the regression
 | Already working | How §0 could break it | Guard |
 |---|---|---|
 | **Hard no-repeat rule** (0 duplicates, 288-profile test) | A favourited database dish appears in the pool **twice** — once from `RECIPES_DB`, once from `state.favorites` — with the same `id`. `usedIds` gets satisfied by one copy while the other still supplies the name. | Dedupe the pool by `id` in `eligibleRecipes()` (step 4). Re-run the duplicate check after. |
-| **Allergy filtering** | The existing regex misses gluten in `Baguette`, `Spaghetti`, `Savoiardi ladyfingers`, and has no soy rule at all — 6 of the 28 dishes would reach someone who ticked that allergy. | `contains[]` early-return (step 3). Verified: Gluten drops bruschetta/tiramisu/bolognese; Soy drops teriyaki salmon/Thai curry/sriracha chicken. |
+| **Allergy filtering** | The existing regex misses gluten in `Baguette`, `Spaghetti`, `Savoiardi ladyfingers`, and has no soy rule at all — several dishes would reach someone who ticked that allergy. | `contains[]` early-return (step 3). Verified: Gluten drops bruschetta/tiramisu/bolognese; Soy drops teriyaki salmon/Thai curry/sriracha chicken. |
 | **AI-ON path** (verified: 49 dishes, 0 dupes, real prices, €107.30 shopping list) | Database dishes carry **no per-ingredient prices**. Swap AI dishes for database dishes and the shopping total, the €/day budget pill, the per-day € chips and §4's "Budget-friendly dinners" all go blank. **This is the one genuine conflict in §0** — see §0.4. | The price table in §0.4. Do not skip it. |
 | **`state.partialAI` top-up** | Nothing — it already fills short AI weeks from `generateWeek()`, which after §0 returns database dishes. It silently gets better. | Leave it alone. Keep the notice. |
-| **Swap-a-dish with AI on** | — | **`requestSwapAI(profile, role, avoidNames)` already exists** and posts to `/generate-meal` with an avoid-list. This is the top-up primitive. **Do not build a new endpoint.** |
+| **Swap-a-dish with AI on** | — | **`requestSwapAI(profile, role, avoidNames)` already exists** and posts to `/generate-meal` with an avoid-list. This is the top-up primitive. **Do not build a new endpoint for the top-up.** (§0.7's `/research-dish` *is* new — different job, see below.) |
 | **Leftovers** (`applyLeftovers` doubles a dinner main → next-day lunch) | Would break if mains were dinner-only. | Database mains carry `types:['lunch','dinner']`, so this works. Verify one leftovers week. |
-| **Pantry hiding** | `pantryHas()` substring-matches both directions, so pantry `Pepper` hides **`Red bell pepper`**, `Rice` hides **`Rice wine`**, `Onion` hides **`Spring onions`**, `Flour` hides **`Large flour tortilla`**. 28 ingredients you must actually buy would vanish. Pre-existing, but the database makes it constant. | Fix `pantryHas()` to match whole words, not substrings (step 8). |
+| **Pantry hiding** | `pantryHas()` substring-matches both directions, so pantry `Pepper` hides **`Red bell pepper`**, `Rice` hides **`Rice wine`**, `Onion` hides **`Spring onions`**, `Flour` hides **`Large flour tortilla`**. Dozens of ingredients you must actually buy would vanish. Pre-existing, but the database makes it constant and the problem grows with every dish added. | Fix `pantryHas()` to match whole words, not substrings (step 8). |
 | **Cook mode + read-aloud** | Reads `steps[]`. Database dishes have them. | Smoke-test one database dish end to end. |
 | **`.ics` export** | Builds its description from `recipeSearchUrl()`. | Point it at `recipeUrl()` (step 6). |
 | **PWA** | New file isn't cached; installed users get `RECIPES_DB is not defined`. | Add to `SHELL` **and** bump `CACHE` (step 1). |
 | **Supabase sync** | `profiles.state` stores the whole week inline. Database recipes are much fatter (photo URL, sourceUrl, full steps) — a 49-slot week could bloat the row badly. | Store `{id}` references for `db-` dishes and rehydrate on load; keep inlining AI dishes, which have no other home. |
+| **Allergy filtering, again — via §0.7** | A user-researched dish enters the same pool as reviewed data, but its `contains[]` was written by a model. An under-listed allergen here reaches a real plate. **The single most safety-critical thing in §0.** | `validateDish()` rejects malformed rows outright, the user confirms the allergen list before saving (`verified:true`), and only `verified` dishes enter `DB` (§0.7.4, §0.7.7). |
+| **Hard no-repeat rule, again — via §0.7** | User dishes arriving from both Supabase and the `localStorage` mirror can double up in the pool. | The `eligibleRecipes()` `id` dedupe from step 4 already covers it — provided user dish `id`s are stable UUIDs assigned by us, not regenerated on each load. |
 
 ### 0.3 The method — ordered, each step verifiable on its own
 
@@ -103,17 +194,20 @@ must define their globals first):
 In `public/sw.js` add **both** `'./recipes-db.js'` and `'./ingredient-prices.js'` to `SHELL` and
 bump `CACHE` `'foodie-shell-v3'` → `'foodie-shell-v4'`. **Skipping the bump ships stale code to
 installed PWAs; forgetting either file means an offline user gets a hard `is not defined` crash.**
-*Verify:* console — `RECIPES_DB.length` is `28` and `typeof estimateIngredientPrice` is
+*Verify:* console — `RECIPES_DB.length` is `57` and `typeof estimateIngredientPrice` is
 `'function'`.
 
-**Step 2 — teach the app that a dish has several roles.** Near line 364 of `app.js`:
+**Step 2 — teach the app that a dish has several roles.** In `app.js`, immediately above
+`function maxDifficultyFor` (start of the generation section):
 ```js
 const DB = (typeof RECIPES_DB !== 'undefined') ? RECIPES_DB : [];
 const dishRoles = r => r.types || [r.type];      // legacy dishes only have .type
 const isCurated = r => typeof r.id === 'string' && r.id.startsWith('db-');
 ```
+Make `DB` a **function or getter, not a frozen array**, if you build §0.7 in the same session —
+user dishes get appended to it there, and a value captured once at load time will never see them.
 
-**Step 3 — allergens from `contains`.** In `passesDietFilters()` (line 366), after the `dislikes`
+**Step 3 — allergens from `contains`.** In `passesDietFilters()`, after the `dislikes`
 loop and **before** the existing `allergies.includes('fish')` block:
 ```js
 if (Array.isArray(recipe.contains)) {
@@ -121,12 +215,13 @@ if (Array.isArray(recipe.contains)) {
   return true;                    // curated dish: contains[] is the whole answer
 }
 ```
-`allergies` is already lowercased on line 368; every `contains` value is lowercase. Leave the
+`allergies` is already lowercased two lines above (`profile.allergies.map(a=>a.toLowerCase())`);
+every `contains` value is lowercase, so they match. Leave the
 existing regex path alone — legacy dishes still need it.
 *Verify:* tick Gluten → bruschetta, tiramisu, bolognese gone. Tick Soy → teriyaki salmon, Thai
 curry, sriracha chicken gone.
 
-**Step 4 — put the database in the pool, deduped.** Rewrite `eligibleRecipes()` (line 381):
+**Step 4 — put the database in the pool, deduped.** Rewrite `eligibleRecipes()` in full:
 ```js
 function eligibleRecipes(role, profile){
   const seen = new Set();
@@ -148,17 +243,20 @@ Add beside `pickMeal()`:
 ```js
 const preferCurated = list => { const c = list.filter(isCurated); return c.length ? c : list; };
 ```
-and change the final selection in `pickMeal()` (line 400) so preference runs
+and change the final selection in `pickMeal()` — the two lines starting `const favFresh=` — so
+preference runs
 **favourites → curated → legacy**:
 ```js
 const favFresh = choices.filter(r => String(r.id).startsWith('fav'));
 const from = (favFresh.length && Math.random() < 0.5) ? favFresh : preferCurated(choices);
 return from[Math.floor(Math.random() * from.length)];
 ```
-Apply `preferCurated()` to the replacement pick in `enforceNoRepeat()` (line 443) **and** in
-`swapMeal()` (line 465) — miss those and swapping quietly drops back to placeholder recipes.
-*Verify (measured against the real data):* an unrestricted **main-only week fills 20 of 21 slots**
-from the database. A 3-course week fills 31 of 49 — see §0.5.
+Apply `preferCurated()` to the replacement pick in `enforceNoRepeat()` (the `if(fresh.length)`
+branch) **and** in `swapMeal()` (its `pickMeal(...)` call) — miss those and swapping quietly drops
+back to placeholder recipes.
+*Verify (measured against the real data, 57 dishes):* an unrestricted **main-only week fills all
+21 of 21 slots**, and a 3-course week fills **all 49 of 49** — see §0.5 for the dessert-repeat
+caveat that remains even at full coverage.
 **Commit.**
 
 **Step 6 — real recipe links.** Keep `recipeSearchUrl()` as the fallback and add beside it:
@@ -167,10 +265,15 @@ function recipeUrl(recipe){
   return (recipe && recipe.sourceUrl) ? recipe.sourceUrl : recipeSearchUrl(recipe && recipe.name);
 }
 ```
-Replace both call sites: the `.ics` description (line 576) and "See full recipe ↗" (line 1482).
+Replace both call sites — find them with:
+```
+grep -n 'recipeSearchUrl(' public/app.js
+```
+One is the `.ics` description (the `` const desc=`Tonight's dinner: `` line), the other is the
+`See full recipe ↗` anchor. The definition itself stays as the fallback.
 Show `Recipe by ${r.sourceName}` beside the link when present.
 
-**Step 7 — real photos.** First line of `dishImageUrl()` (line 490):
+**Step 7 — real photos.** First line of the `dishImageUrl()` body:
 ```js
 if (recipe.photo) return recipe.photo;      // curated dishes carry their own photo
 ```
@@ -196,9 +299,10 @@ function pantryHas(name){
 
 **Step 9 — make curated dishes browsable *and* openable.** Two places, and missing the second is a
 silent bug:
-- Browse carousels (lines 1363–1366) read `RECIPES` only. Change each to `[...DB, ...RECIPES]` so
+- The browse carousels read `RECIPES` only — the four `const quick=` / `const bfast=` /
+  `const lunches=` / `const dinners=` lines inside `renderBrowse`. Change each to `[...DB, ...RECIPES]` so
   curated dishes fill `Weeknight winners`, `Sweet endings` etc. This is what widens browsing (§4).
-- `findBrowseRecipe()` (line 1313) must become
+- `findBrowseRecipe()` must become
   `[...DB, ...RECIPES, ...STARTERS, ...DESSERTS, ...state.favorites]`.
   **Skip this and curated cards render fine but tapping one opens nothing** — the lookup returns
   `undefined`.
@@ -209,7 +313,8 @@ new infrastructure.
 - `enforceNoRepeat()` already records slots it could not fill uniquely into `state.repeatedDishes`.
   **That list is the trigger.** If it is non-empty *and* AI is on, call the existing
   `requestSwapAI(profile, role, avoidNames)` once per unfilled slot, passing every name already
-  used. No new endpoint.
+  used. **No new endpoint for this** — §0.7's `/research-dish` is a separate feature with a
+  different job (filling a database row on request, not filling a slot at plan time).
 - Keep `/generate-week` as the "surprise me entirely with AI" path — it is verified working and
   supplies real prices. It is no longer the default.
 - Relabel the toggle: *"Let AI invent extra dishes when the cookbook runs short"*.
@@ -236,18 +341,18 @@ of Gemini and of the dish list):**
 
 | File | What it is |
 |---|---|
-| `public/ingredient-prices.js` | **The price table. Single source of truth.** `INGREDIENT_PRICES` — all 126 distinct ingredients used by `recipes-db.js`, each priced per `100g` / `100ml` / `piece` / `clove` / `slice` / `stalk`. Exposes `estimateIngredientPrice(ing)`. Browser global + Node export, same pattern as `recipes-db.js`. |
+| `public/ingredient-prices.js` | **The price table. Single source of truth.** `INGREDIENT_PRICES` — all 172 distinct ingredients used by `recipes-db.js`, each priced per `100g` / `100ml` / `piece` / `clove` / `slice` / `stalk`. Exposes `estimateIngredientPrice(ing)`. Browser global + Node export, same pattern as `recipes-db.js`. |
 | `docs/INGREDIENT-PRICES.md` | Human-readable price list. **Generated — never hand-edit.** |
 | `tools/build-prices-md.js` | Rebuilds the `.md` from the `.js`, and warns in the terminal if `recipes-db.js` uses an ingredient this table doesn't price yet. `node tools/build-prices-md.js` |
 
 Prices are **informed estimates** (French supermarket, mid-range own-brand, 2026), not scraped
 live prices — the file says so at the top and that framing must reach the UI too (label as
 *"Estimated — varies by shop"*, same wording §5 already uses for Gemini's total). Verified: all
-126 ingredients used by the current 28 dishes have a price (none return the unknown-ingredient
-€0), and a simulated week comes out at a believable €4.79/day (mains only) to €6.17/day (3 courses)
+172 ingredients used by the current 57 dishes have a price (none return the unknown-ingredient
+€0), and a simulated week comes out at a believable €4.78/day (mains only) to €8.85/day (3 courses)
 per person — in the same range as the €107/week the real AI-ON test produced for a household.
 
-**The one line this actually takes to wire in** — change `priceOf()` (line 552) so AI prices
+**The one line this actually takes to wire in** — change `priceOf()` so AI prices
 still win, and this is only ever the fallback:
 ```js
 function priceOf(ing){
@@ -267,20 +372,23 @@ loading the file, is step 1a / step 1b of §0.3).
 
 ### 0.5 Known gaps — measured, so nobody rediscovers them
 
-- **28 dishes covers a main-only week, not a 3-course one.** Measured by simulating the step-5
-  picker against the real data:
+- **At 57 dishes, both a main-only week and a 3-course week fill completely from the database.**
+  Measured by simulating the step-5 picker against the real data:
 
   | Goal | Slots/week | Filled from database |
   |---|---|---|
-  | Stay balanced / Feel light (mains) | 21 | **20 of 21** |
-  | Get stronger (starter + main + dessert) | 49 | 31 of 49 |
+  | Stay balanced / Feel light (mains) | 21 | **21 of 21** |
+  | Get stronger (starter + main + dessert) | 49 | **49 of 49** |
 
-  The shortfall is entirely starters and desserts: a 3-course week needs **14 of each**; the
-  database has **6 and 5**. Until it grows, expect the repeat notice or the Gemini top-up to fire on
-  "Get stronger". **Add desserts and starters first** — mains and breakfasts are already strong.
-- **A gluten allergy leaves only 7 of 28 dishes.** Dairy and gluten are common across the set. Bias
-  the next additions toward naturally gluten- and dairy-free dishes.
-- **12 of 28 dishes have `nutrition:'estimated'`** — Love & Lemons doesn't publish nutrition, so
+  This grew from an initial 31/49 on the "Get stronger" goal (28-dish database) once 10 starters
+  and 5 desserts were added. **Desserts remain the thinnest category** (10 dishes covering 14
+  dessert slots a week), so a few dessert repeats still show up across a full week even though
+  every slot is filled by a real curated dish rather than falling through to the legacy pool or
+  Gemini. **Add more desserts first** if the database keeps growing — mains, starters and
+  breakfasts are all comfortably ahead of what a week needs.
+- **A gluten allergy leaves 22 of 57 dishes.** Dairy and gluten are common across the set. Bias
+  future additions toward naturally gluten- and dairy-free dishes.
+- **32 of 57 dishes have `nutrition:'estimated'`** — Love & Lemons doesn't publish nutrition, so
   those kcal/protein figures were computed from the ingredients. Good approximations, not measured
   values. The other 16 are `'source'`. Surface the distinction if nutrition is ever shown as a hard
   number.
@@ -291,7 +399,7 @@ loading the file, is step 1a / step 1b of §0.3).
   `['Nuts','Dairy','Gluten','Shellfish','Soy']`; hummus/tahini carries `sesame`. Add the option when
   convenient — the data is already there.
 
-### 0.6 How Lucille adds dishes
+### 0.6 How Lucille adds dishes by hand
 
 1. Open `public/recipes-db.js`, copy a block, paste it into the right section.
 2. Unique `id` starting with `db-`.
@@ -301,7 +409,192 @@ loading the file, is step 1a / step 1b of §0.3).
 5. `node tools/build-recipe-md.js` to rebuild the catalogue.
 
 No other file needs touching. Once §0.3 is done, a new dish appears in the planner and in browse
-automatically.
+automatically. The full plain-English version of this is **`docs/HOW-TO-ADD-A-DISH.md`** — keep the
+two in sync if the schema ever changes.
+
+---
+
+### 0.7 "Add a dish I love" — Gemini researches it INTO the database
+
+The feature: the user types a dish they love (*"chicken tikka masala"*), pastes a recipe or a link,
+or photographs a recipe card — and Gemini fills in every field the schema needs so it becomes a
+permanent, browsable dish. **If it can't do that honestly, it says so and adds nothing.**
+
+**This does not weaken the precedence rule — it strengthens it.** Gemini is a *researcher* filling
+in a database row, not an author inventing a meal at plan time. Once a dish is saved it is an
+ordinary database dish and is picked ahead of anything Gemini generates on the fly (§0.3 step 5).
+Every dish the user adds this way makes the database bigger and Gemini's generate-time role smaller.
+
+#### 0.7.1 Where a researched dish is stored — read this first
+
+**A web page cannot write to `public/recipes-db.js`.** That file is shipped code on Render; the
+browser has no filesystem access to it. So "add it to the database" happens on two levels, and
+conflating them is the main way this feature gets built wrong:
+
+| Level | Where it lives | Who sees it | When |
+|---|---|---|---|
+| **Per-user** | `user_dishes` table in Supabase (+ `localStorage` mirror for AI-off/offline) | just that user | immediately on save |
+| **Shipped** | `public/recipes-db.js` | everyone, forever | only when Lucille promotes it (§0.7.5) |
+
+The per-user level is what makes the feature real for users. The shipped level is how a genuinely
+good dish graduates into the product. Build the per-user level first; §0.7.5 is a ten-minute
+add-on once it works.
+
+Add to `supabase/schema.sql` (same owner-only RLS pattern as the four existing tables — copy the
+`do $$ ... $$` loop and add `'user_dishes'` to its array):
+
+```sql
+create table if not exists public.user_dishes (
+  id          uuid primary key default gen_random_uuid(),
+  user_id     uuid not null references auth.users (id) on delete cascade,
+  dish        jsonb not null,          -- one object in the recipes-db.js shape
+  source      text,                    -- 'name' | 'text' | 'url' | 'photo'
+  verified    boolean not null default false,   -- user confirmed the allergens
+  created_at  timestamptz not null default now()
+);
+create index if not exists user_dishes_user_idx on public.user_dishes (user_id, created_at desc);
+```
+
+#### 0.7.2 The three input modes
+
+One entry point — an **"＋ Add a dish I love"** button on the `My Meal Plan` tab (§2), opening a
+small overlay:
+
+| Mode | User gives | What Gemini is asked to do |
+|---|---|---|
+| **Name** | *"chicken tikka masala"* | Research the classic dish and produce a standard version |
+| **Text / link** | pasted recipe, or a URL | Extract and convert what's actually there — do not substitute |
+| **Photo** | picture of a recipe card or cookbook page | Read the image and convert what's legible |
+
+Photo mode needs a change to `server.js`: `callAIonce()` currently sends only
+`contents:[{parts:[{text: prompt}]}]`. Accept an optional second part so vision works:
+
+```js
+async function callAIonce(prompt, model = MODEL, imageBase64 = null, mimeType = 'image/jpeg') {
+  const parts = [{ text: prompt }];
+  if (imageBase64) parts.push({ inlineData: { mimeType, data: imageBase64 } });
+  // …unchanged: contents: [{ parts }], same generationConfig, same error handling
+}
+```
+`callAI()` must thread the same two arguments through its `MODEL_CHAIN` loop. Cap uploads at
+**4 MB** and downscale client-side before sending — a full-resolution phone photo will blow the
+token budget and can trip the `finishReason !== 'STOP'` guard already in `callAIonce`.
+
+#### 0.7.3 The endpoint and its prompt
+
+New endpoint in `server.js`, next to the two existing ones and following their exact shape
+(API-key guard → `readBody` → `callAI` → `sendJson`, `try/catch` returning `{error}`):
+
+```js
+if (req.method === 'POST' && req.url === '/research-dish') {
+  if (!API_KEY) return sendJson(res, 500, { error: 'No API key configured on the server.' });
+  try {
+    const { mode, query, imageBase64, mimeType, profile } = await readBody(req);
+    const out = await callAI(buildResearchPrompt({ mode, query, profile }), imageBase64, mimeType);
+    return sendJson(res, 200, out);
+  } catch (e) { console.error(e.message); return sendJson(res, 500, { error: e.message }); }
+}
+```
+
+`buildResearchPrompt()` must demand **exactly the `recipes-db.js` shape** (§0.1) and enforce these
+rules — they are the difference between a usable row and a corrupt one:
+
+- **Quantities per single serving, metric** (`g` `ml` `tsp` `tbsp` `piece` `clove` `slice` `stalk`
+  `pinch`). Never a whole-recipe amount — `scaleRecipe()` multiplies by household size afterwards.
+- **`category` exactly one of** `Produce` `Meat & Fish` `Dairy` `Bakery` `Frozen` `Pantry`.
+- **`contains` must list every allergen present**, from
+  `gluten dairy nuts eggs soy shellfish fish sesame`. *"When unsure whether an ingredient carries an
+  allergen, include it."* Over-listing costs a user one dish; under-listing can hurt them.
+- **`time` = `prepTime` + `cookTime`, active only.** Chilling/marinating goes in `passiveTime`.
+- **`nutrition:'estimated'`** unless a real source page was read, in which case `'source'`.
+- **Never invent a `sourceUrl` or a `photo` URL.** Return `sourceUrl:null` rather than a guess —
+  this is the same anti-hallucination rule §0.3 step 6 already relies on. The client then falls back
+  to the existing `recipeSearchUrl(name)`.
+- **Return `{"ok":false,"reason":"…"}`** if the request isn't a real dish, the image is unreadable,
+  or the text isn't a recipe. A refusal is a correct answer; a fabricated dish is not.
+
+#### 0.7.4 Validate before it ever reaches the pool — non-negotiable
+
+Gemini's reply is **untrusted input**. A malformed dish doesn't just look wrong, it silently breaks
+allergy filtering, the shopping list and the no-repeat rule. Write `validateDish(obj)` in `app.js`
+and reject rather than repair:
+
+☐ every required field present (`name` `type` `types` `time` `prepTime` `cookTime` `difficulty`
+  `servings` `kcal` `protein` `nutrition` `tags` `contains` `ingredients` `steps`)
+☐ `type` ∈ the five course words · `types` a non-empty array of them · `type` ∈ `types`
+☐ `difficulty` an integer 1–4 · `kcal`, `protein`, `servings`, times all finite and ≥ 0
+☐ `time === prepTime + cookTime`
+☐ `ingredients` non-empty; **every** row has a valid `category` **and** a valid `unit` and a
+  positive numeric `qty`
+☐ `contains` an array drawn only from the eight allergen words
+☐ `steps` non-empty
+☐ `id` **assigned by us**, never by Gemini: `` `user-${crypto.randomUUID()}` ``. Not `db-` —
+  `isCurated()` (§0.3 step 2) must still mean *shipped and reviewed*, and `user-` keeps
+  `state.favorites`' `fav` prefix unambiguous too.
+
+Anything failing → show the user the failure, save nothing. **Never half-save a dish.**
+
+Then, because allergens are safety-critical and this data came from a model, **show the parsed dish
+back to the user before saving** — photo, times, and the `contains` list rendered as plain words
+("Contains: gluten, dairy") with an *"Add anything missing"* control. Saving sets `verified:true`.
+Until the user confirms, the dish must not enter meal generation. Surface it in the UI as
+*"Added by you — nutrition is an estimate"*, and never let a `verified:false` dish be picked for
+someone with allergies set.
+
+#### 0.7.5 Promoting a good dish into the shipped database
+
+On any user-added dish, a **"Copy as database entry"** action that puts a ready-to-paste
+`recipes-db.js` block on the clipboard — the §0.1 shape, `id` rewritten to the next free `db-…`,
+quantities untouched. Lucille pastes it into the right section of `public/recipes-db.js`, adds any
+new ingredient to `public/ingredient-prices.js` (§0.4), and runs both generators:
+
+```
+node tools/build-recipe-md.js
+node tools/build-prices-md.js
+```
+
+That is the only path by which a dish reaches every user — and it keeps a human in the loop before
+model-written data ships to everyone.
+
+#### 0.7.6 Failure messages — say which thing went wrong
+
+The user's requirement is that the app tells them when it can't. Distinguish the causes, because
+the fix differs and a generic "something went wrong" teaches them nothing:
+
+| Cause | Message |
+|---|---|
+| `{"ok":false}` — not a real dish / unreadable photo | *"I couldn't find a reliable recipe for that. Try a more specific name, or paste the recipe text."* |
+| `validateDish()` rejected | *"I found it but couldn't get the details right. Nothing was saved."* |
+| Gemini 503 / all models failed | *"The recipe service is busy. Try again in a minute."* (`MODEL_CHAIN` already retries — this is genuinely Google, not us.) |
+| Daily quota spent | *"You've used today's recipe lookups. You can still add a dish by hand."* → link `docs/HOW-TO-ADD-A-DISH.md` |
+| AI turned off | *"Turn on AI generation to research dishes automatically, or add one by hand."* |
+| Offline | *"You're offline — this needs a connection."* |
+
+**Quota is a real constraint: the free tier is 20 requests/day**, shared with week generation and
+the §0.3 step-10 top-up. So: one call per add (no automatic retries beyond `MODEL_CHAIN`'s own),
+show the user a remaining-today count, and **check the name against the existing pool first** — if
+`RECIPES_DB` already has a close name match, offer that dish instead of spending a call.
+
+#### 0.7.7 Wiring it into the pool
+
+User dishes join the pool in **exactly one place** — extend the `DB` constant from §0.3 step 2 so
+every downstream consumer (generation, browse carousels, `findBrowseRecipe`, filters) picks them up
+with no further changes:
+
+```js
+const DB = [
+  ...(typeof RECIPES_DB !== 'undefined' ? RECIPES_DB : []),
+  ...(state.userDishes || []).filter(d => d.verified),   // user-researched, confirmed
+];
+```
+`state.userDishes` loads from Supabase on sign-in and from `localStorage` otherwise, and syncs
+through the existing `profiles.state` blob mechanism. The `eligibleRecipes()` dedupe from §0.3
+step 4 already protects the no-repeat rule if the same dish arrives twice.
+
+**Ordering, stated once and plainly:** a week is filled from `RECIPES_DB` and verified user dishes
+first; only slots that genuinely cannot be filled fall through to Gemini (§0.3 step 10). Adding
+dishes here shrinks that fall-through. Gemini never proposes a dish that the database could have
+filled.
 
 ---
 
@@ -439,6 +732,11 @@ Never label a section with a database word.
 Filters narrow the carousels live, combine with AND, and show a `Clear all` chip when active.
 They must respect the profile's allergies/dislikes at all times (those are never filterable away).
 
+**Add one more carousel when §0.7 is built:** `Your own dishes` — the user's researched/added
+dishes, shown directly beneath `Your favourites ♥`. Skip it when empty. Its empty state is where
+the **"＋ Add a dish I love"** entry point lives, so the feature is discoverable from browse as well
+as from the planner.
+
 ---
 
 ## 5. Shopping (the `Shop Ingredients` tab)
@@ -464,21 +762,20 @@ Keep the friendly goal words (Feel light / Stay balanced / Get stronger) and the
 
 ## 7. Build order — verify + commit after each
 
-0. **Dish database (§0) — DO THIS FIRST.** All 11 steps of §0.3, plus the price table in §0.4.
-   §3 and §4 are both built on this data; doing it after means building them twice. Run the §0.2
-   regression table before moving on.
-1. Palette swap (§1) — every screen re-tinted, nothing tomato-coloured remains.
-2. Card component (§3) — image-on-top, used everywhere. Reads `prepTime`/`cookTime`/`difficulty`
-   straight from §0's data; show `passiveTime` separately.
-3. One-page planner + tabs + sidebar (§2); delete the old shopping screen + step bar.
-   The sidebar's €/day comes from §0.4's price estimate when AI is off.
-4. Categories + dessert/starter sections (§4). `Sweet endings` and `Small plates to start` are only
-   worth building once §0's dessert/starter count has grown — see §0.5.
-5. Filter row (§4). The `Dietary ▾` filters read `tags`; allergies read `contains` (§0.3 step 3).
-6. Shopping tab + total at bottom (§5) — Gemini `estimatedTotal` as headline, §0.4 estimate as the
-   AI-off fallback.
-7. Copy pass (§6).
-8. Full QA (§8) → show Lucille → deploy only on her word.
+One phase per session (§00.3). The model column repeats §00.1 so you don't have to scroll back.
+
+| # | Phase | Model | Notes |
+|---|---|---|---|
+| **0** | **Dish database (§0)** — all 11 steps of §0.3 **+ the price wiring in §0.4** | Sonnet | **DO THIS FIRST.** §3 and §4 are built on this data; doing it later means building them twice. Run the §0.2 regression table before moving on. |
+| **1** | Palette swap (§1) | Sonnet | Every screen re-tinted, nothing tomato-coloured remains. Re-check AA contrast. |
+| **2** | Card component (§3) | Sonnet | Image-on-top, used everywhere. Reads `prepTime`/`cookTime`/`difficulty` from §0's data; `passiveTime` shown separately. |
+| **3** | One-page planner + tabs + sidebar (§2) | **🔶 Opus** | Delete the old shopping screen + step bar. Sidebar €/day comes from §0.4 when AI is off. **The highest-risk phase — see §00.1.** |
+| **4** | Categories + dessert/starter sections (§4) | Sonnet | `Sweet endings` and `Small plates to start` both now have enough dishes (§0.5). |
+| **5** | Filter row (§4) | Sonnet | `Dietary ▾` reads `tags`; allergies read `contains` (§0.3 step 3) and are never filterable away. |
+| **6** | Shopping tab + total at bottom (§5) | Sonnet | Gemini `estimatedTotal` as headline, §0.4 estimate as the AI-off fallback. |
+| **7** | **"Add a dish I love" (§0.7)** | **🔶 Opus** | Order within the phase: schema + storage (§0.7.1) → `/research-dish` (§0.7.3) → `validateDish()` + confirm-allergens (§0.7.4) → pool wiring (§0.7.7) → `Your own dishes` carousel (§4) → failure messages (§0.7.6) → "Copy as database entry" (§0.7.5). Last of the feature work because it needs the card, the one-page planner and the carousels already in place — and because it's the only part of V3 that puts model-written data beside reviewed data. **Ship name/text modes before photo mode**; vision needs the `callAIonce()` change and is the easiest piece to defer. |
+| **8** | Copy pass (§6) | Sonnet | |
+| **9** | **Final verification (§9)** | **🔶 Opus** | Whole-system pass. Then show Lucille → deploy **only on her word**. |
 
 ---
 
@@ -501,7 +798,8 @@ Keep the friendly goal words (Feel light / Stay balanced / Get stronger) and the
 
 ☐ **A generated week is filled from the database first** — with AI off, every slot a curated dish
   can legally fill is filled by one; legacy-pool dishes appear only once it's exhausted.
-  Benchmark: a main-only week on an unrestricted profile fills **20 of 21** slots.
+  Benchmark: at 57 dishes, both a main-only week and a full 3-course week fill **every slot**
+  from the database on an unrestricted profile (§0.5).
 ☐ **Every curated dish shows its own real photo and links to its real recipe page** — no Google
   search links and no Unsplash stand-ins for a dish that carries a `photo`.
 ☐ **Allergies use `contains`, not name-guessing.** Tick Gluten → bruschetta, tiramisu and bolognese
@@ -516,5 +814,133 @@ Keep the friendly goal words (Feel light / Stay balanced / Get stronger) and the
 ☐ **No-repeat survives favouriting.** Favourite a database dish, re-plan, confirm still 0 duplicates
   (the pool dedupe in §0.3 step 4 is what protects this).
 ☐ Gemini is only called to *top up* what the database can't fill, never to author a week from
-  scratch — and the top-up reuses `requestSwapAI`, with **no new endpoint** and ≤5 calls per week.
+  scratch — and the top-up reuses `requestSwapAI`, adding **no endpoint of its own** and ≤5 calls
+  per week. (§0.7's `/research-dish` is the one genuinely new endpoint in V3.)
 ☐ `state.partialAI` and the honest repeat notice both still fire and are still visible.
+
+**§0.7 — "Add a dish I love"**
+
+☐ All three input modes work: a **dish name**, **pasted recipe text or a URL**, and a **photo** of
+  a recipe card. (Name and text may ship first; photo may land after — see §7 step 7.)
+☐ A researched dish arrives in the **exact `recipes-db.js` shape**: per-serving metric quantities,
+  a valid `category` and `unit` on every ingredient, `time === prepTime + cookTime`.
+☐ **`validateDish()` rejects rather than repairs.** Feed it a deliberately broken response (bad
+  `category`, missing `contains`, `time` that doesn't add up) → nothing is saved and the user is
+  told. **Never a half-saved dish.**
+☐ **The user confirms the allergen list before the dish is saved**, and a `verified:false` dish
+  never enters meal generation. This is the safety-critical one — test it explicitly with a profile
+  that has allergies set.
+☐ **Gemini never invents a `sourceUrl` or `photo`** — with no real source it returns `null` and the
+  app falls back to `recipeSearchUrl(name)` and the emoji tile.
+☐ **Failure is specific, never generic.** Each row of §0.7.6 produces its own message: unresearchable
+  dish, validation failure, 503, quota spent, AI off, offline.
+☐ **The saved dish behaves like any other database dish** — browsable in `Your own dishes`, opens
+  its detail overlay, respects filters and allergies, obeys the no-repeat rule, and is picked
+  **ahead of** anything Gemini generates at plan time.
+☐ It **survives sign-out → sign-in** (Supabase `user_dishes`) and still exists offline
+  (`localStorage` mirror), with no duplicate appearing when both sources load.
+☐ **"Copy as database entry"** puts a paste-ready `recipes-db.js` block on the clipboard, with a
+  fresh `db-…` id — and pasting it in + running both generators actually works.
+☐ Quota is respected: **one call per add**, a remaining-today count is visible, and an existing
+  close name match in the pool is offered instead of spending a call.
+
+---
+
+## 9. Final verification pass — 🔶 Opus, whole system
+
+Run this **after every other phase is committed**, in a fresh session, with **AI OFF** unless a
+check says otherwise. This is a different job from building any single phase: nobody has yet looked
+at all of V3 at once, and the failures that matter now are the ones that live *between* phases.
+
+**Read before starting:** `CLAUDE.md`, then §00, §0.2 and §8 of this file.
+
+### 9.1 Automated — run these first, they're free and catch the dumb things
+
+```bash
+cd "~/Work/claude/Projects/Meal plan Lucille"
+
+# 1. Everything parses.
+for f in public/app.js public/recipes-db.js public/ingredient-prices.js server.js; do
+  node --check "$f" && echo "OK  $f"
+done
+
+# 2. The data still passes its own invariants (57 dishes, no bad category/unit, time adds up).
+node -e '
+const {RECIPES_DB}=require("./public/recipes-db.js");
+const {INGREDIENT_PRICES,estimateIngredientPrice}=require("./public/ingredient-prices.js");
+const CATS=["Produce","Meat & Fish","Dairy","Bakery","Frozen","Pantry"];
+const UNITS=["g","ml","tsp","tbsp","piece","clove","slice","stalk","pinch"];
+let e=0; const ids=new Set();
+RECIPES_DB.forEach(r=>{
+  if(ids.has(r.id)){console.log("DUP ID",r.id);e++;} ids.add(r.id);
+  if(r.time!==r.prepTime+r.cookTime){console.log("TIME",r.id);e++;}
+  if(!r.types.includes(r.type)){console.log("TYPE",r.id);e++;}
+  r.ingredients.forEach(i=>{
+    if(!CATS.includes(i.category)){console.log("CAT",r.id,i.name);e++;}
+    if(!UNITS.includes(i.unit)){console.log("UNIT",r.id,i.name);e++;}
+    if(!INGREDIENT_PRICES[i.name.toLowerCase()]){console.log("UNPRICED",i.name);e++;}
+    else if(estimateIngredientPrice(i)===0){console.log("ZERO-PRICE",r.id,i.name);e++;}
+  });
+});
+console.log(RECIPES_DB.length+" dishes, "+e+" errors");'
+
+# 3. Generated docs are in sync with their sources.
+#    (Don't use `git diff docs/` for this — it also shows every other uncommitted change.
+#     Hash, regenerate, compare: only a change *caused by regenerating* means they were stale.)
+before=$(md5 -q docs/RECIPE-DATABASE.md)$(md5 -q docs/INGREDIENT-PRICES.md)
+node tools/build-recipe-md.js >/dev/null && node tools/build-prices-md.js >/dev/null
+after=$(md5 -q docs/RECIPE-DATABASE.md)$(md5 -q docs/INGREDIENT-PRICES.md)
+[ "$before" = "$after" ] && echo "✓ docs in sync" || echo "✗ docs were stale — now regenerated, commit them"
+
+# 4. The secret never got committed.
+git log --all --oneline -- gemini-key.txt        # must be empty
+grep -rn "AIza" public/ server.js || echo "no API key in shipped files"
+```
+
+### 9.2 By hand, in the browser — AI OFF
+
+Work down §8 in full. These are the cross-phase ones §8 can't express, and the ones most likely to
+be broken by a *later* phase than the one that introduced them:
+
+☐ **Generate 5 weeks in a row** on an unrestricted profile. Every one: 0 duplicate dish names, every
+  slot filled from the database, no `/generate-*` call in the Network tab.
+☐ **Then set 2 allergies + 2 dislikes** and generate 5 more. Nothing forbidden appears; if the pool
+  genuinely can't fill a slot the honest repeat notice shows rather than a silent duplicate.
+☐ **Tick Gluten** → bruschetta, tiramisu, spaghetti bolognese all gone. **Tick Soy** → teriyaki
+  salmon, Thai red curry, sriracha chicken all gone. *(This is the check that proves `contains[]`
+  beat the old regex — §0.2's most important row.)*
+☐ **Prices with AI OFF**: €/day pill, per-day € chips and the bottom total all show real numbers.
+  A week lands around **€4.80/day (mains only)** to **€8.85/day (3 courses)** per person — wildly
+  outside that range means §0.4 is mis-wired.
+☐ **Full pantry ticked**: `Red bell pepper`, `Spring onions`, `Rice wine`, `Large flour tortilla`
+  all still on the list; `Olive oil` and `Garlic` correctly hidden.
+☐ **Favourite a database dish → re-plan → still 0 duplicates** (the §0.3 step-4 dedupe).
+☐ **Every surface at 375px and 1280px.** No horizontal scroll at 375px. Zero console errors on any
+  screen, including after opening/closing every overlay.
+☐ **Cook mode + read-aloud** on a database dish, start to finish.
+☐ **`.ics` export** → open the file, confirm 14 valid events and that recipe links are the real
+  `sourceUrl`, not a Google search, for dishes that have one.
+☐ **PWA**: `CACHE` bumped in `sw.js`, `recipes-db.js` **and** `ingredient-prices.js` both in `SHELL`,
+  installs cleanly, and an offline reload still boots. *(Miss either file and offline users get a
+  hard `is not defined` crash — the single most likely shipping bug in V3.)*
+☐ **Questionnaire still asked once**; "Save changes" edits without regenerating.
+☐ **Sign out → sign in**: week, favourites and any §0.7 user dishes all survive.
+
+### 9.3 One AI-ON run — exactly one
+
+Only after everything above is green, and budget for it: the free tier is **20 requests/day**.
+
+☐ Tick "Use real AI generation", plan **one** week. Confirm the database still filled the slots it
+  could and Gemini was only reached for genuine gaps (§0.3 step 10) — **not** asked to author the
+  week. Check the Network tab for the actual call count; ≤5 top-up calls.
+☐ Shopping total comes from Gemini's `estimatedTotal` and is labelled *"Estimated — varies by shop."*
+☐ If §0.7 shipped: add one dish by name and one by pasted text. Confirm the allergen-confirm step
+  appears, the dish saves, and it then behaves like any other database dish.
+
+### 9.4 Write the session up
+
+Before handing back, update `CLAUDE.md`: what shipped, what's verified vs. unverified, anything
+deliberately deferred, and any new known gap. That file is the next session's only memory — a
+green build with a stale `CLAUDE.md` costs the next person an hour of rediscovery.
+
+**Then show Lucille. Deploy only on her word** — she pushes via GitHub Desktop.
