@@ -45,6 +45,31 @@ const RECIPES = [
     {name:'Shrimp',qty:150,unit:'g',category:'Meat & Fish',buyDayBefore:true},{name:'Tortilla wrap',qty:2,unit:'',category:'Bakery',buyDayBefore:false},{name:'Avocado',qty:1,unit:'',category:'Produce',buyDayBefore:true},{name:'Lime',qty:1,unit:'',category:'Produce',buyDayBefore:false}],steps:['Pan-fry shrimp with spices 3-4 min.','Warm tortillas.','Fill with shrimp, sliced avocado and a squeeze of lime.']},
   {id:'d7',type:'dinner',name:'Spaghetti bolognese',desc:'Beef mince, tomato, pasta, onion',time:35,difficulty:2,emoji:'🍝',img:'spaghetti',tags:[],kcal:720,protein:40,ingredients:[
     {name:'Beef mince',qty:150,unit:'g',category:'Meat & Fish',buyDayBefore:true},{name:'Chopped tomatoes',qty:1,unit:'can',category:'Pantry',buyDayBefore:false},{name:'Pasta',qty:100,unit:'g',category:'Pantry',buyDayBefore:false},{name:'Onion',qty:1,unit:'',category:'Produce',buyDayBefore:false}],steps:['Brown mince with chopped onion.','Add tomatoes, simmer 20 min.','Serve over cooked spaghetti.']},
+  // --- extra mains so dietary filters can't shrink the pool below 7/day (no-repeat rule, §3) ---
+  {id:'b8',type:'breakfast',name:'Scrambled eggs on toast',desc:'Eggs, butter, sourdough',time:8,difficulty:1,emoji:'🍳',img:'egg',tags:['vegetarian'],kcal:410,protein:24,ingredients:[
+    {name:'Eggs',qty:3,unit:'',category:'Dairy',buyDayBefore:false},{name:'Sourdough bread',qty:2,unit:'slices',category:'Bakery',buyDayBefore:true},{name:'Butter',qty:10,unit:'g',category:'Dairy',buyDayBefore:false}],steps:['Whisk and season the eggs.','Scramble gently in butter.','Serve on toasted sourdough.']},
+  {id:'b9',type:'breakfast',name:'Porridge & berries',desc:'Oats, milk, berries, honey',time:8,difficulty:1,emoji:'🥣',img:'oatmeal',tags:['vegetarian'],kcal:430,protein:15,ingredients:[
+    {name:'Oats',qty:60,unit:'g',category:'Pantry',buyDayBefore:false},{name:'Milk',qty:250,unit:'ml',category:'Dairy',buyDayBefore:false},{name:'Mixed berries',qty:80,unit:'g',category:'Produce',buyDayBefore:true},{name:'Honey',qty:1,unit:'tbsp',category:'Pantry',buyDayBefore:false}],steps:['Simmer oats with milk 5 min.','Top with berries and honey.']},
+  {id:'b10',type:'breakfast',name:'Cottage cheese & tomato',desc:'Cottage cheese, tomato, rye',time:5,difficulty:1,emoji:'🍅',img:'toast',tags:['vegetarian'],kcal:350,protein:26,ingredients:[
+    {name:'Cottage cheese',qty:180,unit:'g',category:'Dairy',buyDayBefore:false},{name:'Tomato',qty:1,unit:'',category:'Produce',buyDayBefore:false},{name:'Rye bread',qty:2,unit:'slices',category:'Bakery',buyDayBefore:true}],steps:['Spoon cottage cheese onto the rye.','Top with sliced tomato, salt and pepper.']},
+  {id:'b11',type:'breakfast',name:'Banana pancakes',desc:'Banana, eggs, flour',time:14,difficulty:2,emoji:'🥞',img:'pancake',tags:['vegetarian'],kcal:470,protein:18,ingredients:[
+    {name:'Banana',qty:1,unit:'',category:'Produce',buyDayBefore:false},{name:'Eggs',qty:2,unit:'',category:'Dairy',buyDayBefore:false},{name:'Flour',qty:60,unit:'g',category:'Pantry',buyDayBefore:false}],steps:['Mash banana, whisk in eggs and flour.','Fry small pancakes 2 min a side.']},
+  {id:'b12',type:'breakfast',name:'Baked eggs in tomato',desc:'Eggs, tomato, pepper, bread',time:16,difficulty:2,emoji:'🍳',img:'egg',tags:['vegetarian'],kcal:440,protein:22,ingredients:[
+    {name:'Eggs',qty:2,unit:'',category:'Dairy',buyDayBefore:false},{name:'Chopped tomatoes',qty:0.5,unit:'can',category:'Pantry',buyDayBefore:false},{name:'Bell pepper',qty:0.5,unit:'',category:'Produce',buyDayBefore:false},{name:'Bread',qty:1,unit:'slices',category:'Bakery',buyDayBefore:true}],steps:['Simmer tomato and pepper with spices.','Crack in the eggs, cover, cook 6 min.','Serve with bread.']},
+  {id:'l8',type:'lunch',name:'Greek salad & pita',desc:'Feta, cucumber, olives, pita',time:10,difficulty:1,emoji:'🥗',img:'salad',tags:['vegetarian'],kcal:520,protein:19,ingredients:[
+    {name:'Feta',qty:60,unit:'g',category:'Dairy',buyDayBefore:false},{name:'Cucumber',qty:1,unit:'',category:'Produce',buyDayBefore:false},{name:'Olives',qty:40,unit:'g',category:'Pantry',buyDayBefore:false},{name:'Pita bread',qty:1,unit:'',category:'Bakery',buyDayBefore:true}],steps:['Chop cucumber and tomato, add olives and feta.','Dress with olive oil; serve with warm pita.']},
+  {id:'l9',type:'lunch',name:'Ham & cheese toastie',desc:'Ham, cheese, bread, salad',time:9,difficulty:1,emoji:'🥪',img:'toast',tags:[],kcal:560,protein:32,ingredients:[
+    {name:'Ham',qty:80,unit:'g',category:'Meat & Fish',buyDayBefore:true},{name:'Cheese',qty:50,unit:'g',category:'Dairy',buyDayBefore:false},{name:'Bread',qty:2,unit:'slices',category:'Bakery',buyDayBefore:true},{name:'Salad greens',qty:40,unit:'g',category:'Produce',buyDayBefore:true}],steps:['Build the sandwich with ham and cheese.','Toast until golden; serve with greens.']},
+  {id:'l10',type:'lunch',name:'Sweet potato & chickpea bowl',desc:'Sweet potato, chickpeas, yogurt',time:25,difficulty:2,emoji:'🍠',img:'bowl',tags:['vegetarian'],kcal:590,protein:21,ingredients:[
+    {name:'Sweet potato',qty:1,unit:'',category:'Produce',buyDayBefore:false},{name:'Chickpeas',qty:1,unit:'can',category:'Pantry',buyDayBefore:false},{name:'Greek yogurt',qty:60,unit:'g',category:'Dairy',buyDayBefore:false}],steps:['Roast diced sweet potato and chickpeas 20 min.','Serve with a spoonful of yogurt.']},
+  {id:'d8',type:'dinner',name:'Roast chicken & veg',desc:'Chicken thighs, carrot, potato',time:40,difficulty:2,emoji:'🍗',img:'chicken',tags:[],kcal:680,protein:46,ingredients:[
+    {name:'Chicken thighs',qty:200,unit:'g',category:'Meat & Fish',buyDayBefore:true},{name:'Carrot',qty:2,unit:'',category:'Produce',buyDayBefore:false},{name:'Potato',qty:2,unit:'',category:'Produce',buyDayBefore:false}],steps:['Toss chicken and veg with oil and herbs.','Roast 35 min at 200°C, turning once.']},
+  {id:'d9',type:'dinner',name:'Cod & lemon potatoes',desc:'Cod, potato, lemon, greens',time:32,difficulty:2,emoji:'🐟',img:'fish',tags:['fish'],kcal:600,protein:42,ingredients:[
+    {name:'Cod fillet',qty:160,unit:'g',category:'Meat & Fish',buyDayBefore:true},{name:'Potato',qty:2,unit:'',category:'Produce',buyDayBefore:false},{name:'Lemon',qty:1,unit:'',category:'Produce',buyDayBefore:false},{name:'Green beans',qty:120,unit:'g',category:'Produce',buyDayBefore:false}],steps:['Roast sliced potato 20 min.','Add cod and lemon, roast 12 min more.','Steam the beans and serve.']},
+  {id:'d10',type:'dinner',name:'Pea & lemon risotto',desc:'Rice, peas, parmesan, lemon',time:35,difficulty:3,emoji:'🍚',img:'rice',tags:['vegetarian'],kcal:640,protein:22,ingredients:[
+    {name:'Risotto rice',qty:90,unit:'g',category:'Pantry',buyDayBefore:false},{name:'Peas',qty:120,unit:'g',category:'Frozen',buyDayBefore:false},{name:'Parmesan',qty:30,unit:'g',category:'Dairy',buyDayBefore:false},{name:'Lemon',qty:0.5,unit:'',category:'Produce',buyDayBefore:false}],steps:['Toast the rice, then add stock a ladle at a time.','Stir in peas near the end.','Finish with parmesan and lemon zest.']},
+  {id:'d11',type:'dinner',name:'Turkey meatballs & pasta',desc:'Turkey mince, tomato, pasta',time:30,difficulty:2,emoji:'🍝',img:'pasta',tags:[],kcal:700,protein:45,ingredients:[
+    {name:'Turkey mince',qty:150,unit:'g',category:'Meat & Fish',buyDayBefore:true},{name:'Chopped tomatoes',qty:1,unit:'can',category:'Pantry',buyDayBefore:false},{name:'Pasta',qty:100,unit:'g',category:'Pantry',buyDayBefore:false}],steps:['Roll the mince into small meatballs and brown them.','Add tomatoes, simmer 15 min.','Serve over pasta.']},
 ];
 
 /* Starters (light) & desserts — courses for lunch/dinner (§3). Kept lighter than mains. */
@@ -77,6 +102,24 @@ const STARTERS = [
     {name:'Tomato',qty:2,unit:'',category:'Produce',buyDayBefore:false},{name:'Rice',qty:40,unit:'g',category:'Pantry',buyDayBefore:false}],steps:['Hollow the tomatoes, fill with cooked herby rice.','Bake 15 min.']},
   {id:'s14',type:'starter',name:'Corn on the cob',desc:'Corn, butter, salt',time:12,difficulty:1,emoji:'🌽',img:'corn',tags:['vegetarian'],kcal:170,protein:5,ingredients:[
     {name:'Corn cob',qty:1,unit:'',category:'Produce',buyDayBefore:false},{name:'Butter',qty:10,unit:'g',category:'Dairy',buyDayBefore:false}],steps:['Boil the corn 8 min.','Brush with butter and season.']},
+  // --- extra starters: lunch AND dinner can each take one, so the pool needs slack for
+  //     dietary filtering (14 slots/week at most) — keeps the no-repeat rule honest.
+  {id:'s15',type:'starter',name:'Cucumber & dill salad',desc:'Cucumber, dill, vinegar',time:6,difficulty:1,emoji:'🥒',img:'salad',tags:['vegetarian','vegan'],kcal:90,protein:2,ingredients:[
+    {name:'Cucumber',qty:1,unit:'',category:'Produce',buyDayBefore:false},{name:'Fresh dill',qty:1,unit:'handful',category:'Produce',buyDayBefore:true}],steps:['Slice cucumber thinly.','Toss with dill, vinegar and a pinch of sugar.']},
+  {id:'s16',type:'starter',name:'Roasted pepper soup',desc:'Peppers, onion, paprika',time:22,difficulty:2,emoji:'🌶',img:'soup',tags:['vegetarian','vegan'],kcal:140,protein:3,ingredients:[
+    {name:'Bell pepper',qty:2,unit:'',category:'Produce',buyDayBefore:false},{name:'Onion',qty:1,unit:'',category:'Produce',buyDayBefore:false}],steps:['Roast peppers and onion 15 min.','Blend with water and paprika.']},
+  {id:'s17',type:'starter',name:'Olives & crudités',desc:'Olives, celery, radish',time:5,difficulty:1,emoji:'🫒',img:'olive',tags:['vegetarian','vegan'],kcal:130,protein:2,ingredients:[
+    {name:'Olives',qty:60,unit:'g',category:'Pantry',buyDayBefore:false},{name:'Celery',qty:2,unit:'sticks',category:'Produce',buyDayBefore:false},{name:'Radish',qty:4,unit:'',category:'Produce',buyDayBefore:true}],steps:['Arrange olives and cut vegetables on a plate.']},
+  {id:'s18',type:'starter',name:'Lentil & herb salad',desc:'Lentils, parsley, lemon',time:12,difficulty:1,emoji:'🥗',img:'lentil',tags:['vegetarian','vegan'],kcal:190,protein:11,ingredients:[
+    {name:'Cooked lentils',qty:120,unit:'g',category:'Pantry',buyDayBefore:false},{name:'Parsley',qty:1,unit:'handful',category:'Produce',buyDayBefore:true},{name:'Lemon',qty:0.5,unit:'',category:'Produce',buyDayBefore:false}],steps:['Toss lentils with chopped parsley.','Dress with lemon and olive oil.']},
+  {id:'s19',type:'starter',name:'Grilled asparagus',desc:'Asparagus, oil, lemon',time:10,difficulty:1,emoji:'🌿',img:'asparagus',tags:['vegetarian','vegan'],kcal:110,protein:4,ingredients:[
+    {name:'Asparagus',qty:150,unit:'g',category:'Produce',buyDayBefore:true},{name:'Lemon',qty:0.5,unit:'',category:'Produce',buyDayBefore:false}],steps:['Griddle asparagus 5 min, turning.','Finish with lemon and sea salt.']},
+  {id:'s20',type:'starter',name:'Watermelon & mint',desc:'Watermelon, mint, lime',time:5,difficulty:1,emoji:'🍉',img:'melon',tags:['vegetarian','vegan'],kcal:100,protein:2,ingredients:[
+    {name:'Watermelon',qty:250,unit:'g',category:'Produce',buyDayBefore:true},{name:'Fresh mint',qty:1,unit:'handful',category:'Produce',buyDayBefore:true}],steps:['Cube the watermelon.','Scatter mint and squeeze over lime.']},
+  {id:'s21',type:'starter',name:'Butternut soup',desc:'Squash, onion, stock',time:25,difficulty:2,emoji:'🎃',img:'soup',tags:['vegetarian','vegan'],kcal:160,protein:4,ingredients:[
+    {name:'Butternut squash',qty:250,unit:'g',category:'Produce',buyDayBefore:false},{name:'Onion',qty:1,unit:'',category:'Produce',buyDayBefore:false}],steps:['Soften onion, add squash and water.','Simmer 18 min, then blend.']},
+  {id:'s22',type:'starter',name:'Avocado on rye',desc:'Avocado, rye, chilli',time:6,difficulty:1,emoji:'🥑',img:'avocado',tags:['vegetarian','vegan'],kcal:210,protein:5,ingredients:[
+    {name:'Avocado',qty:0.5,unit:'',category:'Produce',buyDayBefore:true},{name:'Rye bread',qty:1,unit:'slices',category:'Bakery',buyDayBefore:true}],steps:['Mash avocado onto the rye.','Season with chilli flakes and salt.']},
 ];
 const DESSERTS = [
   {id:'x1',type:'dessert',name:'Fresh fruit salad',desc:'Seasonal fruit, mint',time:6,difficulty:1,emoji:'🍓',img:'fruit,salad',tags:['vegetarian','vegan'],kcal:120,protein:2,ingredients:[
@@ -107,6 +150,23 @@ const DESSERTS = [
     {name:'Mango sorbet',qty:2,unit:'scoops',category:'Frozen',buyDayBefore:false}],steps:['Scoop sorbet into a bowl and serve.']},
   {id:'x14',type:'dessert',name:'Chocolate mousse',desc:'Chocolate, egg',time:15,difficulty:3,emoji:'🍫',img:'chocolate,mousse',tags:['vegetarian'],kcal:230,protein:6,ingredients:[
     {name:'Dark chocolate',qty:40,unit:'g',category:'Pantry',buyDayBefore:false},{name:'Eggs',qty:1,unit:'',category:'Dairy',buyDayBefore:false}],steps:['Melt chocolate, fold into whisked egg white.','Chill 1 hour before serving.']},
+  // --- extra desserts: same reason as the starters above (up to 14 slots a week).
+  {id:'x15',type:'dessert',name:'Apple compote',desc:'Apple, cinnamon',time:15,difficulty:1,emoji:'🍎',img:'apple',tags:['vegetarian','vegan'],kcal:120,protein:1,ingredients:[
+    {name:'Apple',qty:2,unit:'',category:'Produce',buyDayBefore:false}],steps:['Simmer chopped apple with a splash of water 12 min.','Stir in cinnamon; serve warm or cold.']},
+  {id:'x16',type:'dessert',name:'Strawberries & balsamic',desc:'Strawberries, balsamic',time:5,difficulty:1,emoji:'🍓',img:'berries',tags:['vegetarian','vegan'],kcal:110,protein:1,ingredients:[
+    {name:'Strawberries',qty:150,unit:'g',category:'Produce',buyDayBefore:true}],steps:['Halve the strawberries.','Drizzle with a little balsamic and let sit 5 min.']},
+  {id:'x17',type:'dessert',name:'Frozen grapes',desc:'Grapes, straight from the freezer',time:3,difficulty:1,emoji:'🍇',img:'grapes',tags:['vegetarian','vegan'],kcal:100,protein:1,ingredients:[
+    {name:'Grapes',qty:150,unit:'g',category:'Produce',buyDayBefore:true}],steps:['Freeze the grapes ahead of time.','Serve straight from the freezer.']},
+  {id:'x18',type:'dessert',name:'Pineapple carpaccio',desc:'Pineapple, lime, mint',time:8,difficulty:1,emoji:'🍍',img:'pineapple',tags:['vegetarian','vegan'],kcal:120,protein:1,ingredients:[
+    {name:'Pineapple',qty:200,unit:'g',category:'Produce',buyDayBefore:true},{name:'Fresh mint',qty:1,unit:'handful',category:'Produce',buyDayBefore:true}],steps:['Slice the pineapple very thinly.','Finish with lime zest and mint.']},
+  {id:'x19',type:'dessert',name:'Coconut rice pudding',desc:'Rice, coconut milk',time:22,difficulty:2,emoji:'🥥',img:'rice,pudding',tags:['vegetarian','vegan'],kcal:230,protein:4,ingredients:[
+    {name:'Rice',qty:40,unit:'g',category:'Pantry',buyDayBefore:false},{name:'Coconut milk',qty:200,unit:'ml',category:'Pantry',buyDayBefore:false}],steps:['Simmer rice in coconut milk 18 min.','Sweeten to taste and serve warm.']},
+  {id:'x20',type:'dessert',name:'Blueberry oat crumble',desc:'Blueberries, oats, honey',time:20,difficulty:2,emoji:'🫐',img:'berries',tags:['vegetarian'],kcal:210,protein:4,ingredients:[
+    {name:'Blueberries',qty:120,unit:'g',category:'Produce',buyDayBefore:true},{name:'Oats',qty:30,unit:'g',category:'Pantry',buyDayBefore:false},{name:'Honey',qty:1,unit:'tbsp',category:'Pantry',buyDayBefore:false}],steps:['Top the berries with oats and honey.','Bake 15 min until bubbling.']},
+  {id:'x21',type:'dessert',name:'Roasted plums',desc:'Plums, honey, vanilla',time:18,difficulty:1,emoji:'🍑',img:'plum',tags:['vegetarian','vegan'],kcal:130,protein:1,ingredients:[
+    {name:'Plums',qty:3,unit:'',category:'Produce',buyDayBefore:true},{name:'Honey',qty:1,unit:'tbsp',category:'Pantry',buyDayBefore:false}],steps:['Halve the plums, drizzle with honey.','Roast 15 min at 190°C.']},
+  {id:'x22',type:'dessert',name:'Figs & honey',desc:'Fresh figs, honey',time:4,difficulty:1,emoji:'🍯',img:'fig',tags:['vegetarian','vegan'],kcal:150,protein:2,ingredients:[
+    {name:'Figs',qty:3,unit:'',category:'Produce',buyDayBefore:true},{name:'Honey',qty:1,unit:'tbsp',category:'Pantry',buyDayBefore:false}],steps:['Quarter the figs.','Drizzle generously with honey.']},
 ];
 // Which courses a lunch/dinner gets, driven by goal & appetite (§3.1). 'main' is always present.
 function coursesForGoal(goal){
@@ -371,6 +431,7 @@ function generateWeek(profile){
 function enforceNoRepeat(week,profile){
   const n=Math.max(1,Number(profile.people)||1);
   const seen=new Set();
+  const unresolved=[];          // dishes we genuinely couldn't replace (pool exhausted)
   week.forEach(day=>day.meals.forEach(meal=>{
     if(!meal.recipe) return;
     const nm=meal.recipe.name.toLowerCase();
@@ -382,8 +443,13 @@ function enforceNoRepeat(week,profile){
     if(fresh.length){
       const r=fresh[Math.floor(Math.random()*fresh.length)];
       meal.recipe=scaleRecipe(r,n); seen.add(r.name.toLowerCase());
-    } else { seen.add(nm); }   // pool exhausted (tiny offline set) — leave it; AI weeks won't hit this
+    } else {
+      // The built-in recipe book has no other dish this person can eat. Rather than hide it,
+      // record it so the planner can say so honestly (AI weeks don't hit this).
+      unresolved.push(meal.recipe.name); seen.add(nm);
+    }
   }));
+  state.repeatedDishes=[...new Set(unresolved)];
   return week;
 }
 function swapMeal(di,mi){
@@ -1281,6 +1347,8 @@ function planBodyHtml(){
   }
   if(state.usedFallback)html+=`<div class="notice">⚠️ Backend offline — showing built-in meals, not AI (no budget/prices).</div>`;
   else if(!state.useAI)html+=`<div class="notice info">ℹ️ Showing built-in meals — AI generation is off. Tick "Use real AI generation" on the profile page for a personalized week.</div>`;
+  // Be honest when the built-in recipe book simply can't fill the week without repeating.
+  if(state.repeatedDishes&&state.repeatedDishes.length)html+=`<div class="notice">🔁 Your allergies and dislikes leave only a few matching dishes, so ${state.repeatedDishes.length===1?'one dish repeats':state.repeatedDishes.length+' dishes repeat'} this week (${state.repeatedDishes.join(', ')}). Turning on <b>AI generation</b> gives you a fully unique week.</div>`;
   state.week.forEach((day,di)=>{
     const kc=dayKcal(day);
     html+=`<div class="day-block"><div class="day-head"><h3 class="day-title">${day.day}</h3>
