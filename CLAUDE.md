@@ -85,9 +85,23 @@ and a classic POST over http). Replaced by `send-feedback`. Don't reintroduce it
 - **Two false alarms worth remembering:** a `pantryHidden: 0` reading was legitimate (that week simply
   contained no pantry item — `pantryHas()` unit-tests correctly); and a `viewport: 0` reading was a
   browser-pane glitch from toggling sizes, not a layout bug. Re-test in a fresh pane before chasing either.
-- **🔴 UNVERIFIED: the AI-ON path.** Phase 6b changed the AI response shape to 3-course `courses`
-  objects and Phase 5 changed the profile fields. Lucille must run **one** week with "Use real AI
-  generation" ticked and report what happens. Gemini free tier = **20 requests/day** — don't burn it.
+- **✅ AI-ON PATH TESTED & FIXED (2026-07-20).** Real Gemini response verified end-to-end: 7 days,
+  49 dishes, **zero duplicates**, correct starter/main/dessert shape, breakfast flat, no invented
+  URLs, nut allergy + mushroom dislike respected. Client parse → 49 meal cards, shopping 83 items /
+  €107.30 with real prices, 2 pantry items hidden, 7 recipe links, 14 calendar events, no console errors.
+  Three real bugs were found and fixed:
+  1. **Model availability is unreliable on the free tier.** `gemini-flash-latest` returned **503
+     "high demand"** for minutes; `gemini-2.5-flash` is **retired (404)**; `gemini-2.0-flash` has
+     **no free quota (429)**. `server.js` now has a **`MODEL_CHAIN`** that falls through
+     (`MODEL` env → `gemini-flash-latest` → **`gemini-flash-lite-latest`** ← verified working →
+     `gemini-2.0-flash-lite`), with 1.5 s backoff and no retry on non-retryable errors.
+     **If AI ever "stops working", check for 503 first — it's usually Google, not our code.**
+  2. **The lite model returned a valid but 1-day week.** The prompt now states the 7-day rule up
+     front, names all seven days, and says a short week is invalid.
+  3. **Safety net:** `requestWeekAI()` tops a short week up from the built-in pool, sets
+     `state.partialAI`, and the planner explains it — never a broken 1-day plan.
+- Gemini free tier = **20 requests/day** — don't burn it on casual testing. To re-test the client
+  parser without spending quota, save a real response and stub `fetch` for `/generate-week`.
 
 ### Offline recipe pool (the AI-OFF fallback)
 12 breakfasts · 10 lunches · 11 dinners · 22 starters · 22 desserts.
@@ -101,7 +115,7 @@ repeated dishes and pointing at AI generation. Don't "fix" that notice by hiding
 2. **Lucille:** deploy both Edge Functions, add the `RESEND_API_KEY` secret, install pg_net, create
    the cron job. **Until `send-feedback` is deployed the in-app feedback form fails** (the live app
    already points at that URL).
-3. **Together:** one AI-ON test week; fix whatever the real Gemini response reveals.
+3. ~~AI-ON test~~ ✅ **DONE 2026-07-20** — tested, three bugs found and fixed (see above). Deploy the fix by pushing.
 4. **V3 REDESIGN → `docs/V3-REDESIGN-BRIEF.md`** (already written & approved): deep walnut + emerald
    + gold-spark palette, one-page planner with `My Meal Plan` / `Shop Ingredients` tabs, day sidebar,
    filter row, image-on-top cards, dessert + starter browse sections, shopping total moved to the
