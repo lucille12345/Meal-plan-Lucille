@@ -530,8 +530,10 @@ function downloadICS(){
   setTimeout(()=>URL.revokeObjectURL(url),1000);
   showToast('📅 Calendar file downloaded — open it to add your week');
 }
-// Feedback → FormSubmit.co AJAX endpoint for Lucille (no account; she confirms once by email).
-const FEEDBACK_ENDPOINT='https://formsubmit.co/ajax/lucillemonamie@icloud.com';
+// Feedback → our own Supabase Edge Function, which emails Lucille via Resend.
+// (Replaced FormSubmit: its one-time confirmation email never arrived.)
+const FEEDBACK_ENDPOINT=(window.SUPABASE_CONFIG&&window.SUPABASE_CONFIG.url)
+  ? window.SUPABASE_CONFIG.url.replace(/\/$/,'')+'/functions/v1/send-feedback' : '';
 function openFeedback(){
   document.querySelectorAll('.fb-overlay').forEach(el=>el.remove());
   const ov=document.createElement('div'); ov.className='fb-overlay';
@@ -559,8 +561,11 @@ function openFeedback(){
     if(msg.length<2){ err.textContent='Please write a short message first.'; err.style.display='block'; return; }
     const btn=ov.querySelector('#fbSend'); btn.disabled=true; btn.textContent='Sending…';
     try{
-      const res=await fetch(FEEDBACK_ENDPOINT,{method:'POST',headers:{'content-type':'application/json',accept:'application/json'},
-        body:JSON.stringify({message:msg,email:email||'(not given)',_subject:'#Foodie feedback 🍽',_template:'table'})});
+      if(!FEEDBACK_ENDPOINT) throw new Error('no endpoint configured');
+      const key=(window.SUPABASE_CONFIG&&window.SUPABASE_CONFIG.anonKey)||'';
+      const res=await fetch(FEEDBACK_ENDPOINT,{method:'POST',
+        headers:{'content-type':'application/json',...(key?{apikey:key,Authorization:'Bearer '+key}:{})},
+        body:JSON.stringify({message:msg,email:email||'',hp:''})});
       if(!res.ok)throw new Error('status '+res.status);
       close(); showToast('✓ Sent — thank you! 💛');
     }catch(e){ btn.disabled=false; btn.textContent='Send to Lucille →';
