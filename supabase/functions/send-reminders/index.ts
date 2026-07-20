@@ -76,6 +76,10 @@ Deno.serve(async () => {
   if (!RESEND_API_KEY) {
     return new Response(JSON.stringify({ error: 'RESEND_API_KEY secret is not set' }), { status: 500 });
   }
+  // Optional secret. Resend's free tier (no verified domain) only delivers to the address the
+  // Resend account was created with — anything else comes back 403. Set TEST_EMAIL_TO to that
+  // address to route every reminder there while testing. Remove it once a domain is verified.
+  const TEST_EMAIL_TO = Deno.env.get('TEST_EMAIL_TO');
 
   const supabase = createClient(
     Deno.env.get('SUPABASE_URL')!,
@@ -106,18 +110,20 @@ Deno.serve(async () => {
     const email = userRes?.user?.email;
     if (!email) { results.push({ user: row.user_id, sent: false, reason: 'no email' }); continue; }
 
+    const to = TEST_EMAIL_TO || email;
     const res = await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: { Authorization: `Bearer ${RESEND_API_KEY}`, 'content-type': 'application/json' },
       body: JSON.stringify({
         from: '#Foodie <onboarding@resend.dev>',   // ← swap for your own domain once verified
-        to: email,
+        to,
         subject: `🛒 Tonight: buy for tomorrow (${items.length} item${items.length === 1 ? '' : 's'})`,
         html: emailHtml(row.state?.profile?.name ?? '', items),
       }),
     });
 
-    results.push({ user: row.user_id, sent: res.ok, status: res.status, items: items.length });
+    const detail = res.ok ? undefined : await res.text();
+    results.push({ user: row.user_id, sent: res.ok, status: res.status, to, items: items.length, detail });
   }
 
   return new Response(JSON.stringify({ day: todayName, results }, null, 2), {
