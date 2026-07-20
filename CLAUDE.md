@@ -107,12 +107,26 @@ repeated dishes and pointing at AI generation. Don't "fix" that notice by hiding
    filter row, image-on-top cards, dessert + starter browse sections, shopping total moved to the
    bottom and supplied by Gemini, delete the 1·2·3 step bar. **Big job — give it its own session.**
 5. **Phase 11:** Tauri desktop wrapper over `/public` → `.dmg`/`.exe` via GitHub Releases.
-6. **🔵 REQUESTED, NOT STARTED — curated recipe database.** Lucille asked for a separate data file of
-   real researched dishes (starters, breakfasts, desserts, and *many* mains) — each with recipe link,
-   a good photo, ingredients **with quantities** (g/ml/tsp), kcal, time, difficulty, protein — clearly
-   separated so she can keep adding to it. **The app must use this database FIRST**, and only fall
-   back to Gemini to invent extra variety when it runs short. This also widens what users can browse.
-   Add the step-by-step wiring instructions into the V3 brief as part of the work.
+6. **🟡 CURATED RECIPE DATABASE — DATA BUILT, WIRING NOT DONE (2026-07-20).**
+   - **Built:** `public/recipes-db.js` (`RECIPES_DB`, 28 real dishes — 5 breakfasts, 6 starters,
+     12 mains, 5 desserts), `docs/RECIPE-DATABASE.md` (generated catalogue), and
+     `tools/build-recipe-md.js` (regenerates the .md from the .js — **the .js is the only source of
+     truth; never hand-edit the .md**). Every link, photo, kcal and protein figure was read from the
+     recipe sites' schema.org data; all 28 links + 28 photos verified HTTP 200. Sources: Love &
+     Lemons, Cookie and Kate, Budget Bytes.
+   - **NOT done: the app doesn't use it yet.** Nothing in `app.js`/`index.html`/`sw.js` was changed,
+     so there is zero regression risk from the data landing. The full step-by-step wiring is
+     **`docs/V3-REDESIGN-BRIEF.md` §9** and it is now **step 0 of the V3 build order** (§3 and §4
+     depend on it).
+   - **Allergy bug found and fixed in the data:** `passesDietFilters()` guesses allergens by regex
+     over ingredient names, and that regex misses `Baguette`, `Spaghetti`, `Savoiardi ladyfingers`
+     (gluten) and every `Soy sauce` — 6 of the 28 dishes would have been served to someone who
+     ticked that allergy. Each dish now carries an explicit `contains:[…]` array, and §9 step 3
+     makes it win over the regex. **Verified:** ticking Gluten correctly drops bruschetta, tiramisu
+     and bolognese; ticking Soy drops teriyaki salmon, Thai curry and sriracha chicken.
+   - **Measured coverage** (simulating the §9 step-5 picker against the real data): a main-only week
+     fills **20 of 21** slots from the database; a 3-course "Get stronger" week fills 31 of 49,
+     short on starters/desserts (needs 14 each, has 6 and 5). **Add desserts and starters first.**
 
 > **DESIGN SESSION — DONE (2026-07-19).** The `docs/DESIGN-BRIEF.md` "Table" design session is
 > complete. A new **`docs/design/`** folder now exists in the repo with every deliverable from the
