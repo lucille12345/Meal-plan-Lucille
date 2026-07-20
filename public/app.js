@@ -515,7 +515,7 @@ async function requestWeekAI(profile){
   const data=await res.json();
   if(!data.week)throw new Error('bad response');
   // AI shape v3: breakfast is a recipe; lunch/dinner carry a `courses` object. Flatten to slots.
-  return data.week.map(day=>{
+  const week=data.week.map((day,i)=>{
     const meals=[];
     (day.meals||[]).forEach(m=>{
       const mealType=m.type||'dinner';
@@ -525,8 +525,17 @@ async function requestWeekAI(profile){
         meals.push(aiSlot(mealType,'main',m));   // breakfast, or a flat meal (back-compat)
       }
     });
-    return {day:day.day,meals};
+    return {day:day.day||DAYS[i],meals};
   });
+  // Safety net: smaller Gemini models sometimes return a partial week (seen: 1 day instead of 7).
+  // Rather than show a broken plan, top the missing days up from the built-in pool.
+  if(week.length<DAYS.length){
+    console.warn(`AI returned only ${week.length} day(s); filling the rest from the built-in recipes.`);
+    const filler=generateWeek(profile);
+    for(let i=week.length;i<DAYS.length;i++) week.push(filler[i]);
+    state.partialAI=true;
+  } else state.partialAI=false;
+  return week.slice(0,DAYS.length);
 }
 async function requestSwapAI(profile,role,avoidNames){
   const res=await fetch(BACKEND_URL+'/generate-meal',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({profile,type:role,avoidNames})});
@@ -1346,6 +1355,7 @@ function planBodyHtml(){
       <div class="tgt-sub">Estimated from your height, weight, age, activity and goal (Mifflin–St Jeor).${perLine}</div></div></div>`;
   }
   if(state.usedFallback)html+=`<div class="notice">⚠️ Backend offline — showing built-in meals, not AI (no budget/prices).</div>`;
+  else if(state.partialAI)html+=`<div class="notice">ℹ️ The AI returned a short week this time, so the later days come from the built-in recipes. Re-plan to try the AI again.</div>`;
   else if(!state.useAI)html+=`<div class="notice info">ℹ️ Showing built-in meals — AI generation is off. Tick "Use real AI generation" on the profile page for a personalized week.</div>`;
   // Be honest when the built-in recipe book simply can't fill the week without repeating.
   if(state.repeatedDishes&&state.repeatedDishes.length)html+=`<div class="notice">🔁 Your allergies and dislikes leave only a few matching dishes, so ${state.repeatedDishes.length===1?'one dish repeats':state.repeatedDishes.length+' dishes repeat'} this week (${state.repeatedDishes.join(', ')}). Turning on <b>AI generation</b> gives you a fully unique week.</div>`;

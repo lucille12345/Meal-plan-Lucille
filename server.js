@@ -158,8 +158,14 @@ Rules: portions per ONE person (see PORTION SIZES). Match difficulty/time to coo
 COURSES — lunch and dinner are multi-course for this person: ${courseList}. Starters and desserts are LIGHTER than the main (starter ≈ 120-220 kcal, dessert ≈ 120-220 kcal). ${courses.includes('starter') ? '' : 'No starter. '}${courses.includes('dessert') ? '' : 'No dessert. '}Breakfast is a single ${brk} dish.`;
 
   if (mode === 'week') {
-    return `You are a meal-planning assistant. Create a 7-day meal plan personalised to this person.
-CRITICAL: every dish name must be UNIQUE across the ENTIRE week — no dish (main, starter or dessert) may appear twice, on any day. A repeated name makes the whole response invalid. Favor the cuisines they love.
+    return `You are a meal-planning assistant. Create a FULL 7-DAY meal plan personalised to this person.
+
+CRITICAL — LENGTH: the "week" array MUST contain EXACTLY 7 day objects, in this order:
+Monday, Tuesday, Wednesday, Thursday, Friday, Saturday, Sunday.
+Do NOT stop after one day. Do NOT return a partial week. A response with fewer than 7 days is invalid
+and will be rejected. Keep each recipe concise so all 7 days fit in one response.
+
+CRITICAL — NO REPEATS: every dish name must be UNIQUE across the ENTIRE week — no dish (main, starter or dessert) may appear twice, on any day. A repeated name makes the whole response invalid. Favor the cuisines they love.
 ${who}
 ${portions}
 ${pricing}
@@ -194,8 +200,19 @@ function sanitizeJson(text) {
   t = t.replace(/,(\s*[}\]])/g, '$1');
   return t;
 }
-async function callAIonce(prompt) {
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent`;
+// Google's capacity varies a lot on the free tier: `gemini-flash-latest` returned 503 ("high
+// demand") for minutes on end, and some pinned models 404 (retired) or 429 (no free quota).
+// So we try a chain and use the first that answers. MODEL env var still wins as the first choice.
+const MODEL_CHAIN = [...new Set([
+  MODEL,
+  'gemini-flash-latest',
+  'gemini-flash-lite-latest',   // verified working 2026-07-20 when the others were 503
+  'gemini-2.0-flash-lite',
+])];
+const RETRYABLE = /\b(429|500|502|503|504)\b|UNAVAILABLE|overloaded|high demand/i;
+
+async function callAIonce(prompt, model = MODEL) {
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`;
   const res = await fetch(url, {
     method: 'POST',
     headers: { 'content-type': 'application/json', 'x-goog-api-key': API_KEY },
@@ -212,11 +229,23 @@ async function callAIonce(prompt) {
   if (finish && finish !== 'STOP') throw new Error(`Response cut off (finishReason=${finish})`);
   return JSON.parse(sanitizeJson(text));
 }
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
 async function callAI(prompt) {
   let lastErr;
-  for (let attempt = 1; attempt <= 2; attempt++) {
-    try { return await callAIonce(prompt); }
-    catch (e) { lastErr = e; console.warn(`Attempt ${attempt} failed: ${e.message}`); }
+  for (const model of MODEL_CHAIN) {
+    for (let attempt = 1; attempt <= 2; attempt++) {
+      try {
+        const out = await callAIonce(prompt, model);
+        if (model !== MODEL) console.log(`(used fallback model: ${model})`);
+        return out;
+      } catch (e) {
+        lastErr = e;
+        console.warn(`${model} attempt ${attempt} failed: ${e.message.slice(0, 120)}`);
+        if (!RETRYABLE.test(e.message)) break;      // 404/400 etc. → next model, don't retry this one
+        if (attempt === 1) await sleep(1500);        // brief backoff before the second try
+      }
+    }
   }
   throw lastErr;
 }
