@@ -130,17 +130,36 @@ repeated dishes and pointing at AI generation. Don't "fix" that notice by hiding
      Lemons, Cookie and Kate, Budget Bytes.
    - **NOT done: the app doesn't use it yet.** Nothing in `app.js`/`index.html`/`sw.js` was changed,
      so there is zero regression risk from the data landing. The full step-by-step wiring is
-     **`docs/V3-REDESIGN-BRIEF.md` §9** and it is now **step 0 of the V3 build order** (§3 and §4
-     depend on it).
+     **`docs/V3-REDESIGN-BRIEF.md` §0** (11 steps + a price table) and it is now **step 0 of the
+     V3 build order** (§3 and §4 depend on it).
    - **Allergy bug found and fixed in the data:** `passesDietFilters()` guesses allergens by regex
      over ingredient names, and that regex misses `Baguette`, `Spaghetti`, `Savoiardi ladyfingers`
      (gluten) and every `Soy sauce` — 6 of the 28 dishes would have been served to someone who
-     ticked that allergy. Each dish now carries an explicit `contains:[…]` array, and §9 step 3
+     ticked that allergy. Each dish now carries an explicit `contains:[…]` array, and §0.3 step 3
      makes it win over the regex. **Verified:** ticking Gluten correctly drops bruschetta, tiramisu
      and bolognese; ticking Soy drops teriyaki salmon, Thai curry and sriracha chicken.
-   - **Measured coverage** (simulating the §9 step-5 picker against the real data): a main-only week
+   - **Measured coverage** (simulating the §0.3 step-5 picker against the real data): a main-only week
      fills **20 of 21** slots from the database; a 3-course "Get stronger" week fills 31 of 49,
      short on starters/desserts (needs 14 each, has 6 and 5). **Add desserts and starters first.**
+   - **🟡 The one real conflict — prices. Data built, not yet wired.** Per-ingredient prices come
+     **only from Gemini** today. Making the database primary would blank the shopping total, the
+     €/day budget pill, the per-day € chips and §4's "Budget-friendly dinners" — a regression
+     against verified-working behaviour. **Built:** `public/ingredient-prices.js`
+     (`INGREDIENT_PRICES` + `estimateIngredientPrice()`, all 126 distinct ingredients used by
+     `recipes-db.js` priced — French supermarket, mid-range own-brand, 2026), plus
+     `docs/INGREDIENT-PRICES.md` and `tools/build-prices-md.js` (same generated-doc pattern as the
+     recipe database — never hand-edit the .md). Verified: 0 unpriced ingredients, and a simulated
+     week comes out at €4.79/day (mains only) to €6.17/day (3 courses) per person — believable, and
+     in the same range as the €107/week the real AI-ON test produced for a household. **Not yet
+     wired:** §0.4 has the one-line `priceOf()` change (AI price wins when present, this table is
+     the fallback) — that's steps 1a/1b of §0.3, still to be done in `app.js`.
+   - **🔴 Pre-existing shopping bug found (not caused by the database, but it makes it constant):**
+     `pantryHas()` substring-matches both directions, so a ticked pantry `Pepper` hides
+     **`Red bell pepper`**, `Rice` hides **`Rice wine`**, `Onion` hides **`Spring onions`** and
+     `Flour` hides **`Large flour tortilla`**. With a full pantry, **28 ingredients you must
+     actually buy vanish from the shopping list.** Fix is §0.3 step 8 (whole-word matching).
+   - **Don't build a `/generate-dishes` endpoint** — `requestSwapAI(profile, role, avoidNames)` →
+     `/generate-meal` already exists and is exactly the top-up primitive needed.
 
 > **DESIGN SESSION — DONE (2026-07-19).** The `docs/DESIGN-BRIEF.md` "Table" design session is
 > complete. A new **`docs/design/`** folder now exists in the repo with every deliverable from the
