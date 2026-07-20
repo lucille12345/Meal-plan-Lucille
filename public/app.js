@@ -494,7 +494,7 @@ function icsStamp(date,h,min){
 function icsEsc(s){ return String(s||'').replace(/\\/g,'\\\\').replace(/;/g,'\\;').replace(/,/g,'\\,').replace(/\n/g,'\\n'); }
 function buildICS(){
   const mon=weekMonday();
-  const lines=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Table//Meal Planner//EN','CALSCALE:GREGORIAN'];
+  const lines=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//#Foodie//Meal Planner//EN','CALSCALE:GREGORIAN'];
   let uid=0; const stampNow=icsStamp(new Date(),new Date().getHours(),new Date().getMinutes());
   const ev=(dayOffset,startH,startMin,endH,endMin,summary,desc)=>{
     const date=new Date(mon.getFullYear(),mon.getMonth(),mon.getDate()+dayOffset);
@@ -560,7 +560,7 @@ function openFeedback(){
     const btn=ov.querySelector('#fbSend'); btn.disabled=true; btn.textContent='Sending…';
     try{
       const res=await fetch(FEEDBACK_ENDPOINT,{method:'POST',headers:{'content-type':'application/json',accept:'application/json'},
-        body:JSON.stringify({message:msg,email:email||'(not given)',_subject:'Table feedback 🍽',_template:'table'})});
+        body:JSON.stringify({message:msg,email:email||'(not given)',_subject:'#Foodie feedback 🍽',_template:'table'})});
       if(!res.ok)throw new Error('status '+res.status);
       close(); showToast('✓ Sent — thank you! 💛');
     }catch(e){ btn.disabled=false; btn.textContent='Send to Lucille →';
@@ -655,7 +655,7 @@ function renderLanding(){
 
   <nav class="glass-nav">
     <div class="wrap nav-inner">
-      <div class="logo"><span class="mark" aria-hidden="true">🍽</span> Table</div>
+      <div class="logo"><span class="mark" aria-hidden="true">🍽</span> #Foodie</div>
       <div class="nav-links">
         <a class="txt hide-sm" href="#how">How it works</a>
         <a class="txt hide-sm" href="#preview">Recipes</a>
@@ -766,8 +766,8 @@ function renderLanding(){
     <div class="wrap">
       <div class="center"><div class="sec-kicker">Good questions</div><h2 style="margin:10px auto 0">Everything you might ask.</h2></div>
       <div class="faq">
-        <details open><summary>Is it really free? <span class="plus" aria-hidden="true">＋</span></summary><p>Yes — free forever, no card required. We built Table to be genuinely useful, not to upsell you.</p></details>
-        <details><summary>Do I need to cook every night? <span class="plus" aria-hidden="true">＋</span></summary><p>Not at all. Turn on "cook once, eat twice" and Table plans leftovers for you, doubling the right dinners so nothing goes to waste.</p></details>
+        <details open><summary>Is it really free? <span class="plus" aria-hidden="true">＋</span></summary><p>Yes — free forever, no card required. We built #Foodie to be genuinely useful, not to upsell you.</p></details>
+        <details><summary>Do I need to cook every night? <span class="plus" aria-hidden="true">＋</span></summary><p>Not at all. Turn on "cook once, eat twice" and #Foodie plans leftovers for you, doubling the right dinners so nothing goes to waste.</p></details>
         <details><summary>Can I swap meals I don't like? <span class="plus" aria-hidden="true">＋</span></summary><p>Tap ✕ on any dish to swap it instantly, or browse categories and add your own favorites to any day.</p></details>
         <details><summary>Where do the recipes link to? <span class="plus" aria-hidden="true">＋</span></summary><p>Every dish links to a real recipe search — no dead links, no fabricated pages. What you see is what you can cook.</p></details>
         <details><summary>Does my data stay mine? <span class="plus" aria-hidden="true">＋</span></summary><p>Always. Your profile and plans are yours; we never sell your data. You can export or delete everything anytime.</p></details>
@@ -783,14 +783,14 @@ function renderLanding(){
       </div>
       <div class="foot-grid">
         <div>
-          <div class="logo"><span class="mark" aria-hidden="true">🍽</span> Table</div>
+          <div class="logo"><span class="mark" aria-hidden="true">🍽</span> #Foodie</div>
           <p style="color:#C9C1B4;font-size:var(--fs-sm);margin-top:12px;max-width:34ch">Dinner, sorted. A calm little app for eating well all week — made with love in France.</p>
         </div>
         <div><h4>Product</h4><a href="#how">How it works</a><a href="#preview">The planner</a><a data-signin>Sign up</a></div>
         <div><h4>Company</h4><a data-signin>Get started</a><a data-signin>Our promise</a></div>
         <div><h4>Legal</h4><a data-signin>Privacy</a><a data-signin>Terms</a></div>
       </div>
-      <div class="baseline"><span>© 2026 Table · Bon appétit.</span><span>Free forever · Made in France 🇫🇷</span></div>
+      <div class="baseline"><span>© 2026 #Foodie · Bon appétit.</span><span>Free forever · Made in France 🇫🇷</span></div>
     </div>
   </footer>`;
   landingRoot.querySelectorAll('[data-signin]').forEach(el=>{ el.onclick=(e)=>{ e.preventDefault(); setScreen('signin'); }; });
@@ -813,7 +813,7 @@ function renderSignIn(){
   app.innerHTML=`
     <div class="card auth-card">
       <a class="top-back" id="backHome" role="button" tabindex="0">← Back home</a>
-      <h2>Welcome to Table</h2>
+      <h2>Welcome to #Foodie</h2>
       <p class="sub">Free forever. No card. Your data stays yours.</p>
       <div id="auth-form">
         <button class="btn-google" id="googleBtn" type="button"><span class="g" aria-hidden="true"></span> Continue with Google</button>

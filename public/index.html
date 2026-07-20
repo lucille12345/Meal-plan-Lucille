@@ -4,12 +4,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#FDFBF7">
-<title>Table — Weekly Meal Planner</title>
+<title>#Foodie — Weekly Meal Planner</title>
 <!-- PWA (Phase 9): installable on phone home-screen + desktop, offline app-shell -->
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icons/icon.svg">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="Table">
+<meta name="apple-mobile-web-app-title" content="#Foodie">
 <meta name="mobile-web-app-capable" content="yes">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -24,7 +24,7 @@
 <!-- the app itself (narrow, gated) -->
 <div class="app-shell" id="app-shell">
   <header class="app">
-    <h1><span class="mark" aria-hidden="true">🍽</span> Table</h1>
+    <h1><span class="mark" aria-hidden="true">🍽</span> #Foodie</h1>
     <p>A week of meals made for you — with recipes, prices and one shopping list.</p>
   </header>
   <div class="steps">
@@ -54,7 +54,7 @@
     if (document.getElementById('installBtn')) return;
     const b = document.createElement('button');
     b.id = 'installBtn';
-    b.textContent = '⬇︎ Install Table';
+    b.textContent = '⬇︎ Install #Foodie';
     b.className = 'install-fab';
     b.onclick = async () => {
       if (!deferredInstall) return;

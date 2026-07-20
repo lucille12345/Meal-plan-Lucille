@@ -1,4 +1,4 @@
-# 🍽 Table — weekly meal planner
+# 🍽 #Foodie — weekly meal planner
 
 A little app that builds you a personalised week of meals — with recipes, prices and one
 shopping list. Made for (and with) Lucille.

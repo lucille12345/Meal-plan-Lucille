@@ -1,5 +1,5 @@
 -- ============================================================================
--- Table — Supabase schema (Phase 3)
+-- #Foodie — Supabase schema (Phase 3)
 -- Paste this whole file into: Supabase dashboard → SQL Editor → New query → Run.
 -- Safe to re-run (uses IF NOT EXISTS / drop-and-recreate for policies).
 --

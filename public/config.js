@@ -1,5 +1,5 @@
 /* ============================================================================
-   Table — connection config
+   #Foodie — connection config
    ----------------------------------------------------------------------------
    Paste your Supabase project's values below to turn ON accounts + cloud sync.
    Leave BOTH empty to run in LOCAL-ONLY mode (no sign-in; saves to this browser

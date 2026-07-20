@@ -1,5 +1,5 @@
 /* ============================================================================
-   Table — Supabase integration (ES module)
+   #Foodie — Supabase integration (ES module)
    ----------------------------------------------------------------------------
    Activates ONLY when public/config.js has a url + anonKey. Otherwise the app
    runs in local-only mode and this module does nothing (app.js falls back to

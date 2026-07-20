@@ -1,6 +1,6 @@
 {
-  "name": "Table — Weekly Meal Planner",
-  "short_name": "Table",
+  "name": "#Foodie — Weekly Meal Planner",
+  "short_name": "#Foodie",
   "description": "A week of meals made for you — with recipes, prices and one shopping list.",
   "start_url": "./",
   "scope": "./",

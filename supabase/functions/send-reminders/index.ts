@@ -1,5 +1,5 @@
 // ============================================================================
-// Table — daily shopping reminder (Supabase Edge Function)
+// #Foodie — daily shopping reminder (Supabase Edge Function)
 // ----------------------------------------------------------------------------
 // Runs once a day (see the cron step in docs/SUPABASE-SETUP.md). For every user
 // it looks at their saved week, works out what needs buying TODAY, and emails
@@ -66,7 +66,7 @@ function emailHtml(name: string, items: string[]): string {
         ${name ? name + ', h' : 'H'}ere's the fresh bit of your list — everything else you already bought at the start of the week.
       </p>
       <ul style="list-style:none;padding:0;margin:0;font-size:15px">${rows}</ul>
-      <p style="color:#A39E95;font-size:12px;margin-top:22px">Sent by Table · your weekly meal planner</p>
+      <p style="color:#A39E95;font-size:12px;margin-top:22px">Sent by #Foodie · your weekly meal planner</p>
     </div>
   </div>`;
 }
@@ -110,7 +110,7 @@ Deno.serve(async () => {
       method: 'POST',
       headers: { Authorization: `Bearer ${RESEND_API_KEY}`, 'content-type': 'application/json' },
       body: JSON.stringify({
-        from: 'Table <onboarding@resend.dev>',   // ← swap for your own domain once verified
+        from: '#Foodie <onboarding@resend.dev>',   // ← swap for your own domain once verified
         to: email,
         subject: `🛒 Tonight: buy for tomorrow (${items.length} item${items.length === 1 ? '' : 's'})`,
         html: emailHtml(row.state?.profile?.name ?? '', items),
