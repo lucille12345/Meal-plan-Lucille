@@ -1,20 +1,48 @@
 # Meal Planner — Project Memory (CLAUDE.md)
 
-_Last updated: 2026-07-19. This file is auto-loaded by Claude Code every session._
+_Last updated: 2026-07-20. This file is auto-loaded by Claude Code every session._
 
-> **DESIGN SESSION — DONE (2026-07-19).** The `DESIGN-BRIEF.md` "Table" design session is
-> complete. A new **`design/`** folder now exists in the repo with every deliverable from the
+> **FOLDER STRUCTURE (tidied 2026-07-20).** Root holds only what must run or deploy from
+> there; everything reference-only lives in `docs/`.
+> ```
+> Meal plan Lucille/
+> ├── CLAUDE.md          ← this file (must stay at root — auto-loaded)
+> ├── README.md          ← plain-English "what is this / how do I run it"
+> ├── server.js          ← backend. MUST stay at root (package.json + render.yaml run it)
+> ├── package.json       ← "start": node server.js
+> ├── render.yaml        ← Render deploy blueprint
+> ├── .gitignore
+> ├── gemini-key.txt     ← 🔑 SECRET, git-ignored, NEVER delete/commit. server.js reads it
+> │                        from the project root (__dirname). Irreplaceable if lost.
+> ├── Open Live Website.webloc   ← one-click shortcut to the live Render site
+> ├── public/            ← THE APP (served statically by server.js)
+> │   ├── index.html  app.js  styles.css  app-screens.css
+> │   ├── config.js   ← Supabase URL + publishable key (public-safe by design)
+> │   ├── cloud.js    ← Supabase client
+> │   ├── manifest.json  sw.js  icons/   ← PWA (Phase 9)
+> ├── supabase/schema.sql        ← tables + RLS + storage bucket
+> └── docs/              ← reference only, nothing here is served or executed
+>     ├── DESIGN-BRIEF.md  OPUS-BUILD-BRIEF.md  ← the two authoritative briefs
+>     ├── RESEARCH.md  STORM-RESEARCH.md        ← background research
+>     ├── SUPABASE-SETUP.md                     ← Lucille's setup steps
+>     └── design/        ← the 9 screen mockups + tokens.css (visual source of truth)
+> ```
+> **Do not move** `server.js`, `public/`, `package.json`, `render.yaml`, `gemini-key.txt`, or
+> `CLAUDE.md` — each is load-bearing at the root.
+
+> **DESIGN SESSION — DONE (2026-07-19).** The `docs/DESIGN-BRIEF.md` "Table" design session is
+> complete. A new **`docs/design/`** folder now exists in the repo with every deliverable from the
 > brief §0, all self-contained (link `tokens.css`; system/Google fonts + Unsplash CDN images
 > only; no build step). Contents:
-> - `design/tokens.css` — **the visual source of truth.** All colors, Fraunces/Inter type,
+> - `docs/design/tokens.css` — **the visual source of truth.** All colors, Fraunces/Inter type,
 >   radii, warm shadows, spacing, motion as CSS variables, PLUS every reusable component class
 >   (`.btn .chip .card .recipe-card .badge .input .stepper .slider .toggle .toast .skeleton
 >   .carousel .dots`). Cook-mode's warm-dark palette is the `.cook-dark` scope at the bottom.
-> - `design/components.html` — every component in every state.
-> - `design/01-landing.html` … `09-profile.html` — the nine screens (landing, sign-up,
+> - `docs/design/components.html` — every component in every state.
+> - `docs/design/01-landing.html` … `09-profile.html` — the nine screens (landing, sign-up,
 >   onboarding, planner (Woolworths rail + carousels), recipe, cook-mode, shopping, features
 >   drawer, profile). Static; light demo JS only.
-> - `design/index.html` — navigation index of all deliverables · `design/README.md` — rationale
+> - `docs/design/index.html` — navigation index of all deliverables · `docs/design/README.md` — rationale
 >   + exact "how Opus should lift this" instructions.
 > Direction realised: "Apple's restraint, Mob's appetite" — warm paper `#FDFBF7`, tomato/basil/
 > honey accents (no blue near food), big Fraunces display. Checked at 375px + 1280px, AA
@@ -22,8 +50,8 @@ _Last updated: 2026-07-19. This file is auto-loaded by Claude Code every session
 >
 > **NEXT STEP → the Opus build session.** Nothing in the live app (`meal-planner.html`,
 > `server.js`) was changed by the design session — those get rewritten during the build.
-> Opus now starts at **`OPUS-BUILD-BRIEF.md` phase 1** (restructure to a `/public` multi-file
-> app-shell), then phase 2 lifts `design/tokens.css` + markup 1:1 into the real screens. The
+> Opus now starts at **`docs/OPUS-BUILD-BRIEF.md` phase 1** (restructure to a `/public` multi-file
+> app-shell), then phase 2 lifts `docs/design/tokens.css` + markup 1:1 into the real screens. The
 > current single-file app stays live on Render until the rebuilt app is ready to deploy.
 
 > **BUILD SESSION — Phases 1–4 DONE (2026-07-19, Opus).** All work is on branch
@@ -37,7 +65,7 @@ _Last updated: 2026-07-19. This file is auto-loaded by Claude Code every session
 >   `public/styles.css`, `public/app.js`. `server.js` now serves `/public` statically (pure
 >   Node, content-type map + path-traversal guard); `/generate-week` + `/generate-meal`
 >   unchanged. Old `meal-planner.html` KEPT as a rollback (not deleted).
-> - **Phase 2 (design lift):** `public/styles.css` = `design/tokens.css` verbatim (design
+> - **Phase 2 (design lift):** `public/styles.css` = `docs/design/tokens.css` verbatim (design
 >   source of truth); new `public/app-screens.css` re-tints every app screen to the Table
 >   tokens; `index.html` links both. Cook mode uses the `.cook-dark` warm-dark scope.
 > - **Verified in-browser, AI OFF:** questionnaire, week/review, recipes-by-day, shopping,
@@ -47,7 +75,7 @@ _Last updated: 2026-07-19. This file is auto-loaded by Claude Code every session
 >   (empty creds = local mode by default), `public/cloud.js` (ESM Supabase client, graceful
 >   fallback), sign-in screen (magic link + Google), auth gate + per-user cloud sync + v1
 >   migration wired into `app.js`, `supabase/schema.sql` (4 tables + RLS + private `dish-photos`
->   bucket), and **`SUPABASE-SETUP.md`** (her step-by-step). **Verified:** local-mode has zero
+>   bucket), and **`docs/SUPABASE-SETUP.md`** (her step-by-step). **Verified:** local-mode has zero
 >   regression (no external calls, boots to saved week), sign-in screen renders, form
 >   validation + offline-guard work. **UNVERIFIED until she connects Supabase:** real magic-link
 >   round-trip, Google OAuth, RLS, cloud sync/migration — test together once config.js is filled
@@ -66,7 +94,7 @@ _Last updated: 2026-07-19. This file is auto-loaded by Claude Code every session
 > **BUILD SESSION — Phase 5 DONE (2026-07-19, Opus). Not committed yet — awaiting Lucille's OK.**
 > Questionnaire v2 (§6) + targets engine wiring, on branch `v2-rebuild`, verified in-browser AI OFF.
 > - **8-step onboarding wizard** replaces the old single-page form (`renderProfile` in `public/app.js`),
->   lifting `design/03-onboarding.html` markup onto the shared tokens: Welcome (name) · You
+>   lifting `docs/design/03-onboarding.html` markup onto the shared tokens: Welcome (name) · You
 >   (age/household steppers, weight/height, gender) · Rhythm (life stage, activity, times/week) ·
 >   Goal (Feel light/Stay balanced/Get stronger cards → stable internal `lose/maintain/gain` keys) ·
 >   Tastes (sweet/savory breakfast single-select, cuisine chips, dislikes, allergies, free-text) ·
@@ -165,14 +193,14 @@ the public internet (Render free tier) — frontend + backend + AI generation al
 > to that repo → Render redeploys automatically.
 > Always show proposed edits before applying them — Lucille prefers to approve each change.
 
-> **Phase 5 (2026-07-18): full redesign after market research.** See **`RESEARCH.md`** for the
+> **Phase 5 (2026-07-18): full redesign after market research.** See **`docs/RESEARCH.md`** for the
 > competitor research (Mealime, Jow, Eat This Much, Samsung Food…), the quality criteria, the
 > exact list of changes (cook mode, kcal/protein, household scaling, persistent shopping-list
 > ticks, favorites, copy/print, new warm design system), and the roadmap. Read it before
 > touching the frontend — it is the design source of truth now. Changes are local, not yet
 > pushed/deployed.
 >
-> **Deep research (2026-07-18): `STORM-RESEARCH.md`** — a broader, multi-perspective research
+> **Deep research (2026-07-18): `docs/STORM-RESEARCH.md`** — a broader, multi-perspective research
 > report (nutrition/TDEE engine, monetization, retention, food-waste/leftovers, onboarding,
 > dietary frameworks, accessibility/EU law, free data APIs) with a ranked, zero-cost feature
 > backlog in its §10.
@@ -207,20 +235,20 @@ the public internet (Render free tier) — frontend + backend + AI generation al
 > (never "maintain/lose/gain" in UI), real recipe links, user dish photos, Google Calendar
 > (.ics first, OAuth later), push/email reminders (SMS = paid, deferred, her call),
 > feedback form to lucillemonamie@icloud.com. Two authoritative briefs, division of labor:
-> - **`DESIGN-BRIEF.md`** → a dedicated Claude *design* session produces a `design/` folder
+> - **`docs/DESIGN-BRIEF.md`** → a dedicated Claude *design* session produces a `docs/design/` folder
 >   (tokens.css, components.html, 9 screen mockups). Design direction: "Apple's restraint,
 >   Mob's appetite" + the exact structural references Lucille chose.
-> - **`OPUS-BUILD-BRIEF.md`** → the Opus build session implements the app in 11 phases,
+> - **`docs/OPUS-BUILD-BRIEF.md`** → the Opus build session implements the app in 11 phases,
 >   lifting the design 1:1. Includes the Supabase/Google/Resend/FormSubmit setup steps
 >   Lucille must do (all free) and the "no doubles" QA checklist.
-> Run the design session FIRST; Opus starts at its phase 1 only once `design/` exists.
+> Run the design session FIRST; Opus starts at its phase 1 only once `docs/design/` exists.
 > (Design session is now DONE — see the status block at the very top; Opus is cleared for phase 1.)
 >
 > **Packaging decided 2026-07-19:** ship BOTH an installable **PWA** (phone + web) AND a
 > free **desktop download** (`.dmg`/`.exe` via **Tauri**, Electron fallback) from ONE web
 > codebase — Lucille wants it great on phone and computer equally, at zero spend. Desktop
 > files distribute via GitHub Releases; App Store (paid) is out of scope. See
-> `OPUS-BUILD-BRIEF.md` §0 (dual-target architecture) + phase 11.
+> `docs/OPUS-BUILD-BRIEF.md` §0 (dual-target architecture) + phase 11.
 
 ---
 

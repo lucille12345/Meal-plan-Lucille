@@ -10,7 +10,7 @@
        • "Project URL"        → url
        • "anon" "public" key  → anonKey   (safe to expose in the browser)
 
-   See SUPABASE-SETUP.md in the project root for the full step-by-step.
+   See docs/SUPABASE-SETUP.md for the full step-by-step.
    ============================================================================ */
 window.SUPABASE_CONFIG = {
   url: 'https://ckhqnqoazgmqxzzzacfl.supabase.co',

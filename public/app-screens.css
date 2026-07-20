@@ -2,7 +2,7 @@
    Table — App screen layouts (Phase 2)
    Structural styles for the app screens (questionnaire, week, recipes,
    shopping, cook mode), built on the design tokens in styles.css.
-   styles.css (design/tokens.css) is the source of truth for colors, type,
+   styles.css (docs/design/tokens.css) is the source of truth for colors, type,
    radii, shadows and the reusable component classes (.btn .chip .card .badge…).
    This file only styles the app-specific structures those mockups imply.
    ============================================================================ */
@@ -92,7 +92,7 @@ button.ghost.on { background: var(--tomato-wash); border-color: var(--tomato); c
 
 /* ============================================================================
    Onboarding questionnaire v2 — friendly 8-step wizard (design 03, §6)
-   Lifts design/03-onboarding.html markup onto the shared tokens. Namespaced
+   Lifts docs/design/03-onboarding.html markup onto the shared tokens. Namespaced
    with q- / .goal / .connect so it never clashes with the 1·2·3 .steps bar.
    ============================================================================ */
 .wizard { max-width: 560px; margin: 0 auto; }
