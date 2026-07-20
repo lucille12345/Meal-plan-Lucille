@@ -30,6 +30,75 @@ _Last updated: 2026-07-20. This file is auto-loaded by Claude Code every session
 > **Do not move** `server.js`, `public/`, `package.json`, `render.yaml`, `gemini-key.txt`, or
 > `CLAUDE.md` — each is load-bearing at the root.
 
+---
+
+# ⭐ WHERE THINGS STAND (2026-07-20) — read this first
+
+**Product is now called `#Foodie`** (renamed from "Table" everywhere user-facing; the historical
+session blocks below still say Table). The `_template:'table'` string in `app.js` is a FormSubmit
+leftover parameter, not the brand — leave it.
+
+**Code:** V2 is complete (Phases 1–10a) and **merged into `main`**.
+**⚠️ 28 commits are waiting to be pushed — the live site still runs the OLD v1 until Lucille pushes.**
+She pushes via **GitHub Desktop → Push origin** (no git credentials in the CLI here); Render then
+auto-deploys. Working tree clean; `main` and `v2-rebuild` hold the same content.
+
+### Accounts & tooling
+| Thing | State |
+|---|---|
+| **Supabase** | LIVE. Schema run, magic-link sign-in verified. Project ref `ckhqnqoazgmqxzzzacfl` |
+| **Resend** | Account created (`llucillespam@gmail.com`), API key generated |
+| **Google Cloud** | Project "meal planner" created. Calendar API + OAuth consent + credentials **NOT** done |
+| **Rust** | Installed (1.97.1). Needs a fresh Terminal window for PATH. Ready for Phase 11 |
+| **GitHub** | `lucille12345/Meal-plan-Lucille` — push via GitHub Desktop only |
+
+### Edge Functions — written, NOT yet deployed by Lucille
+- `supabase/functions/send-reminders/index.ts` — daily shopping reminder e-mail.
+  Secrets: `RESEND_API_KEY`, optional `TEST_EMAIL_TO` (overrides recipient).
+  Needs **pg_net installed** before Cron can call an Edge Function. The Supabase schedule box is
+  **GMT**; Paris is GMT+2 in summer, so `0 16 * * *` = 6 pm Paris.
+- `supabase/functions/send-feedback/index.ts` — powers the in-app feedback form.
+  **`app.js` already points at this URL**, so feedback fails until it is deployed.
+
+⚠️ **Resend free tier, no verified domain → only delivers to `llucillespam@gmail.com`.** The first
+reminder test returned `{"sent":false,"status":403,"items":2}` for exactly this reason — the logic
+worked, the recipient was rejected. Use `TEST_EMAIL_TO`, or log into #Foodie with that gmail.
+
+**FormSubmit was abandoned** — its one-time activation e-mail never arrived (tried the AJAX endpoint
+and a classic POST over http). Replaced by `send-feedback`. Don't reintroduce it.
+
+### Verified vs unverified
+- **Verified with AI OFF:** every screen, persistence, no-repeat, leftovers, pantry hiding, cook mode
+  + read-aloud, recipe links + photos, PWA install/offline, .ics export, 375px + 1280px, zero console
+  errors, zero `/generate-*` calls.
+- **🔴 UNVERIFIED: the AI-ON path.** Phase 6b changed the AI response shape to 3-course `courses`
+  objects and Phase 5 changed the profile fields. Lucille must run **one** week with "Use real AI
+  generation" ticked and report what happens. Gemini free tier = **20 requests/day** — don't burn it.
+
+### Offline recipe pool (the AI-OFF fallback)
+12 breakfasts · 10 lunches · 11 dinners · 22 starters · 22 desserts.
+A 288-profile stress test drove the no-repeat work: **0 duplicates for normal profiles**, but a
+heavily-restricted profile (2 allergies + 2 dislikes) genuinely cannot fill 7 unique breakfasts —
+`enforceNoRepeat()` records what it couldn't fix and the planner shows an honest notice naming the
+repeated dishes and pointing at AI generation. Don't "fix" that notice by hiding it.
+
+### NEXT STEPS, in order
+1. **Lucille:** GitHub Desktop → **Push origin** (28 commits) → Render deploys → v2 goes live.
+2. **Lucille:** deploy both Edge Functions, add the `RESEND_API_KEY` secret, install pg_net, create
+   the cron job.
+3. **Together:** one AI-ON test week; fix whatever the real Gemini response reveals.
+4. **V3 REDESIGN → `docs/V3-REDESIGN-BRIEF.md`** (already written & approved): deep walnut + emerald
+   + gold-spark palette, one-page planner with `My Meal Plan` / `Shop Ingredients` tabs, day sidebar,
+   filter row, image-on-top cards, dessert + starter browse sections, shopping total moved to the
+   bottom and supplied by Gemini, delete the 1·2·3 step bar. **Big job — give it its own session.**
+5. **Phase 11:** Tauri desktop wrapper over `/public` → `.dmg`/`.exe` via GitHub Releases.
+6. **🔵 REQUESTED, NOT STARTED — curated recipe database.** Lucille asked for a separate data file of
+   real researched dishes (starters, breakfasts, desserts, and *many* mains) — each with recipe link,
+   a good photo, ingredients **with quantities** (g/ml/tsp), kcal, time, difficulty, protein — clearly
+   separated so she can keep adding to it. **The app must use this database FIRST**, and only fall
+   back to Gemini to invent extra variety when it runs short. This also widens what users can browse.
+   Add the step-by-step wiring instructions into the V3 brief as part of the work.
+
 > **DESIGN SESSION — DONE (2026-07-19).** The `docs/DESIGN-BRIEF.md` "Table" design session is
 > complete. A new **`docs/design/`** folder now exists in the repo with every deliverable from the
 > brief §0, all self-contained (link `tokens.css`; system/Google fonts + Unsplash CDN images
@@ -159,6 +228,29 @@ _Last updated: 2026-07-20. This file is auto-loaded by Claude Code every session
 >   AI; chips only show when prices exist (AI on).
 > - **Files:** `public/app.js`, `public/app-screens.css`.
 > - Next was Phase 9 (below).
+
+> **SESSION — 2026-07-20 (Opus): rename, folder tidy, integrations, QA, V2 release.**
+> - **Folder tidied:** reference material moved to `docs/` (5 briefs/research + the `design/`
+>   mockups), `.DS_Store` deleted, `README.md` added, all 17 moved-path references updated.
+> - **Renamed Table → #Foodie** everywhere user-facing (title, manifest, header, install button,
+>   landing, .ics PRODID, e-mails, README). SW cache bumped to `foodie-shell-v3`.
+> - **Questionnaire is now once-only + easy to edit:** in edit mode (a week exists) every step has a
+>   **"Save changes"** button that saves and returns to the planner *without* regenerating; the last
+>   step becomes "Save & re-plan week". "Start a new week" became **"🔄 Re-plan this week"** and
+>   regenerates from the saved profile instead of re-asking the questionnaire. Shared `planWeek()`.
+>   Planner button relabelled "⚙️ Edit my answers".
+> - **Integrations:** wrote `send-reminders` + `send-feedback` Edge Functions; dropped FormSubmit;
+>   added the `TEST_EMAIL_TO` override after the first test returned Resend 403.
+> - **QA sweep before release (important):** a 210-profile stress test revealed the no-repeat rule
+>   failing in ~half of realistic setups — earlier single-profile passes had just been lucky. Root
+>   cause: dietary filters shrank pools below a week's demand (sides were exactly 14 for 14 slots).
+>   Fixed by adding **28 recipes** (+5 breakfasts, +3 lunches, +4 dinners, +8 starters, +8 desserts)
+>   and by reporting genuinely-unfixable repeats instead of hiding them. Re-verified: 0 duplicates in
+>   60 runs on Lucille's profile and 60 with no restrictions.
+> - **Security pre-flight:** Gemini key never committed, git-ignored, absent from all shipped files;
+>   no Resend key in code; only the Supabase publishable key ships (public-safe by design).
+> - **Released:** `v2-rebuild` merged into `main` as "Release v2: #Foodie". Awaiting her push.
+> - **Wrote `docs/V3-REDESIGN-BRIEF.md`** from her Woolworths reference — see NEXT STEPS above.
 
 > **BUILD SESSION — Phases 9 & 10a DONE (2026-07-19, Opus). Committed to `v2-rebuild`.**
 > - **Phase 9 PWA (Target A):** `public/manifest.json` (standalone, theme/bg colour, SVG icons
