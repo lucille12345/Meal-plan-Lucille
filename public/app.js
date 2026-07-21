@@ -179,8 +179,11 @@ const COURSE_LABEL = { starter:'Starter', main:'Main', dessert:'Dessert', single
 /* ============================================================
    2. STATE
    ============================================================ */
+// `screen` is now only: landing | signin | profile | loading | review.
+// 'review' IS the one-page planner (§2) — the old separate 'recipes' and 'shopping'
+// screens were merged into it: shopping is the second tab, recipes are a detail overlay.
 const state = { screen:'profile', profile:null, week:[], usedFallback:false, selectedDay:0,
-  useAI:false, favorites:[], checked:{}, plannerMode:'plan' };
+  useAI:false, favorites:[], checked:{}, plannerTab:'plan' };   // plannerTab: 'plan' | 'shop'
 // Where to reach the backend:
 //  - opened as a local file (double-click) → talk to the local Node server on :8787
 //  - served over http(s) (local `node server.js`, or hosted on Render) → same origin, no host needed
@@ -594,7 +597,11 @@ function priceOf(ing){
   if(typeof ing.price==='number'&&isFinite(ing.price)) return ing.price;
   return (typeof estimateIngredientPrice==='function') ? estimateIngredientPrice(ing) : 0;
 }
-function itemKey(ing){ return ing.name.toLowerCase()+'|'+ing.unit; }
+// The two pools spell "one of something" differently — the curated database uses unit:'piece',
+// the older built-in pool uses unit:''. Keying on the raw string split the SAME ingredient into
+// two shopping rows ("Apple · 3 piece" and "Apple · 4"). Normalise so they aggregate into one.
+function unitKey(u){ const t=String(u||'').trim().toLowerCase(); return (t===''||t==='piece'||t==='pieces')?'piece':t; }
+function itemKey(ing){ return ing.name.toLowerCase()+'|'+unitKey(ing.unit); }
 /* ============================================================
    4b. Integrations (§5) — .ics calendar export + feedback form
    (zero-setup, no account needed; push/email/Google OAuth come later)
@@ -720,15 +727,6 @@ function buildShoppingList(){
    ============================================================ */
 const app=document.getElementById('app');
 function setScreen(n){ state.screen=n; render(); }
-function updateSteps(){
-  document.querySelectorAll('.step').forEach(el=>{
-    el.classList.remove('active','done');
-    const order=['profile','review','shopping'];
-    const here=order.indexOf(state.screen==='recipes'?'review':state.screen);
-    const mine=order.indexOf(el.dataset.step);
-    if(mine===here)el.classList.add('active'); else if(mine<here)el.classList.add('done');
-  });
-}
 const shellEl=document.getElementById('app-shell');
 const landingRoot=document.getElementById('landing-root');
 function render(){
@@ -744,17 +742,11 @@ function render(){
   landingRoot.style.display='none';
   landingRoot.innerHTML='';
   removeLandingParallax();
-  updateSteps();
-  // The 1·2·3 step bar is only meaningful inside the planner flow — hide it on sign-in.
-  const stepsEl=document.querySelector('.steps');
-  // Sign-in and the onboarding wizard each have their own progress UI — hide the 1·2·3 bar there.
-  if(stepsEl)stepsEl.style.display=(state.screen==='signin'||state.screen==='profile')?'none':'';
   if(state.screen==='signin')renderSignIn();
   else if(state.screen==='profile')renderProfile();
   else if(state.screen==='loading')renderLoading();
-  else if(state.screen==='review')renderReview();
-  else if(state.screen==='recipes')renderRecipes();
-  else if(state.screen==='shopping')renderShopping();
+  else if(state.week&&state.week.length)renderPlanner();   // 'review' — the one-page planner (§2)
+  else renderProfile();          // no week to show: fall back to the questionnaire, never a blank page
   window.scrollTo(0,0);
   if(state.screen!=='signin')saveState();   // don't persist while signed out
 }
@@ -1019,7 +1011,7 @@ async function planWeek(){
     enforceNoRepeat(state.week,state.profile);   // recompute state.repeatedDishes after patching
   }
   if(state.profile.leftovers) applyLeftovers(state.week);
-  state.plannerMode='plan';
+  state.plannerTab='plan';       // a fresh week always lands on the meal-plan tab, not shopping
   setScreen('review');
 }
 
@@ -1355,21 +1347,6 @@ function recipeCardHtml(r,o={}){
     </div>
   </article>`;
 }
-function mealCard(meal,di,mi){
-  if(meal.loading)return `<div class="recipe-card loading"><div class="photo"><div class="mini-spin"></div></div>
-    <div class="body"><span class="cat">${mealTypeLabel(meal)}</span><h3 class="title" style="color:var(--muted)">finding a new dish…</h3></div></div>`;
-  const r=meal.recipe;
-  if(!r)return `<div class="recipe-card"><div class="body"><span class="cat">${mealTypeLabel(meal)}</span><h3 class="title">— no option —</h3></div></div>`;
-  const extra=(r.isLeftover?'<span class="badge leftover">♻️ Leftover — just reheat</span>':'')
-    +(r.batchNote?'<span class="badge batch">🍲 Cook double → tomorrow\'s lunch</span>':'');
-  return recipeCardHtml(r,{
-    className:meal.rejected?'rejected':'',
-    topLabel:mealTypeLabel(meal),
-    favAttr:`data-fav="${di}-${mi}"`,
-    cornerBtn:`<button class="icon-btn swap" data-swap="${di}-${mi}" title="Don't like it — swap" aria-label="Swap this ${meal.type}">✕</button>`,
-    extraBadges:extra,
-  });
-}
 function dayKcal(day){
   let sum=0, any=false;
   day.meals.forEach(m=>{ if(!m.rejected&&m.recipe&&typeof m.recipe.kcal==='number'){ sum+=m.recipe.kcal; any=true; } });
@@ -1381,25 +1358,58 @@ function showToast(msg){
   document.body.appendChild(t); setTimeout(()=>t.remove(),2000);
 }
 // a small square thumbnail for the rail (photo, else emoji tile)
-function railSlot(day,mealType){
-  const slot=day.meals.find(m=>m.type===mealType&&(m.course==='main'||m.course==='single'||!m.course));
-  const lab={breakfast:'B',lunch:'L',dinner:'D'}[mealType];
-  if(!slot||!slot.recipe) return `<div class="slot empty" data-add-day="${DAYS.indexOf(day.day)}" title="Add ${mealType}">＋</div>`;
-  const img=dishImageUrl(slot.recipe);
-  const inner=img?`<img src="${img}" alt="" loading="lazy" onerror="this.replaceWith(Object.assign(document.createElement('div'),{className:'emoji-fill',textContent:'${slot.recipe.emoji||'🍽️'}'}))">`
-    :`<div class="emoji-fill">${slot.recipe.emoji||'🍽️'}</div>`;
-  return `<div class="slot" title="${slot.recipe.name}">${inner}<span class="lab">${lab}</span></div>`;
+// Household cost of one day, matching how the shopping list counts: leftovers cost nothing
+// extra (already bought with the original dish), and priceOf() falls back to the estimate table.
+function dayCost(day){
+  let sum=0;
+  day.meals.forEach(m=>{
+    if(m.rejected||!m.recipe||m.recipe.isLeftover) return;
+    (m.recipe.ingredients||[]).forEach(i=>{ sum+=priceOf(i); });
+  });
+  return sum;
+}
+// "13–19 Jul" for the sidebar header, from the upcoming Monday the .ics export already uses.
+function weekLabel(){
+  const mon=weekMonday(); const sun=new Date(mon.getFullYear(),mon.getMonth(),mon.getDate()+6);
+  const m=d=>d.toLocaleDateString('en-GB',{month:'short'});
+  return mon.getMonth()===sun.getMonth()
+    ? `${mon.getDate()}–${sun.getDate()} ${m(sun)}`
+    : `${mon.getDate()} ${m(mon)} – ${sun.getDate()} ${m(sun)}`;
+}
+// One dish inside a sidebar day: small thumb + name + course label. Click opens the detail overlay.
+function railDishRow(meal,di,mi){
+  const r=meal.recipe; if(!r) return '';
+  const img=dishImageUrl(r);
+  const thumb=img?`<img src="${img}" alt="" loading="lazy" onerror="this.replaceWith(Object.assign(document.createElement('div'),{className:'emoji-fill',textContent:'${r.isLeftover?'♻️':(r.emoji||'🍽️')}'}))">`
+    :`<div class="emoji-fill">${r.isLeftover?'♻️':(r.emoji||'🍽️')}</div>`;
+  return `<button class="dish-row ${meal.rejected?'rejected':''}" data-open="${di}-${mi}" title="${r.name}">
+    <span class="dr-thumb">${thumb}</span>
+    <span class="dr-text"><span class="dr-name">${r.name}</span><span class="dr-course">${mealTypeLabel(meal)}</span></span>
+  </button>`;
 }
 function railHtml(){
   let rows='';
   state.week.forEach((day,di)=>{
     const kc=dayKcal(day);
+    const cost=dayCost(day);
+    const dishes=day.meals.map((m,mi)=>m.recipe?railDishRow(m,di,mi):'').join('');
+    const empty=day.meals.some(m=>m.recipe)?'':`<div class="slot empty" data-add-day="${di}" title="Nothing planned — browse dishes on the right">＋</div>`;
     rows+=`<div class="day-row" data-drop-day="${di}">
-      <div class="dh"><b>${day.day}</b><span class="kcal">${kc?kc.toLocaleString('en-US')+' kcal':'—'}</span></div>
-      <div class="slots">${railSlot(day,'breakfast')}${railSlot(day,'lunch')}${railSlot(day,'dinner')}</div>
+      <div class="dh"><b>${day.day}</b><span class="kcal">${kc?kc.toLocaleString('en-US')+' kcal':'—'}${cost>0?` · €${cost.toFixed(2)}`:''}</span></div>
+      <div class="dishes">${dishes}${empty}</div>
     </div>`;
   });
-  return `<aside class="rail"><h2>This week</h2><div class="sub">Drag a dish onto a day, or tap ＋</div>${rows}</aside>`;
+  // The ‹ › arrows are deliberately disabled: the app plans exactly one week at a time, so there
+  // is no previous/next week to move to yet. Rendering them disabled (rather than omitting them)
+  // keeps the §2 layout shape and matches the "Coming soon" convention used in the questionnaire.
+  return `<aside class="rail">
+    <div class="rail-head">
+      <button class="wk-arrow" disabled title="Only the current week is planned for now">‹</button>
+      <span class="wk-label">${weekLabel()}</span>
+      <button class="wk-arrow" disabled title="Only the current week is planned for now">›</button>
+    </div>
+    <div class="sub">Drag a dish from the right onto a day, or tap one to see the recipe.</div>
+    ${rows}</aside>`;
 }
 // browse card (recipe-card token markup) — draggable, with ⊕ add + ♥ fav
 function browseCard(r){
@@ -1426,7 +1436,7 @@ function addDishToDay(recipe,di){
   const scaled=scaleRecipe({...recipe},peopleCount());
   if(slot){ slot.recipe=scaled; slot.rejected=false; }
   else { day.meals.push({type:mealType,course:'main',recipe:scaled,rejected:false}); }
-  saveState(); showToast(`✓ ${recipe.name} → ${day.day}`); renderReview();
+  saveState(); showToast(`✓ ${recipe.name} → ${day.day}`); renderPlanner();
 }
 function openDayPicker(recipe,anchor){
   document.querySelectorAll('.day-picker').forEach(el=>el.remove());
@@ -1441,7 +1451,10 @@ function openDayPicker(recipe,anchor){
   const close=(e)=>{ if(!menu.contains(e.target)){ menu.remove(); document.removeEventListener('click',close); } };
   setTimeout(()=>document.addEventListener('click',close),0);
 }
-function planBodyHtml(){
+// The target banner + honest notices that used to sit above the week's day-blocks.
+// The day-blocks themselves are gone (§2 — the week now lives in the sidebar), so these
+// ride at the top of the main column instead.
+function plannerNoticesHtml(){
   const tgt=computeTargets(state.profile);
   let html='';
   if(tgt){
@@ -1463,13 +1476,6 @@ function planBodyHtml(){
       : `Turning on <b>AI generation</b> lets it try to fill the gap.`;
     html+=`<div class="notice">🔁 Your allergies and dislikes leave only a few matching dishes, so ${many} this week (${state.repeatedDishes.join(', ')}). ${suggestion}</div>`;
   }
-  state.week.forEach((day,di)=>{
-    const kc=dayKcal(day);
-    html+=`<div class="day-block"><div class="day-head"><h3 class="day-title">${day.day}</h3>
-      ${kc?`<span class="day-kcal">≈ ${kc} kcal/day per person (est.)</span>`:''}</div>`;
-    day.meals.forEach((meal,mi)=>html+=mealCard(meal,di,mi));
-    html+=`</div>`;
-  });
   return html;
 }
 function browseBodyHtml(){
@@ -1485,55 +1491,54 @@ function browseBodyHtml(){
     ${carousel('Lunch mains',lunches)}
     ${carousel('Dinner mains',dinners)}`;
 }
-function renderReview(){
+/* ----- THE one-page planner (§2): tabs + sticky week sidebar + main column -----
+   `review`, `recipes` and `shopping` used to be three separate screens. They are now one page:
+   the week is the sidebar, browsing/shopping are the two tabs, and a recipe opens as an overlay. */
+function renderPlanner(){
   const nm=(state.profile?.name||'').trim();
-  const mode=state.plannerMode;
+  const tab=state.plannerTab==='shop'?'shop':'plan';
   app.innerHTML=`
     <div class="planner-head">
       <h2>${nm?nm+"'s week":'Your week'}</h2>
-      <div class="mode-toggle">
-        <button data-mode="plan" class="${mode==='plan'?'on':''}">✨ Plan for me</button>
-        <button data-mode="browse" class="${mode==='browse'?'on':''}">🧺 Browse &amp; add</button>
+      <div class="tabs" role="tablist">
+        <button role="tab" data-tab="plan" aria-selected="${tab==='plan'}" class="${tab==='plan'?'on':''}">My Meal Plan</button>
+        <button role="tab" data-tab="shop" aria-selected="${tab==='shop'}" class="${tab==='shop'?'on':''}">Shop Ingredients</button>
       </div>
     </div>
     <div class="planner">
       ${railHtml()}
-      <main class="planner-main">${mode==='browse'?browseBodyHtml():planBodyHtml()}</main>
+      <main class="planner-main">${tab==='shop'?shoppingBodyHtml():plannerNoticesHtml()+browseBodyHtml()}</main>
     </div>
     <div class="status-bar">
-      <span class="count">${mode==='browse'?'Drag or ⊕ to add · ♥ favorite':'✕ swap · ♥ favorite'}</span>
+      <span class="count">${tab==='shop'?'Ticks are remembered':'Drag or ⊕ to add · ♥ favorite'}</span>
       <div class="btn-row">
         <button class="ghost" id="backBtn">⚙️ Edit my answers</button>
-        <button class="ghost" id="recipesBtn">📖 Recipes by day</button>
-        <button class="primary" id="listBtn" style="margin-top:0">Shopping list →</button>
+        <button class="primary" id="replanBtn" style="margin-top:0">🔄 Re-plan this week</button>
       </div>
     </div>`;
-  // mode toggle
-  app.querySelectorAll('[data-mode]').forEach(b=>b.onclick=()=>{ state.plannerMode=b.dataset.mode; renderReview(); });
-  // plan-mode swap / fav
-  app.querySelectorAll('[data-swap]').forEach(btn=>{
-    btn.onclick=async()=>{
-      const [di,mi]=btn.dataset.swap.split('-').map(Number);
-      const meal=state.week[di].meals[mi];
-      if(!state.useAI){ swapMeal(di,mi); renderReview(); saveState(); return; }
-      const role=meal.course==='main'?meal.type:(meal.course||meal.type);
-      const avoid=[]; state.week.forEach(d=>d.meals.forEach(m=>{if(m.recipe)avoid.push(m.recipe.name);}));
-      meal.loading=true; renderReview();
-      try { meal.recipe=await requestSwapAI(state.profile,role,avoid); }
-      catch(e){ console.warn('Swap failed, local:',e.message); swapMeal(di,mi); }
-      meal.loading=false; renderReview(); saveState();
-    };
+
+  // ---- tabs ----
+  app.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{ state.plannerTab=b.dataset.tab; renderPlanner(); });
+
+  // ---- sidebar: tap a dish → detail overlay ----
+  app.querySelectorAll('[data-open]').forEach(b=>b.onclick=()=>{
+    const [di,mi]=b.dataset.open.split('-').map(Number);
+    openRecipeOverlay(di,mi);
   });
-  app.querySelectorAll('[data-fav]').forEach(btn=>{
-    btn.onclick=()=>{ const [di,mi]=btn.dataset.fav.split('-').map(Number);
-      const r=state.week[di].meals[mi].recipe; if(r){ toggleFavorite(r); renderReview(); } };
-  });
-  // browse-mode add / fav
+
+  // ---- browse: ⊕ add / ♥ fav / tap card → detail overlay ----
   app.querySelectorAll('[data-badd]').forEach(b=>b.onclick=(e)=>{ e.stopPropagation();
     const r=findBrowseRecipe(b.dataset.badd); if(r)openDayPicker(r,b); });
   app.querySelectorAll('[data-bfav]').forEach(b=>b.onclick=(e)=>{ e.stopPropagation();
-    const r=findBrowseRecipe(b.dataset.bfav); if(r){ toggleFavorite(r); renderReview(); } });
-  // drag & drop: cards → rail days
+    const r=findBrowseRecipe(b.dataset.bfav); if(r){ toggleFavorite(r); renderPlanner(); } });
+  app.querySelectorAll('.recipe-card[data-rid]').forEach(card=>{
+    card.addEventListener('click',e=>{
+      if(e.target.closest('.icon-btn')) return;          // ⊕ / ♥ have their own handlers
+      const r=findBrowseRecipe(card.dataset.rid); if(r)openRecipeOverlay(null,null,r);
+    });
+  });
+
+  // ---- drag & drop: browse cards → sidebar days ----
   app.querySelectorAll('.recipe-card[draggable]').forEach(card=>{
     card.addEventListener('dragstart',e=>{ e.dataTransfer.setData('text/plain',card.dataset.rid); e.dataTransfer.effectAllowed='copy'; card.classList.add('dragging'); });
     card.addEventListener('dragend',()=>card.classList.remove('dragging'));
@@ -1544,70 +1549,88 @@ function renderReview(){
     row.addEventListener('drop',e=>{ e.preventDefault(); row.classList.remove('drop');
       const r=findBrowseRecipe(e.dataTransfer.getData('text/plain')); if(r)addDishToDay(r,Number(row.dataset.dropDay)); });
   });
-  // empty rail slots: tap ＋ to add via day already known
-  app.querySelectorAll('.slot.empty[data-add-day]').forEach(s=>s.onclick=()=>{ state.plannerMode='browse'; renderReview(); });
+  // an empty day: nudge toward the browse column (which is already on-screen beside it)
+  app.querySelectorAll('.slot.empty[data-add-day]').forEach(s=>s.onclick=()=>{
+    state.plannerTab='plan'; renderPlanner();
+    app.querySelector('.planner-main')?.scrollIntoView({behavior:'smooth',block:'start'});
+  });
+
+  if(tab==='shop') bindShopping();
   document.getElementById('backBtn').onclick=()=>setScreen('profile');
-  document.getElementById('recipesBtn').onclick=()=>{ state.selectedDay=0; setScreen('recipes'); };
-  document.getElementById('listBtn').onclick=()=>setScreen('shopping');
+  document.getElementById('replanBtn').onclick=()=>{ if(state.profile) planWeek(); else setScreen('profile'); };
 }
 
-/* ----- Screen: recipes by day (with method + cook mode) ----- */
-function renderRecipes(){
-  const di=state.selectedDay;
-  const day=state.week[di];
-  const diffLabel=n=>['','Very easy','Easy','Medium','Involved','Advanced'][n]||'';
-  const meals=day.meals.filter(m=>m.recipe&&!m.rejected);
-  app.innerHTML=`
-    <div class="card">
-      <h2>Recipes by day</h2>
-      <p class="sub">Pick a day to see each dish — ingredients first, then the method. Hit ▶ Cook for full-screen step-by-step mode.</p>
-      <div class="day-tabs">
-        ${DAYS.map((d,i)=>`<div class="day-tab ${i===di?'on':''}" data-day="${i}">${d.slice(0,3)}</div>`).join('')}
-      </div>
-      <h3 class="day-title" style="margin:0 0 14px">${day.day}</h3>
-      ${meals.map((m,idx)=>{
-        const r=m.recipe;
-        if(r.isLeftover){
-          return `<div class="recipe">
-            <div class="rtype">${mealTypeLabel(m)}</div>
-            <div class="rname">♻️ ${r.name}</div>
-            <p class="list-note">${r.desc||''}. You already bought and cooked this — nothing extra to shop for. Just reheat until piping hot.</p>
-            <div class="badges"><span class="badge leftover">♻️ Leftover</span>${nutriBadges(r)}</div>
-          </div>`;
-        }
-        const imgUrl=dishImageUrl(r);
-        return `<div class="recipe">
-          ${imgUrl?`<div class="recipe-photo"><img src="${imgUrl}" alt="" loading="lazy" onerror="this.closest('.recipe-photo').remove()"></div>`:''}
-          <div class="rtype">${mealTypeLabel(m)}</div>
-          <div class="rname">${r.emoji||''} ${r.name}</div>
-          <div class="rdesc">${r.desc||''}</div>
-          <div class="ing-head">🧾 Ingredients ${peopleCount()>1?`<span class="hint">(for ${peopleCount()} people)</span>`:''}${r.batchNote?' <span class="hint">— double batch, half becomes tomorrow\'s lunch</span>':''}</div>
-          <ul class="ing-list">
-            ${r.ingredients.map(i=>{const pr=priceOf(i);return `<li><span>${i.name}</span><span class="iq">${formatQty(i.qty,i.unit)}${pr>0?' · €'+pr.toFixed(2):''}</span></li>`;}).join('')}
-          </ul>
-          ${(r.steps&&r.steps.length)?`<div class="ing-head">👩‍🍳 Method</div><ol class="step-list">${r.steps.map(s=>`<li>${s}</li>`).join('')}</ol>`:''}
-          <div class="badges">
-            <span class="badge">⏱ ${r.time} min</span>
-            <span class="badge diff">${diffLabel(r.difficulty)}</span>
-            ${nutriBadges(r)}
-          </div>
-          <div class="recipe-actions">
-            ${(r.steps&&r.steps.length)?`<button class="cook-btn" data-cook="${idx}">▶ Cook</button>`:''}
-            <a class="recipe-link" href="${recipeUrl(r)}" target="_blank" rel="noopener noreferrer">See full recipe ↗</a>${r.sourceName?`<span class="sub" style="font-size:.85em">Recipe by ${r.sourceName}</span>`:''}
-            <button class="ghost fav-inline ${isFavorite(r.name)?'on':''}" data-favr="${idx}" style="padding:9px 14px">${isFavorite(r.name)?'♥ Saved':'♡ Save as favorite'}</button>
-          </div>
-        </div>`;
-      }).join('') || '<p class="sub">No meals for this day.</p>'}
-      <div class="btn-row" style="margin-top:8px">
-        <button class="ghost" id="backReview2">← Back to week</button>
-        <button class="primary" id="toList2" style="margin-top:0">Shopping list →</button>
+/* ----- Recipe detail overlay (§2: "never a page change") -----
+   Replaces the old "Recipes by day" screen. Opened from a sidebar dish (di/mi given, so it can
+   also swap that slot) or from a browse card (recipe given directly, no slot to swap). */
+function openRecipeOverlay(di,mi,recipeDirect){
+  const meal=(di!=null&&mi!=null)?state.week[di]?.meals[mi]:null;
+  const r=recipeDirect||meal?.recipe;
+  if(!r) return;
+  const overlay=document.createElement('div');
+  overlay.className='sheet-overlay';
+  overlay.setAttribute('role','dialog');
+  overlay.setAttribute('aria-modal','true');
+  overlay.setAttribute('aria-label',r.name);
+  const prevFocus=document.activeElement;
+  function close(){
+    document.removeEventListener('keydown',onKey);
+    overlay.remove();
+    if(prevFocus&&prevFocus.focus)prevFocus.focus();
+  }
+  function onKey(e){ if(e.key==='Escape')close(); }
+  function paint(){
+    const cur=meal?meal.recipe:r;                      // re-read after a swap
+    const img=dishImageUrl(cur);
+    const diffLabel=['','Very easy','Easy','Medium','Involved','Advanced'][cur.difficulty]||'';
+    overlay.innerHTML=`<div class="sheet">
+      <button class="sheet-close" aria-label="Close">✕</button>
+      ${img?`<div class="sheet-photo"><img src="${img}" alt="" onerror="this.closest('.sheet-photo').remove()"></div>`:''}
+      <div class="sheet-body">
+        ${meal?`<div class="rtype">${mealTypeLabel(meal)}</div>`:`<div class="rtype">${cur.type}</div>`}
+        <h2 class="rname">${cur.emoji||''} ${cur.name}</h2>
+        <div class="rdesc">${cur.desc||''}</div>
+        ${cur.isLeftover?`<p class="list-note">You already bought and cooked this — nothing extra to shop for. Just reheat until piping hot.</p>`:`
+        <div class="ing-head">🧾 Ingredients ${peopleCount()>1?`<span class="hint">(for ${peopleCount()} people)</span>`:''}${cur.batchNote?' <span class="hint">— double batch, half becomes tomorrow\'s lunch</span>':''}</div>
+        <ul class="ing-list">
+          ${(cur.ingredients||[]).map(i=>{const pr=priceOf(i);return `<li><span>${i.name}</span><span class="iq">${formatQty(i.qty,i.unit)}${pr>0?' · €'+pr.toFixed(2):''}</span></li>`;}).join('')}
+        </ul>
+        ${(cur.steps&&cur.steps.length)?`<div class="ing-head">👩‍🍳 Method</div><ol class="step-list">${cur.steps.map(s=>`<li>${s}</li>`).join('')}</ol>`:''}`}
+        <div class="badges">
+          <span class="badge">⏱ ${cur.time} min</span>
+          <span class="badge diff">${diffLabel}</span>
+          ${nutriBadges(cur)}
+        </div>
+        <div class="recipe-actions">
+          ${(cur.steps&&cur.steps.length)?`<button class="cook-btn" data-cook>▶ Cook</button>`:''}
+          <a class="recipe-link" href="${recipeUrl(cur)}" target="_blank" rel="noopener noreferrer">See full recipe ↗</a>${cur.sourceName?`<span class="sub" style="font-size:.85em">Recipe by ${cur.sourceName}</span>`:''}
+          <button class="ghost fav-inline ${isFavorite(cur.name)?'on':''}" data-favr style="padding:9px 14px">${isFavorite(cur.name)?'♥ Saved':'♡ Save as favorite'}</button>
+          ${meal?`<button class="ghost" data-swapr style="padding:9px 14px" title="Don't like it — swap for another dish">✕ Swap this dish</button>`:''}
+        </div>
       </div>
     </div>`;
-  app.querySelectorAll('[data-day]').forEach(t=>t.onclick=()=>{ state.selectedDay=Number(t.dataset.day); renderRecipes(); });
-  app.querySelectorAll('[data-cook]').forEach(b=>b.onclick=()=>openCookMode(meals[Number(b.dataset.cook)].recipe));
-  app.querySelectorAll('[data-favr]').forEach(b=>b.onclick=()=>{ toggleFavorite(meals[Number(b.dataset.favr)].recipe); renderRecipes(); });
-  document.getElementById('backReview2').onclick=()=>setScreen('review');
-  document.getElementById('toList2').onclick=()=>setScreen('shopping');
+    overlay.querySelector('.sheet-close').onclick=close;
+    const cookBtn=overlay.querySelector('[data-cook]');
+    if(cookBtn)cookBtn.onclick=()=>openCookMode(cur);
+    overlay.querySelector('[data-favr]').onclick=()=>{ toggleFavorite(cur); paint(); renderPlanner(); };
+    const sw=overlay.querySelector('[data-swapr]');
+    if(sw)sw.onclick=async()=>{
+      sw.disabled=true; sw.textContent='Finding another…';
+      if(!state.useAI){ swapMeal(di,mi); }
+      else {
+        const role=meal.course==='main'?meal.type:(meal.course||meal.type);
+        const avoid=[]; state.week.forEach(d=>d.meals.forEach(m=>{if(m.recipe)avoid.push(m.recipe.name);}));
+        try { meal.recipe=await requestSwapAI(state.profile,role,avoid); }
+        catch(e){ console.warn('Swap failed, local:',e.message); swapMeal(di,mi); }
+      }
+      saveState(); paint(); renderPlanner();
+    };
+  }
+  overlay.addEventListener('click',e=>{ if(e.target===overlay)close(); });
+  document.addEventListener('keydown',onKey);
+  paint();
+  document.body.appendChild(overlay);
+  overlay.querySelector('.sheet-close').focus();
 }
 
 /* ----- Cook mode (full-screen, one step at a time) ----- */
@@ -1662,7 +1685,8 @@ function openCookMode(recipe){
 /* ----- Screen 3: shopping list ----- */
 function sumPrices(items){ return items.reduce((s,i)=>s+(typeof i.price==='number'?i.price:0),0); }
 function dayChip(items){ const t=sumPrices(items); return t>0?`<span class="day-total">€${t.toFixed(2)}</span>`:''; }
-function renderShopping(){
+/* The `Shop Ingredients` tab body (§2 — no longer its own screen). */
+function shoppingBodyHtml(){
   const { pantry, fresh, total, anyPrice, skipped }=buildShoppingList();
   const buyOrder=['Sunday (before the week)',...DAYS];
   const freshDays=Object.keys(fresh).sort((a,b)=>buyOrder.indexOf(a)-buyOrder.indexOf(b));
@@ -1681,7 +1705,7 @@ function renderShopping(){
       ${pill}</div>
       <p class="sub" style="margin:0 0 14px">Prices are rough estimates and will vary by shop.</p>`;
   }
-  app.innerHTML=`
+  return `
     <div class="card">
       <h2>Your shopping list</h2>
       <p class="sub">Built from ${mealCount()} dishes across the week. Repeated items are added up automatically. Ticks are remembered — even if you close the page.</p>
@@ -1703,22 +1727,17 @@ function renderShopping(){
         ${freshDays.length?freshDays.map(bd=>{ const items=[...fresh[bd].values()]; return `<div class="buyday"><div class="head">📅 ${bd} ${anyPrice?dayChip(items):''}</div>
           ${items.sort((a,b)=>a.name.localeCompare(b.name)).map(i=>itemRow(i)).join('')}</div>`;}).join(''):'<p class="sub">Nothing perishable this week.</p>'}
       </div>
-      <div class="btn-row no-print">
-        <button class="ghost" id="backReview">← Back to meals</button>
-        <button class="ghost" id="recipesBtn2">📖 Recipes by day</button>
-        <button class="primary" id="restart" style="margin-top:0">🔄 Re-plan this week</button>
-      </div>
       <p class="sub no-print" style="text-align:center;margin:18px 0 0">
         <a role="button" tabindex="0" id="fbLink" style="cursor:pointer;font-weight:600">💬 A thought? Tell Lucille</a></p>
     </div>`;
+}
+function bindShopping(){
   bindChecks();
-  document.getElementById('copyList').onclick=copyListText;
-  document.getElementById('printList').onclick=()=>window.print();
-  document.getElementById('icsBtn').onclick=downloadICS;
-  document.getElementById('fbLink').onclick=openFeedback;
-  document.getElementById('backReview').onclick=()=>setScreen('review');
-  document.getElementById('recipesBtn2').onclick=()=>{ state.selectedDay=0; setScreen('recipes'); };
-  document.getElementById('restart').onclick=()=>{ if(state.profile) planWeek(); else setScreen('profile'); };
+  const on=(id,fn)=>{ const el=document.getElementById(id); if(el)el.onclick=fn; };
+  on('copyList',copyListText);
+  on('printList',()=>window.print());
+  on('icsBtn',downloadICS);
+  on('fbLink',openFeedback);
 }
 function itemRow(i){
   const key=itemKey(i);
