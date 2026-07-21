@@ -917,7 +917,7 @@ function renderLanding(){
     </div>
   </section>
 
-  <section class="sec" id="preview" style="background:var(--surface-2)">
+  <section class="sec" id="preview" style="background:var(--green-wash)">
     <div class="wrap">
       <div class="sec-kicker">The planner</div>
       <h2>Your whole week, on one calm screen.</h2>
@@ -959,7 +959,7 @@ function renderLanding(){
     </div>
   </section>
 
-  <section class="sec" style="padding-top:24px">
+  <section class="sec" style="padding-top:24px;background:var(--wood-wash)">
     <div class="wrap">
       <div class="sec-kicker">Why people stay</div>
       <h2>Small numbers, big weeknights.</h2>
@@ -972,7 +972,7 @@ function renderLanding(){
     </div>
   </section>
 
-  <section class="sec" style="background:var(--surface-2)">
+  <section class="sec" style="background:var(--green-wash)">
     <div class="wrap">
       <div class="center"><div class="sec-kicker">Good questions</div><h2 style="margin:10px auto 0">Everything you might ask.</h2></div>
       <div class="faq">

@@ -13,10 +13,23 @@
 /* ---- page shell (narrow app; the landing uses the wider tokens .wrap) ---- */
 .app-shell { max-width: 960px; margin: 0 auto; padding: 28px 20px 96px; }
 
-header.app { text-align: center; margin-bottom: 6px; }
-header.app h1 { font-size: var(--fs-h1); font-weight: 700; letter-spacing: -0.02em; margin: 0 0 6px; }
-header.app h1 .accent { color: var(--tomato); }
-header.app p { margin: 0; color: var(--muted); font-size: var(--fs-sm); }
+/* §1: the app's masthead is the walnut band. It full-bleeds past .app-shell's 960px using
+   the 50vw margin trick, so the wood reads as a band across the whole window rather than a
+   floating brown box — "dark bands, footer, nav" in the token table. A gold hairline under
+   it is the spark; the wood itself is flat colour, never a grain texture. */
+header.app {
+  text-align: center;
+  margin: -28px calc(50% - 50vw) 22px;      /* cancel .app-shell's top padding, then full-bleed */
+  padding: 30px 20px 26px;
+  background: var(--wood-deep);
+  border-bottom: 1px solid var(--gold);
+  color: #fff;
+}
+header.app h1 { font-size: var(--fs-h1); font-weight: 700; letter-spacing: -0.02em; margin: 0 0 6px; color: #fff; }
+header.app h1 .accent { color: var(--gold-bright); }
+header.app .mark { color: var(--gold-bright); }
+/* rgba rather than --muted: that token is tuned for dark text on paper and disappears on wood */
+header.app p { margin: 0; color: rgba(255,255,255,.78); font-size: var(--fs-sm); }
 
 /* ---- 3-step progress indicator ---- */
 .steps { display: flex; justify-content: center; gap: var(--s-2); margin: 22px 0 30px; flex-wrap: wrap; }
