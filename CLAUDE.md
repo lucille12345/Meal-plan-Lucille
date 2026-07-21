@@ -474,6 +474,23 @@ repeated dishes and pointing at AI generation. Don't "fix" that notice by hiding
        §0.2's old "dedupe by id" never merged a favourite with its source. `eligibleRecipes()` now
        dedupes by **name** with favourites first, plus a `sourceId` for provenance. Full write-up
        at the phase-7/§0.7 entry above; §0.2 and §0.3 step 4 corrected to match.
+   - **🔴 §1's WOOD WAS NEVER ACTUALLY APPLIED — found by Lucille after the §9 pass, fixed
+     2026-07-21.** Phase 1 defined the full walnut palette but put it on almost nothing.
+     Measured before the fix: **`--wood-deep` used once** (landing footer), **`--wood` and
+     `--wood-mid` zero times**, `--wood-wash` only as an alias target — against `--green-wash`
+     at 10 uses. The app read as ivory + green + gold, and §8 asks for "deep walnut wood".
+     **Cause:** phase 1's alias strategy (old token names repointed at the new palette)
+     re-tinted every screen for free, but it can only recolour something that already existed.
+     Tomato had a successor (buttons); **wood had no predecessor to inherit from**, so nothing
+     ever received it. **Fix (restrained scope, Lucille's choice):** the app masthead is now a
+     full-bleed `--wood-deep` band with white text and a `--gold` hairline, and the landing
+     bands alternate `paper → green-wash → paper → wood-wash → green-wash → wood-deep footer`.
+     The planner stays light on purpose — wood frames it rather than fills it. Contrast all
+     clears AA (white on wood-deep 16.27, subtitle 9.63, ink on wood-wash 12.42, muted 4.82,
+     gold-deep on wood-wash 4.62); no h-scroll at 375px or 1280px despite the 50vw full-bleed.
+     **Lesson for future verification: §8's checklist items are two-sided.** "No tomato/honey
+     anywhere" was checked and ticked; "deep walnut wood" in the same line was not. Verify that
+     the new thing is PRESENT, not just that the old thing is gone.
 5. **Phase 11:** Tauri desktop wrapper over `/public` → `.dmg`/`.exe` via GitHub Releases.
 6. **🟡 CURATED RECIPE DATABASE — DATA BUILT, WIRING NOT DONE (2026-07-20, grown same day).**
    - **Built:** `public/recipes-db.js` (`RECIPES_DB`, **57 real dishes** — 9 breakfasts, 16 starters,
