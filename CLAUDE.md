@@ -491,6 +491,20 @@ repeated dishes and pointing at AI generation. Don't "fix" that notice by hiding
      **Lesson for future verification: §8's checklist items are two-sided.** "No tomato/honey
      anywhere" was checked and ticked; "deep walnut wood" in the same line was not. Verify that
      the new thing is PRESENT, not just that the old thing is gone.
+   - **🪵 REAL WOOD GRAIN — §1's "wood is flat colour" is SUPERSEDED (2026-07-21, Lucille's
+     call).** Shown the flat brown version she said *"I want wood not wood colors"* and sent a
+     walnut sample. The masthead and footer now carry an actual grain texture over
+     **`--wood-plank` `#6B4228`**. **It is a generated inline SVG (`--wood-grain` in
+     `styles.css`), not a photograph** — ~640 bytes, no network request, works offline in the
+     PWA, and cannot 404 or hit hotlink protection (which is the real risk the brief's original
+     "no images" rule was guarding against; note every dish photo in this app *is* hotlinked
+     and does carry that risk). Grain runs **horizontally** on wide bands — vertical grain on a
+     short wide element reads as brushed fabric, not timber; both were tested side by side.
+     **Contrast is safe by construction:** the SVG filter paints only *dark* grain, so the base
+     colour is the lightest possible pixel and therefore the worst case — white on it is
+     **8.62:1**, the muted subtitle **4.84:1**. Greens were deliberately left alone; she asked
+     for green *and* wood, not wood instead of green. The brief's §1 bullet is struck through
+     with the same explanation, so **don't "fix" this back to flat.**
 5. **Phase 11:** Tauri desktop wrapper over `/public` → `.dmg`/`.exe` via GitHub Releases.
 6. **🟡 CURATED RECIPE DATABASE — DATA BUILT, WIRING NOT DONE (2026-07-20, grown same day).**
    - **Built:** `public/recipes-db.js` (`RECIPES_DB`, **57 real dishes** — 9 breakfasts, 16 starters,

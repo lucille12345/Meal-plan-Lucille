@@ -665,7 +665,16 @@ Overwrite the token block in `public/styles.css`; every screen inherits (no hard
 - Alternate section bands: `--paper` → `--green-wash` → `--wood-wash` down the page so it never
   reads flat. Use `--wood-deep` for the footer and any full-bleed dark band, with white text and
   `--gold` hairlines.
-- Wood is flat colour (no fake wood-grain images/textures).
+- ~~Wood is flat colour (no fake wood-grain images/textures).~~ **SUPERSEDED 2026-07-21 by
+  Lucille.** She saw the flat version and asked for *actual wood*, sending a walnut sample.
+  The masthead and footer now carry a **real grain texture** over `--wood-plank` (`#6B4228`).
+  It is a **generated inline SVG** (`--wood-grain` in `styles.css`), not a photograph — ~640
+  bytes, no network request, works offline in the PWA, and can never 404 or hit hotlink
+  protection, which is what the original "no images" instinct was actually protecting against.
+  Grain runs **horizontally** on wide bands: vertical grain on a short wide element reads as
+  brushed fabric rather than timber (both were tested). Contrast is safe by construction —
+  the filter paints only *dark* grain, so the base colour is the lightest possible pixel
+  (white on it 8.62:1). **Do not "fix" this back to flat.**
 - Keep Fraunces (display) + Inter (UI). Keep radii, shadows, `:focus-visible`, reduced-motion.
 - Re-check AA contrast; use `--green-deep` / `--gold-deep` for small text on light.
 
