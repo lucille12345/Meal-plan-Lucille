@@ -1,31 +1,46 @@
 # Meal Planner — Project Memory (CLAUDE.md)
 
-_Last updated: 2026-07-20. This file is auto-loaded by Claude Code every session._
+_Last updated: 2026-07-21. This file is auto-loaded by Claude Code every session._
 
-> **FOLDER STRUCTURE (tidied 2026-07-20).** Root holds only what must run or deploy from
-> there; everything reference-only lives in `docs/`.
+> **FOLDER STRUCTURE (re-verified 2026-07-21 — the tree below is what's actually on disk,**
+> **checked file-by-file, not just what was true when phase 0 tidied it).** Root holds only
+> what must run or deploy from there; everything reference-only lives in `docs/`; every
+> `git status --ignored` entry accounted for (only `gemini-key.txt` and macOS's own
+> `.DS_Store` are untracked, both by design — see `.gitignore`). Zero `node_modules` (the
+> backend has no dependencies — see `package.json`), zero leftover rollback/test/scratch files.
 > ```
 > Meal plan Lucille/
 > ├── CLAUDE.md          ← this file (must stay at root — auto-loaded)
 > ├── README.md          ← plain-English "what is this / how do I run it"
 > ├── server.js          ← backend. MUST stay at root (package.json + render.yaml run it)
-> ├── package.json       ← "start": node server.js
+> ├── package.json       ← "start": node server.js. Zero dependencies.
 > ├── render.yaml        ← Render deploy blueprint
-> ├── .gitignore
+> ├── .gitignore         ← gemini-key.txt, .env, .DS_Store, node_modules/
 > ├── gemini-key.txt     ← 🔑 SECRET, git-ignored, NEVER delete/commit. server.js reads it
 > │                        from the project root (__dirname). Irreplaceable if lost.
 > ├── Open Live Website.webloc   ← one-click shortcut to the live Render site
+> ├── .claude/launch.json        ← lets Claude Code's browser preview start `node server.js`
 > ├── public/            ← THE APP (served statically by server.js)
 > │   ├── index.html  app.js  styles.css  app-screens.css
 > │   ├── config.js   ← Supabase URL + publishable key (public-safe by design)
-> │   ├── cloud.js    ← Supabase client
-> │   ├── manifest.json  sw.js  icons/   ← PWA (Phase 9)
-> ├── supabase/schema.sql        ← tables + RLS + storage bucket
+> │   ├── cloud.js    ← Supabase client (ES module)
+> │   ├── recipes-db.js         ← the curated dish database (§0 of the V3 brief)
+> │   ├── ingredient-prices.js  ← the AI-off price table (§0.4)
+> │   └── manifest.json  sw.js  icons/   ← PWA
+> ├── supabase/
+> │   ├── schema.sql             ← tables + RLS + storage bucket + user_dishes (V3 §0.7)
+> │   └── functions/             ← send-feedback, send-reminders (Edge Functions, undeployed)
+> ├── tools/
+> │   ├── build-recipe-md.js     ← regenerates docs/RECIPE-DATABASE.md from recipes-db.js
+> │   └── build-prices-md.js     ← regenerates docs/INGREDIENT-PRICES.md from ingredient-prices.js
 > └── docs/              ← reference only, nothing here is served or executed
->     ├── DESIGN-BRIEF.md  OPUS-BUILD-BRIEF.md  ← the two authoritative briefs
+>     ├── V3-REDESIGN-BRIEF.md         ← current authoritative brief (all 10 phases done)
+>     ├── DESIGN-BRIEF.md  OPUS-BUILD-BRIEF.md  ← the two ORIGINAL v2 briefs (historical)
+>     ├── HOW-TO-ADD-A-DISH.md         ← Lucille's plain-English guide to hand-editing recipes-db.js
+>     ├── RECIPE-DATABASE.md  INGREDIENT-PRICES.md  ← GENERATED catalogues, never hand-edit
 >     ├── RESEARCH.md  STORM-RESEARCH.md        ← background research
 >     ├── SUPABASE-SETUP.md                     ← Lucille's setup steps
->     └── design/        ← the 9 screen mockups + tokens.css (visual source of truth)
+>     └── design/        ← the 9 screen mockups + tokens.css (v2's visual source of truth)
 > ```
 > **Do not move** `server.js`, `public/`, `package.json`, `render.yaml`, `gemini-key.txt`, or
 > `CLAUDE.md` — each is load-bearing at the root.
