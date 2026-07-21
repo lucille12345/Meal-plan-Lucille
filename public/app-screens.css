@@ -176,7 +176,7 @@ button.ghost.on { background: var(--tomato-wash); border-color: var(--tomato); c
 /* §2 tabs: My Meal Plan · Shop Ingredients */
 .tabs { display: inline-flex; background: var(--surface-2); border-radius: var(--r-pill); padding: 4px; }
 .tabs button { border: 0; background: transparent; padding: 8px 18px; border-radius: var(--r-pill); font-weight: 600; font-size: var(--fs-sm); color: var(--muted); cursor: pointer; font-family: var(--font-ui); transition: all var(--dur) var(--ease); }
-.tabs button.on { background: var(--surface); color: var(--ink); box-shadow: var(--sh-1); }
+.tabs button.on { background: var(--surface); color: var(--green-deep); box-shadow: var(--sh-1); }
 
 /* §2: sidebar collapses ABOVE the main column under 900px */
 .planner { display: grid; grid-template-columns: 276px 1fr; gap: 22px; align-items: start; }
@@ -186,12 +186,18 @@ button.ghost.on { background: var(--tomato-wash); border-color: var(--tomato); c
 .rail { position: sticky; top: 12px; align-self: start; max-height: calc(100vh - 24px); overflow-y: auto; scrollbar-width: thin; }
 .rail .sub { font-size: var(--fs-xs); color: var(--muted); margin: 0 0 14px; }
 @media (max-width: 900px) { .rail { position: static; max-height: none; overflow: visible; } }
-.rail-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 2px; }
-.wk-label { font-family: var(--font-display); font-weight: 600; font-size: var(--fs-lg); color: var(--ink); }
-.wk-arrow { border: 1px solid var(--hairline); background: var(--surface); color: var(--ink); border-radius: var(--r-pill); width: 28px; height: 28px; font-size: 15px; line-height: 1; cursor: pointer; font-family: var(--font-ui); }
-.wk-arrow:disabled { opacity: .3; cursor: default; }
+/* V4 §2: the week label strip is a walnut band — it echoes the masthead above and brackets
+   the day list below, so wood appears at least twice on the planner instead of only once.
+   White on --wood-plank measures 8.6:1; well past AA. */
+.rail-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 12px;
+  background-color: var(--wood-plank); background-image: var(--wood-grain); background-size: 100% 100%;
+  border-radius: 14px; padding: 12px 14px; border: 1px solid var(--gold); box-shadow: var(--sh-1); }
+.wk-label { font-family: var(--font-display); font-weight: 600; font-size: var(--fs-lg); color: #fff; }
+.wk-arrow { border: 1px solid rgba(255,255,255,.35); background: rgba(255,255,255,.08); color: #fff; border-radius: var(--r-pill); width: 28px; height: 28px; font-size: 15px; line-height: 1; cursor: pointer; font-family: var(--font-ui); }
+.wk-arrow:disabled { opacity: .4; cursor: default; }
 
 .day-row { border: 1px solid var(--hairline); border-radius: 14px; padding: 12px; margin-bottom: 10px; background: var(--surface); box-shadow: var(--sh-1); transition: border-color var(--dur) var(--ease), box-shadow var(--dur) var(--ease), background var(--dur) var(--ease); }
+.day-row:hover { border-color: var(--green); }
 .day-row.drop { border-color: var(--green); border-style: dashed; background: var(--green-wash); box-shadow: var(--sh-2); }
 .day-row .dh { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; margin-bottom: 8px; }
 .day-row .dh b { font-size: var(--fs-sm); }
@@ -281,12 +287,16 @@ button.ghost.on { background: var(--tomato-wash); border-color: var(--tomato); c
 .buyday { border: 1px solid var(--hairline); border-radius: var(--r-input); padding: 12px 16px; margin-bottom: 10px; background: var(--surface); }
 .buyday .head { font-weight: 700; font-size: var(--fs-sm); margin-bottom: 4px; }
 
+/* V4 §2: the shopping total sits at the bottom of the tab — a walnut card here brackets the
+   tab the way the footer brackets the landing page, giving wood its second home on this screen. */
 .total-bar {
-  border: 1px solid var(--hairline); border-radius: var(--r-card); padding: 16px 18px; margin-bottom: 6px;
-  background: var(--surface); display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap;
+  border: 1px solid var(--gold); border-radius: var(--r-card); padding: 18px 20px; margin-bottom: 6px;
+  background-color: var(--wood-plank); background-image: var(--wood-grain); background-size: 100% 100%;
+  color: #fff; display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; box-shadow: var(--sh-2);
 }
-.total-bar .big { font-size: 26px; font-weight: 700; font-family: var(--font-display); }
-.total-bar .big .per { font-size: var(--fs-sm); font-weight: 600; color: var(--muted); font-family: var(--font-ui); }
+.total-bar .big { font-size: 26px; font-weight: 700; font-family: var(--font-display); color: #fff; }
+.total-bar .big .per { font-size: var(--fs-sm); font-weight: 600; color: rgba(255,255,255,.8); font-family: var(--font-ui); }
+.total-bar .est-note { font-size: var(--fs-xs); color: rgba(255,255,255,.72); }
 .day-total { display: inline-block; margin-left: 8px; font-size: var(--fs-xs); font-weight: 700; color: var(--basil-deep); background: var(--basil-wash); padding: 2px 9px; border-radius: var(--r-pill); font-variant-numeric: tabular-nums; vertical-align: middle; }
 .list-col h3 .day-total, .buyday .head .day-total { float: right; }
 .pill { font-size: var(--fs-sm); padding: 4px 12px; border-radius: var(--r-pill); font-weight: 700; }
