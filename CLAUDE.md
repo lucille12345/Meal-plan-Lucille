@@ -116,8 +116,8 @@ repeated dishes and pointing at AI generation. Don't "fix" that notice by hiding
    the cron job. **Until `send-feedback` is deployed the in-app feedback form fails** (the live app
    already points at that URL).
 3. ~~AI-ON test~~ ✅ **DONE 2026-07-20** — tested, three bugs found and fixed (see above). Deploy the fix by pushing.
-4. **▶️ V3 REDESIGN → `docs/V3-REDESIGN-BRIEF.md` — IN PROGRESS.** Phases 0, 1, 2, 3 done (below);
-   **next up is phase 4 (categories, §4) — back to Sonnet.**
+4. **▶️ V3 REDESIGN → `docs/V3-REDESIGN-BRIEF.md` — IN PROGRESS.** Phases 0–6 done (below);
+   **next up is phase 7 ("Add a dish I love", §0.7) — switch to Opus, thinking high.**
    - **Start each phase at the brief's `§00. How to run this build`.** It holds the per-phase model
      plan, session hygiene, and the stop-don't-guess rules. **`§7` is the order to build in — the
      section numbering is historical, do not work top-to-bottom.**
@@ -244,6 +244,33 @@ repeated dishes and pointing at AI generation. Don't "fix" that notice by hiding
        targets / 81 draggable cards; addDishToDay + favourite work; no-repeat holds (43/43 unique);
        leftovers intact; shopping tab renders 157 checkboxes + total bar + .ics; zero console
        errors; zero `/generate-*` calls.
+   - **✅ PHASES 4+5 DONE + VERIFIED (2026-07-21, Sonnet).** Browse categories + filter row (§4),
+     built together since the filter row operates directly on the carousels. **8 categories**,
+     empty ones skipped: `Your favourites ♥`, `Weeknight winners` (mains ≤20 min),
+     `Budget-friendly dinners` (dinners sorted cheapest by €/serving via new `dishServingCost()`),
+     `Fresh & light` (mains tagged vegetarian/vegan/fish), `Comfort classics` (remaining mains,
+     deduped by id against the three above), `Small plates to start` (all starters),
+     `Sweet endings` (all desserts), `Breakfasts`. `Your own dishes` (§0.7) deliberately not added
+     — that feature doesn't exist yet. **Filter row:** `All filters` sheet (reuses phase 3's
+     `.sheet-overlay`), `My saved` toggle, `Dietary▾`/`Ingredient▾`/`Meal type▾` popovers, `Clear
+     all` chip. AND across groups, OR within a group (`applyBrowseFilters()`). The `-free` dietary
+     options reuse the **exact** allergen logic `passesDietFilters()` trusts for real generation
+     (`contains[]` first, legacy regex fallback) via a new read-only `dishHasAllergen()` — so the
+     filter chips can never disagree with what's actually safe. **The profile's allergies/dislikes
+     apply unconditionally inside `applyBrowseFilters()`, regardless of what's ticked** — verified:
+     setting a Gluten allergy with *no* dietary filter selected still shows zero gluten dishes
+     among 96 results.
+   - **✅ PHASE 6 DONE + VERIFIED (2026-07-21, Sonnet).** Shopping total moved to the bottom + Gemini
+     `estimatedTotal` (§5). Total card now sits after both list columns (verified via DOM position),
+     reworded to the brief's exact copy ("Estimated total €X.XX" / "≈ €Y.YY / day" / "Estimated —
+     varies by shop."). `server.js`'s week prompt asks for a top-level `estimatedTotal` (sum of the
+     per-ingredient prices it already produced, not a separately invented figure);
+     `requestWeekAI()` captures it into `state.estimatedTotal`; the shopping tab shows it as
+     headline when present, client-side sum otherwise. **Important:** under phase 0's precedence
+     rule `requestWeekAI()` isn't called by default (database fills the week first; AI only tops up
+     gaps via `requestSwapAI`), so `estimatedTotal` is wired and ready but stays empty until a
+     future "regenerate entirely with AI" action calls `requestWeekAI()` directly — not a bug,
+     documented so nobody wonders why it's unpopulated today.
 5. **Phase 11:** Tauri desktop wrapper over `/public` → `.dmg`/`.exe` via GitHub Releases.
 6. **🟡 CURATED RECIPE DATABASE — DATA BUILT, WIRING NOT DONE (2026-07-20, grown same day).**
    - **Built:** `public/recipes-db.js` (`RECIPES_DB`, **57 real dishes** — 9 breakfasts, 16 starters,
