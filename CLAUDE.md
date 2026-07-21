@@ -422,13 +422,36 @@ repeated dishes and pointing at AI generation. Don't "fix" that notice by hiding
        - Also fixed a false positive phase 7's broadened gluten pattern introduced:
          **"Gluten-free bread" matched `bread`**, rejecting a dish picked *because* it was
          gluten-free. `<allergen>-free` is now honoured.
-       - **🟡 Gemini mis-categorises ingredients.** It returned **"Eggs" with `category:'Dairy'`**
-         (eggs are not dairy) and writes prep into ingredient names ("chicken breast, cubed",
-         "onion, finely chopped"), which both flows into the shopping list and stops
-         `estimateIngredientPrice()` matching. We cannot tell a mis-labelled category from a
-         genuine one, so it **fails closed** — costing a dish, never risking one. A prompt tweak
-         ("ingredient names must be shopping-list names, no preparation") is the fix if it
-         annoys her.
+       - **🔴 CORRECTION + FIX (2026-07-21, later the same day). The "Gemini mis-categorised
+         Eggs as Dairy" note first written here was WRONG, and the real cause was a genuine bug
+         in our own filter.** `recipes-db.js` deliberately files **`Eggs` under `Dairy`** too —
+         `category` is the **supermarket aisle**, not an allergen. The actual defect was that
+         `passesDietFilters()` read that aisle as if it meant "contains the dairy allergen", so
+         a **dairy-allergic user lost every egg dish** — and, worse, every dish using
+         **`Almond milk`** (also shelved under `Dairy`), which is precisely what such a user
+         should be steered *towards*. Three fixes, all verified:
+         1. **`DAIRY_AISLE_NON_DAIRY`** exempts things shelved in the Dairy aisle that carry no
+            dairy: eggs (narrowly matched — a loose `/egg/` would have waved through *Eggnog*)
+            and the plant milks. A dish with eggs **and** milk is still excluded, because the
+            milk is its own ingredient row. Their own allergens still bite: almond milk is still
+            rejected for a nut allergy, soy milk for a soy allergy.
+         2. **The AI prompt now asks for `contains[]`** on top-up dishes, and spells out that
+            `category` is the aisle while allergens live in `contains`.
+         3. **`normalizeRecipe()` was silently dropping `contains`** — so even with the prompt
+            fixed, the allergen list would have been thrown away client-side. Now kept, filtered
+            to the eight known allergen words.
+         **The trust rule this establishes (important):** an allergen list may always **VETO** a
+         dish, but only a **reviewed** list may **CLEAR** one. Shipped `db-` dishes and
+         allergen-confirmed `user-` dishes are trusted outright (§00.5 rule 2); a model-written
+         `contains[]` on an `ai` dish is an extra veto only, and still falls through to the
+         ingredient rules — so an AI dish claiming `contains:[]` while listing double cream is
+         still caught. Verified with 13 cases incl. favourited copies (which keep provenance via
+         the `sourceId` work), and curated pool sizes are unchanged (gluten still 22 of 57).
+       - **🟡 Gemini writes preparation into ingredient names** ("chicken breast, cubed",
+         "onion, finely chopped"), which reaches the shopping list and stops
+         `estimateIngredientPrice()` matching. Both prompts now require plain shopping-list
+         names with preparation confined to `steps`. **Unverified against a live call** — the
+         prompt change landed after the AI-ON budget was spent.
        - **🟡 Google's free tier was congested throughout: `gemini-flash-latest` returned 503
          and the `MODEL_CHAIN` fell through, making a single lookup take ~90 SECONDS.** The
          "Looking it up…" button gives no sense of that wait. Not a bug — it is the documented
