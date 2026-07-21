@@ -116,8 +116,8 @@ repeated dishes and pointing at AI generation. Don't "fix" that notice by hiding
    the cron job. **Until `send-feedback` is deployed the in-app feedback form fails** (the live app
    already points at that URL).
 3. ~~AI-ON test~~ ✅ **DONE 2026-07-20** — tested, three bugs found and fixed (see above). Deploy the fix by pushing.
-4. **▶️ V3 REDESIGN → `docs/V3-REDESIGN-BRIEF.md` — IN PROGRESS.** Phases 0, 1, 2 done (below);
-   **next up is phase 3 (one-page planner) — switch to Opus, thinking high, for this one.**
+4. **▶️ V3 REDESIGN → `docs/V3-REDESIGN-BRIEF.md` — IN PROGRESS.** Phases 0, 1, 2, 3 done (below);
+   **next up is phase 4 (categories, §4) — back to Sonnet.**
    - **Start each phase at the brief's `§00. How to run this build`.** It holds the per-phase model
      plan, session hygiene, and the stop-don't-guess rules. **`§7` is the order to build in — the
      section numbering is historical, do not work top-to-bottom.**
@@ -199,6 +199,51 @@ repeated dishes and pointing at AI generation. Don't "fix" that notice by hiding
      column. Fixed by renaming to `.card-stat`. **Verified live:** both the plan-list and browse-
      carousel cards render the full anatomy correctly with real curated photos/prices, zero console
      errors, zero horizontal scroll at 375px.
+   - **✅ PHASE 3 DONE + VERIFIED (2026-07-21, Opus).** The one-page planner (§2) — the riskiest
+     phase. `review` + `recipes` + `shopping` are now a single screen; `state.screen` is only
+     `landing|signin|profile|loading|review` and **`review` IS the planner**.
+     **Tabs** (`state.plannerTab`) — `My Meal Plan` / `Shop Ingredients`; `renderShopping()` became
+     `shoppingBodyHtml()` + `bindShopping()` keeping total bar, budget pill, per-day chips, ticks,
+     copy/print/.ics/feedback. **Sidebar** rebuilt: week label + (disabled) arrows, then Mon–Sun
+     with **every** dish as a small row (thumb + name + course label) instead of three B/L/D
+     squares, plus day kcal **and** €/day via a new `dayCost()`; sticky with its own scroll so a
+     3-course week doesn't run off-screen; collapses above main under **900px** (was 780). **Recipe
+     detail is now an overlay** (`openRecipeOverlay`) — photo, ingredients w/ prices, method, Cook,
+     ♥, "See full recipe", and swap when opened from a planned slot; Esc/backdrop/✕ all close and
+     focus returns. `renderRecipes()` **deleted**. The **mode toggle is gone** (with one page the
+     week is always in the sidebar and browsing always in main); the target banner + honest notices
+     moved to the top of the main column (`planBodyHtml` → `plannerNoticesHtml`), so the per-day
+     meal-card blocks retired and **`mealCard()` was deleted** (`browseCard` still uses phase 2's
+     shared `recipeCardHtml`). **1·2·3 step bar removed** from `index.html`; `updateSteps()` deleted.
+     `render()` now guards a `review` screen with an empty week → falls back to the questionnaire
+     rather than a blank page.
+     - **⚠️ Documented deviation:** §2 asks for week ‹ › arrows, but the app plans exactly **one**
+       week and has no multi-week storage. They render **disabled with a tooltip** rather than
+       wired to nothing or silently dropped — matching the "Coming soon" convention the
+       questionnaire already uses. Wiring them up is trivial once weeks are stored.
+     - **🔴 Shopping bug found + fixed while verifying (separate concern from §2):** the curated
+       database writes `unit:'piece'` where the older pool writes `unit:''`, so `itemKey()` split
+       the **same** ingredient across two shopping rows — a real week showed *"Apple · 3 piece"*
+       and *"Apple · 4"* as separate lines. `itemKey()` now normalises `''`/`'piece'`/`'pieces'`
+       into one bucket, verified to **sum** rather than drop (3 sources → 1 row, totals match).
+       **Side effect:** this changes the localStorage keys behind shopping ticks, so a list ticked
+       before this commit starts unticked once.
+     - **🟡 Known gap, deliberately NOT fixed here (out of phase-3 scope):** the same ingredient in
+       genuinely *different* units still gets separate rows — e.g. `Olive oil` appears as tbsp,
+       tsp **and** ml; also maple syrup, plain flour, fresh ginger, soy sauce, balsamic vinegar,
+       coconut oil, fresh basil/parsley. Consolidating needs real unit conversion at aggregation
+       time (`ingredient-prices.js` already has `UNIT_TO_BASE`, and each ingredient needs a g-or-ml
+       base). Pre-existing — the old pool always mixed spoons — but more visible now. **Note:
+       splitting fresh items across buy-days is BY DESIGN, not a duplicate.**
+     - **Verified live (AI off):** 1280px two-column + 375px stacked with no h-scroll; tabs switch
+       without navigation; sidebar shows all 43 slots with kcal + €/day; overlay opens from a
+       sidebar dish *and* a browse card — confirmed genuinely on top via `elementFromPoint`
+       hit-testing, because the screenshot tool does **not** composite `position:fixed` overlays in
+       full-page capture (a tooling artifact, not an app bug — don't chase it); Esc closes; swap
+       works AI-off and updates overlay + sidebar together; cook mode + read-aloud open; 7 drop
+       targets / 81 draggable cards; addDishToDay + favourite work; no-repeat holds (43/43 unique);
+       leftovers intact; shopping tab renders 157 checkboxes + total bar + .ics; zero console
+       errors; zero `/generate-*` calls.
 5. **Phase 11:** Tauri desktop wrapper over `/public` → `.dmg`/`.exe` via GitHub Releases.
 6. **🟡 CURATED RECIPE DATABASE — DATA BUILT, WIRING NOT DONE (2026-07-20, grown same day).**
    - **Built:** `public/recipes-db.js` (`RECIPES_DB`, **57 real dishes** — 9 breakfasts, 16 starters,
