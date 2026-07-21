@@ -1017,9 +1017,29 @@ function renderLanding(){
   }
 }
 
-/* ----- Sign-in / sign-up (magic link + Google) — cloud mode only ----- */
+/* ----- Sign-in / sign-up (password + Google) — cloud mode only (V4 §1) -----
+   Password is the primary path: email is used once at sign-up, then only as the login
+   identifier. No email is sent on an ordinary sign-in, so there is no rate limit to hit.
+   The last email to sign in on this browser is remembered (email only, never the password —
+   V4 §1.3b) so the everyday flow is: open app → email pre-filled → type password → in. */
+const LAST_EMAIL_KEY='foodieLastEmail';
+function rememberedEmail(){ try{ return localStorage.getItem(LAST_EMAIL_KEY)||''; }catch(e){ return ''; } }
+function rememberEmail(email){ try{ localStorage.setItem(LAST_EMAIL_KEY,email); }catch(e){} }
+function forgetEmail(){ try{ localStorage.removeItem(LAST_EMAIL_KEY); }catch(e){} }
+// Turn Supabase's terse auth errors into plain English (V4 §1.3).
+function friendlyAuthError(e){
+  const m=((e&&e.message)||'').toLowerCase();
+  if(m.includes('invalid login')) return 'That email and password don’t match. Try again, or reset your password.';
+  if(m.includes('already registered')||m.includes('already been registered')) return 'You already have an account — switch to Sign in.';
+  if(m.includes('email not confirmed')) return 'Check your inbox and click the link, then sign in.';
+  if(m.includes('password')&&m.includes('should be')) return 'Passwords need at least 8 characters.';
+  return (e&&e.message)||'Something went wrong. Please try again.';
+}
 function renderSignIn(){
   const cloudOn = !!(window.Cloud && window.Cloud.enabled);
+  const remembered=rememberedEmail();
+  // mode: 'in' = sign in, 'up' = create account. Default to sign in.
+  let mode='in';
   app.innerHTML=`
     <div class="card auth-card">
       <a class="top-back" id="backHome" role="button" tabindex="0">← Back home</a>
@@ -1028,50 +1048,97 @@ function renderSignIn(){
       <div id="auth-form">
         <button class="btn-google" id="googleBtn" type="button"><span class="g" aria-hidden="true"></span> Continue with Google</button>
         <div class="divider">or with email</div>
+        <div class="auth-tabs" role="tablist">
+          <button class="auth-tab active" id="tabIn" type="button" role="tab">Sign in</button>
+          <button class="auth-tab" id="tabUp" type="button" role="tab">Create account</button>
+        </div>
         <label for="authEmail">Email</label>
-        <input type="email" id="authEmail" placeholder="you@email.com" autocomplete="email">
-        <button class="primary btn-block" id="magicBtn" type="button">Email me a magic link →</button>
+        <input type="email" id="authEmail" placeholder="you@email.com" autocomplete="email" value="${remembered.replace(/"/g,'&quot;')}">
+        <label for="authPass">Password</label>
+        <input type="password" id="authPass" placeholder="At least 8 characters" autocomplete="current-password">
+        <div id="confirmRow" style="display:none">
+          <label for="authPass2">Confirm password</label>
+          <input type="password" id="authPass2" placeholder="Type it again" autocomplete="new-password">
+        </div>
+        <button class="primary btn-block" id="submitBtn" type="button">Sign in →</button>
+        <div class="auth-links">
+          <a class="txt" id="forgotLink" role="button" tabindex="0" style="${mode==='in'?'':'display:none'}">Forgot your password?</a>
+          ${remembered?`<a class="txt" id="notYouLink" role="button" tabindex="0">Not you? Use a different email</a>`:''}
+        </div>
         <ul class="promise">
           <li><span class="tick">✓</span> <span><b>Free forever</b> — no card, no trial clock</span></li>
-          <li><span class="tick">✓</span> <span><b>No passwords</b> — we email you a one-tap link</span></li>
+          <li><span class="tick">✓</span> <span><b>One password</b> — no codes to wait for</span></li>
           <li><span class="tick">✓</span> <span><b>Your data stays yours</b> — export or delete anytime</span></li>
         </ul>
         <p class="auth-err" id="authErr" style="display:none"></p>
-      </div>
-      <div id="auth-sent" style="display:none">
-        <div class="confirm">
-          <div class="env" aria-hidden="true">📬</div>
-          <h3>Check your email</h3>
-          <p class="sub">We sent a magic link to <span id="sentEmail" class="mailto"></span>. Tap it and you're in — no password needed.</p>
-          <button class="ghost" id="diffEmail" type="button">Use a different email</button>
-        </div>
+        <p class="auth-ok" id="authOk" style="display:none"></p>
       </div>
     </div>`;
-  const backHome=document.getElementById('backHome');
-  if(backHome) backHome.onclick=()=>setScreen('landing');
-  const err=document.getElementById('authErr');
-  const showErr=(m)=>{ err.textContent=m; err.style.display='block'; };
+  const $=(id)=>document.getElementById(id);
+  const backHome=$('backHome'); if(backHome) backHome.onclick=()=>setScreen('landing');
+  const err=$('authErr'), ok=$('authOk');
+  const showErr=(m)=>{ err.textContent=m; err.style.display='block'; ok.style.display='none'; };
+  const showOk=(m)=>{ ok.textContent=m; ok.style.display='block'; err.style.display='none'; };
   const notConnected='Sign-in isn’t connected yet — add your Supabase details in config.js.';
-  document.getElementById('magicBtn').onclick=async()=>{
-    const email=document.getElementById('authEmail').value.trim();
+  const emailEl=$('authEmail'), passEl=$('authPass'), pass2El=$('authPass2');
+
+  // Focus straight to the password field when the email is already known (V4 §1.3b).
+  if(remembered){ passEl.focus(); } else { emailEl.focus(); }
+
+  function setMode(m){
+    mode=m;
+    $('tabIn').classList.toggle('active',m==='in');
+    $('tabUp').classList.toggle('active',m==='up');
+    $('confirmRow').style.display=m==='up'?'block':'none';
+    $('submitBtn').textContent=m==='up'?'Create my account →':'Sign in →';
+    $('forgotLink').style.display=m==='in'?'':'none';
+    passEl.setAttribute('autocomplete',m==='up'?'new-password':'current-password');
+    err.style.display='none'; ok.style.display='none';
+  }
+  $('tabIn').onclick=()=>setMode('in');
+  $('tabUp').onclick=()=>setMode('up');
+
+  $('submitBtn').onclick=async()=>{
+    const email=emailEl.value.trim(); const pw=passEl.value;
     if(!/.+@.+\..+/.test(email)){ showErr('Please enter a valid email address.'); return; }
+    if(pw.length<8){ showErr('Passwords need at least 8 characters.'); return; }
+    if(mode==='up' && pw!==pass2El.value){ showErr('Those two passwords don’t match.'); return; }
     if(!cloudOn){ showErr(notConnected); return; }
+    $('submitBtn').disabled=true; $('submitBtn').textContent=mode==='up'?'Creating…':'Signing in…';
     try{
-      const { error }=await window.Cloud.signInWithEmail(email);
-      if(error)throw error;
-      document.getElementById('sentEmail').textContent=email;
-      document.getElementById('auth-form').style.display='none';
-      document.getElementById('auth-sent').style.display='block';
-    }catch(e){ showErr('Could not send the link: '+((e&&e.message)||'unknown error')); }
+      if(mode==='up'){
+        const { data, error }=await window.Cloud.signUpWithPassword(email,pw);
+        if(error)throw error;
+        rememberEmail(email);
+        // With email-confirmation OFF (V4 §1.4) a session exists immediately and onAuthChange
+        // takes over. If confirmation is ON, no session yet — tell them to check their inbox.
+        if(!(data&&data.session)) showOk('Account created — check your inbox to confirm, then sign in.');
+      }else{
+        const { error }=await window.Cloud.signInWithPassword(email,pw);
+        if(error)throw error;
+        rememberEmail(email);
+        // success → onAuthChange fires and swaps the screen; nothing more to do here.
+      }
+    }catch(e){ showErr(friendlyAuthError(e)); }
+    finally{ $('submitBtn').disabled=false; $('submitBtn').textContent=mode==='up'?'Create my account →':'Sign in →'; }
   };
-  document.getElementById('googleBtn').onclick=async()=>{
+
+  $('forgotLink').onclick=async()=>{
+    const email=emailEl.value.trim();
+    if(!/.+@.+\..+/.test(email)){ showErr('Enter your email above first, then tap Forgot your password.'); return; }
+    if(!cloudOn){ showErr(notConnected); return; }
+    try{ const { error }=await window.Cloud.sendPasswordReset(email); if(error)throw error;
+      showOk('If that email has an account, a reset link is on its way.');
+    }catch(e){ showErr('Could not send the reset link: '+((e&&e.message)||'unknown error')); }
+  };
+
+  const notYou=$('notYouLink');
+  if(notYou) notYou.onclick=()=>{ forgetEmail(); emailEl.value=''; emailEl.focus(); notYou.remove(); };
+
+  $('googleBtn').onclick=async()=>{
     if(!cloudOn){ showErr(notConnected); return; }
     try{ const { error }=await window.Cloud.signInWithGoogle(); if(error)throw error; }
     catch(e){ showErr('Google sign-in failed: '+((e&&e.message)||'unknown error')); }
-  };
-  document.getElementById('diffEmail').onclick=()=>{
-    document.getElementById('auth-sent').style.display='none';
-    document.getElementById('auth-form').style.display='block';
   };
 }
 

@@ -398,12 +398,24 @@ button.ghost.on { background: var(--tomato-wash); border-color: var(--tomato); c
   background: conic-gradient(from -45deg, #EA4335 0 25%, #FBBC05 0 50%, #34A853 0 75%, #4285F4 0); }
 .divider { display: flex; align-items: center; gap: 14px; color: var(--faint); font-size: var(--fs-xs); margin: 22px 0; }
 .divider::before, .divider::after { content: ""; height: 1px; background: var(--hairline); flex: 1; }
-.auth-card #magicBtn { margin-top: 16px; }
+.auth-card #submitBtn { margin-top: 18px; }
+.auth-card label { display: block; font-weight: 600; font-size: var(--fs-sm); margin: 14px 0 6px; }
+.auth-card input { width: 100%; }
+/* Sign in / Create account toggle (V4 §1) */
+.auth-tabs { display: flex; gap: 6px; background: var(--green-wash); border-radius: var(--r-pill); padding: 4px; margin: 4px 0 4px; }
+.auth-tab { flex: 1; border: none; background: transparent; padding: 9px 12px; border-radius: var(--r-pill);
+  font-family: var(--font-ui); font-weight: 600; font-size: var(--fs-sm); color: var(--muted); cursor: pointer;
+  transition: background var(--dur) var(--ease), color var(--dur) var(--ease); }
+.auth-tab.active { background: var(--surface); color: var(--basil-deep); box-shadow: var(--sh-1); }
+.auth-links { display: flex; flex-direction: column; gap: 6px; margin-top: 12px; }
+.auth-links .txt { color: var(--basil-deep); font-weight: 600; font-size: var(--fs-sm); cursor: pointer; }
+.auth-links .txt:hover { text-decoration: underline; }
 .promise { list-style: none; padding: 0; display: flex; flex-direction: column; gap: 10px; margin: 26px 0 0; }
 .promise li { display: flex; gap: 10px; align-items: center; font-size: var(--fs-sm); color: var(--muted); }
 .promise li b { color: var(--ink); font-weight: 600; }
 .promise .tick { color: var(--basil-deep); font-size: 15px; }
 .auth-err { color: var(--reject); font-size: var(--fs-sm); margin-top: 14px; }
+.auth-ok { color: var(--basil-deep); font-size: var(--fs-sm); margin-top: 14px; font-weight: 600; }
 .confirm { text-align: center; padding: 8px 0; }
 .confirm .env { width: 82px; height: 82px; border-radius: 22px; background: var(--basil-wash); display: grid; place-items: center; font-size: 38px; margin: 0 auto 20px; }
 .confirm h3 { font-size: var(--fs-h3); font-family: var(--font-display); }

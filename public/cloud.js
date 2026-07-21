@@ -40,6 +40,17 @@ if (!cfg.url || !cfg.anonKey) {
 
       // ---- auth ----
       getSession: async () => (await client.auth.getSession()).data.session,
+      // Primary path (V4 §1): real accounts with a password. Email is used once at sign-up and
+      // then only as the login identifier — no email is sent on an ordinary sign-in, so there is
+      // no rate limit to hit.
+      signUpWithPassword: (email, password) =>
+        client.auth.signUp({ email, password }),
+      signInWithPassword: (email, password) =>
+        client.auth.signInWithPassword({ email, password }),
+      sendPasswordReset: (email) =>
+        client.auth.resetPasswordForEmail(email, { redirectTo: location.origin }),
+      // Kept as the account-recovery fallback if a password is forgotten and the reset email
+      // fails — no longer the primary button (V4 §1.2).
       signInWithEmail: (email) =>
         client.auth.signInWithOtp({ email, options: { emailRedirectTo: location.origin } }),
       signInWithGoogle: () =>

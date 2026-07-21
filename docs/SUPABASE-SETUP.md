@@ -56,21 +56,64 @@ key goes there just fine.)*
 4. **Authentication → Providers → Email** should already be **enabled** (it is by default).
    Nothing else to do here for email sign-in.
 
-## 5. Try it
+## 5. Turn OFF the confirmation email (do this — it's the whole point of V4 §1)
+
+The app now uses **a password**, not an emailed link. But Supabase, by default, still makes
+you click a confirmation link the **first** time you create an account — which puts you back
+into "wait for an email" territory. Turn it off:
+
+1. Supabase dashboard → **Authentication** → **Sign In / Providers** → **Email**.
+2. Turn **OFF** the toggle **"Confirm email"**. Save.
+
+**Trade-off, so you know:** with this off, anyone can sign up with any email without proving
+they own it. For a personal meal planner where each account only sees its own data, that's
+completely fine. If you'd rather keep confirmation on, the app already shows a clear "check
+your inbox" message — it just means the first sign-up needs one emailed click. Everyday
+sign-ins never send email either way.
+
+While you're here: **Authentication → URL Configuration → Redirect URLs** → add
+`http://localhost:8787` so sign-in also works when you run it locally.
+
+## 6. Try it
 1. In Terminal: `node server.js`, then open **http://localhost:8787**.
-2. You should now see the **Welcome to Table** sign-in screen.
-3. Type your email → **Email me a magic link** → check your inbox → tap the link → you're in.
-   Your existing week/favorites from this browser are carried up to your account
-   automatically the first time.
+2. You'll see **Welcome to #Foodie** with **Sign in / Create account** tabs.
+3. Tap **Create account** → type your email + a password (8+ characters) twice → **Create my
+   account**. You're straight in (no email link, assuming step 5 is done).
+4. Your existing week/favorites from this browser are carried up to your account the first time.
+5. Sign out, then sign back in with just your **email + password** — your email is already
+   filled in for you, so you only type the password.
+
+---
+
+## 7. "Continue with Google" — the setup that makes it actually work
+
+The Google button is in the app and the code is correct, but it fails until you connect a
+Google project. This is a one-time, free setup. Do it in order:
+
+1. **Google Cloud Console** (console.cloud.google.com) → your existing **"meal planner"**
+   project → **APIs & Services** → **OAuth consent screen**. Choose **External**,
+   app name **#Foodie**, your email (`lucillemonamie@icloud.com`) as both support and
+   developer contact. Save.
+2. Same area → **Audience** → add `lucillemonamie@icloud.com` (and any other address you'll
+   sign in with) as **Test users**. While the app is in "Testing", only these can sign in.
+3. **APIs & Services** → **Credentials** → **Create credentials** → **OAuth client ID** →
+   application type **Web application**.
+4. Under **Authorised redirect URIs**, add **exactly** this — copied byte-for-byte, no
+   trailing slash:
+   `https://ckhqnqoazgmqxzzzacfl.supabase.co/auth/v1/callback`
+5. Create it, then copy the **Client ID** and **Client secret**.
+6. **Supabase dashboard** → **Authentication** → **Sign In / Providers** → **Google** →
+   enable it, paste both values, Save.
+7. Test on the live site. If it still fails, it's almost always the redirect URI in step 4 —
+   it must match exactly, no trailing slash.
 
 ---
 
 ## Good to know
-- **Email limits:** Supabase's built-in email sender is rate-limited (a few messages an
-  hour) and links can land in **spam** — totally fine for your own testing. (Higher volume
-  later needs a custom email sender; we'll do that if/when it matters.)
-- **Google sign-in** ("Continue with Google") is in the UI but needs a separate free Google
-  Cloud setup — we'll do that in a later phase; email magic-link is all you need for now.
-- **Nothing breaks if you skip this.** Leave `public/config.js` empty and the app stays in
+- **Password sign-in has no email limit** — the reason we switched. Only the *first* account
+  creation (and password resets) touch email, and with confirmation off even sign-up doesn't.
+- **Magic link still exists** as a hidden fallback for account recovery — it's just no longer
+  the main button.
+- **Nothing breaks if you skip all this.** Leave `public/config.js` empty and the app stays in
   local-only mode exactly as before.
 - **Don't share** your database password. The **anon key is fine** to be in the code.
