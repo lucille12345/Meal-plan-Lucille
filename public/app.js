@@ -183,7 +183,9 @@ const COURSE_LABEL = { starter:'Starter', main:'Main', dessert:'Dessert', single
 // 'review' IS the one-page planner (§2) — the old separate 'recipes' and 'shopping'
 // screens were merged into it: shopping is the second tab, recipes are a detail overlay.
 const state = { screen:'profile', profile:null, week:[], usedFallback:false, selectedDay:0,
-  useAI:false, favorites:[], checked:{}, plannerTab:'plan' };   // plannerTab: 'plan' | 'shop'
+  useAI:false, favorites:[], checked:{}, plannerTab:'plan',   // plannerTab: 'plan' | 'shop'
+  // §4 browse filters — ephemeral (not persisted): saved is a toggle, the rest are checklists.
+  browseFilters:{ saved:false, dietary:[], ingredient:[], mealType:[] } };
 // Where to reach the backend:
 //  - opened as a local file (double-click) → talk to the local Node server on :8787
 //  - served over http(s) (local `node server.js`, or hosted on Render) → same origin, no host needed
@@ -1411,6 +1413,68 @@ function railHtml(){
     <div class="sub">Drag a dish from the right onto a day, or tap one to see the recipe.</div>
     ${rows}</aside>`;
 }
+/* ============================================================
+   §4: Browse filters — pill row above the carousels.
+   Combine with AND across the three groups below; OR within a group (tick chicken + beef
+   to see either). "My saved" and the profile's allergies/dislikes are never filterable away —
+   the allergy/dislike check always runs regardless of what's ticked in the filter row.
+   ============================================================ */
+const DIETARY_OPTIONS = [
+  {v:'vegetarian', label:'Vegetarian'},
+  {v:'vegan',      label:'Vegan'},
+  {v:'fish-free',  label:'Fish-free'},
+  {v:'dairy-free', label:'Dairy-free'},
+  {v:'gluten-free',label:'Gluten-free'},
+];
+const INGREDIENT_OPTIONS = [
+  {v:'chicken', label:'Chicken'}, {v:'beef', label:'Beef'}, {v:'fish', label:'Fish'},
+  {v:'pasta', label:'Pasta'}, {v:'rice', label:'Rice'}, {v:'veg', label:'Veg'},
+];
+const MEALTYPE_OPTIONS = [
+  {v:'breakfast', label:'Breakfast'}, {v:'lunch', label:'Lunch'}, {v:'dinner', label:'Dinner'},
+  {v:'starter', label:'Starter'}, {v:'dessert', label:'Dessert'},
+];
+// Same allergen rules passesDietFilters() trusts for real generation (contains[] first,
+// legacy regex fallback) — reused read-only here so the "-free" filter chips agree with it.
+function dishHasAllergen(r,allergen){
+  if(Array.isArray(r.contains)) return r.contains.includes(allergen);
+  if(allergen==='fish') return r.tags.includes('fish');
+  if(allergen==='dairy') return r.ingredients.some(i=>i.category==='Dairy');
+  if(allergen==='gluten') return r.ingredients.some(i=>/bread|pasta|tortilla|pizza|granola|oats|noodle|couscous|bagel|pita|muesli|flour|bun/.test(i.name.toLowerCase()));
+  return false;
+}
+function matchesDietary(r,key){
+  if(key==='vegetarian') return r.tags.includes('vegetarian');
+  if(key==='vegan') return r.tags.includes('vegan');
+  if(key==='fish-free') return !dishHasAllergen(r,'fish');
+  if(key==='dairy-free') return !dishHasAllergen(r,'dairy');
+  if(key==='gluten-free') return !dishHasAllergen(r,'gluten');
+  return true;
+}
+function matchesIngredient(r,key){
+  const names=r.ingredients.map(i=>i.name.toLowerCase());
+  if(key==='veg') return r.tags.includes('vegetarian');
+  if(key==='fish') return r.tags.includes('fish')||names.some(n=>n.includes('fish'));
+  if(key==='pasta') return names.some(n=>/pasta|spaghetti|orzo|penne|ditalini|noodle/.test(n));
+  if(key==='rice') return names.some(n=>/\brice\b/.test(n)&&!/rice wine|rice noodle|rice paper/.test(n));
+  return names.some(n=>n.includes(key));   // chicken, beef
+}
+function matchesMealType(r,key){ return dishRoles(r).includes(key); }
+// Applies the whole browseFilters state (AND across groups, OR within a group) to a pool,
+// on top of the profile's allergies/dislikes — those are never filterable away.
+function applyBrowseFilters(list){
+  const f=state.browseFilters;
+  let out=list.filter(r=>passesDietFilters(r,state.profile||{dislikes:[],allergies:[]}));
+  if(f.saved){ const names=new Set(state.favorites.map(x=>x.name)); out=out.filter(r=>names.has(r.name)); }
+  if(f.dietary.length) out=out.filter(r=>f.dietary.every(k=>matchesDietary(r,k)));
+  if(f.ingredient.length) out=out.filter(r=>f.ingredient.some(k=>matchesIngredient(r,k)));
+  if(f.mealType.length) out=out.filter(r=>f.mealType.some(k=>matchesMealType(r,k)));
+  return out;
+}
+function browseFiltersActive(){
+  const f=state.browseFilters;
+  return f.saved||f.dietary.length||f.ingredient.length||f.mealType.length;
+}
 // browse card (recipe-card token markup) — draggable, with ⊕ add + ♥ fav
 function browseCard(r){
   return recipeCardHtml(r,{
@@ -1478,18 +1542,126 @@ function plannerNoticesHtml(){
   }
   return html;
 }
+// The filter row: All filters (opens a sheet with everything) · My saved (toggle) ·
+// Dietary ▾ / Ingredient ▾ / Meal type ▾ (each opens a small checklist popover) · Clear all.
+function filterCount(){ const f=state.browseFilters; return f.dietary.length+f.ingredient.length+f.mealType.length+(f.saved?1:0); }
+function filterRowHtml(){
+  const n=filterCount();
+  return `<div class="filter-row">
+    <button class="chip filter-chip" id="allFiltersBtn">☰ All filters${n?` (${n})`:''}</button>
+    <button class="chip filter-chip ${state.browseFilters.saved?'selected':''}" data-toggle-saved>My saved</button>
+    ${filterDropdownBtn('dietary','Dietary',DIETARY_OPTIONS)}
+    ${filterDropdownBtn('ingredient','Ingredient',INGREDIENT_OPTIONS)}
+    ${filterDropdownBtn('mealType','Meal type',MEALTYPE_OPTIONS)}
+    ${browseFiltersActive()?`<button class="chip filter-chip clear" id="clearFiltersBtn">✕ Clear all</button>`:''}
+  </div>`;
+}
+function filterDropdownBtn(group,label,opts){
+  const count=state.browseFilters[group].length;
+  return `<button class="chip filter-chip ${count?'selected':''}" data-filter-group="${group}">${label} ${count?`(${count})`:''} ▾</button>`;
+}
+function filterChecklistHtml(group,opts){
+  const sel=state.browseFilters[group];
+  return opts.map(o=>`<label class="filter-opt"><input type="checkbox" data-filter-value="${group}:${o.v}" ${sel.includes(o.v)?'checked':''}><span>${o.label}</span></label>`).join('');
+}
+function toggleFilterValue(group,value){
+  const arr=state.browseFilters[group];
+  const i=arr.indexOf(value);
+  if(i===-1)arr.push(value); else arr.splice(i,1);
+}
+function openFilterPopover(group,anchor){
+  document.querySelectorAll('.filter-popover').forEach(el=>el.remove());
+  const opts={dietary:DIETARY_OPTIONS,ingredient:INGREDIENT_OPTIONS,mealType:MEALTYPE_OPTIONS}[group];
+  const pop=document.createElement('div'); pop.className='filter-popover';
+  pop.innerHTML=filterChecklistHtml(group,opts);
+  document.body.appendChild(pop);
+  const r=anchor.getBoundingClientRect();
+  pop.style.top=(window.scrollY+r.bottom+6)+'px';
+  pop.style.left=Math.min(window.scrollX+r.left, window.scrollX+window.innerWidth-pop.offsetWidth-12)+'px';
+  pop.querySelectorAll('[data-filter-value]').forEach(cb=>cb.onchange=()=>{
+    const [g,v]=cb.dataset.filterValue.split(':'); toggleFilterValue(g,v); renderPlanner();
+  });
+  const close=(e)=>{ if(!pop.contains(e.target)&&e.target!==anchor){ pop.remove(); document.removeEventListener('click',close); } };
+  setTimeout(()=>document.addEventListener('click',close),0);
+}
+function openAllFiltersSheet(){
+  const overlay=document.createElement('div');
+  overlay.className='sheet-overlay';
+  overlay.setAttribute('role','dialog'); overlay.setAttribute('aria-modal','true'); overlay.setAttribute('aria-label','All filters');
+  function close(){ document.removeEventListener('keydown',onKey); overlay.remove(); }
+  function onKey(e){ if(e.key==='Escape')close(); }
+  overlay.innerHTML=`<div class="sheet">
+    <button class="sheet-close" aria-label="Close">✕</button>
+    <div class="sheet-body">
+      <h2 class="rname" style="margin-top:0">All filters</h2>
+      <label class="filter-opt" style="margin-bottom:14px"><input type="checkbox" id="af-saved" ${state.browseFilters.saved?'checked':''}><span>My saved only</span></label>
+      <div class="ing-head">Dietary</div>
+      <div class="filter-grid">${filterChecklistHtml('dietary',DIETARY_OPTIONS)}</div>
+      <div class="ing-head">Ingredient</div>
+      <div class="filter-grid">${filterChecklistHtml('ingredient',INGREDIENT_OPTIONS)}</div>
+      <div class="ing-head">Meal type</div>
+      <div class="filter-grid">${filterChecklistHtml('mealType',MEALTYPE_OPTIONS)}</div>
+      <div class="recipe-actions" style="margin-top:16px">
+        <button class="primary" id="af-apply" style="margin-top:0">Show results</button>
+        ${browseFiltersActive()?`<button class="ghost" id="af-clear">Clear all</button>`:''}
+      </div>
+    </div>
+  </div>`;
+  overlay.addEventListener('click',e=>{ if(e.target===overlay)close(); });
+  document.addEventListener('keydown',onKey);
+  document.body.appendChild(overlay);
+  overlay.querySelector('.sheet-close').onclick=close;
+  overlay.querySelector('#af-saved').onchange=(e)=>{ state.browseFilters.saved=e.target.checked; };
+  overlay.querySelectorAll('[data-filter-value]').forEach(cb=>cb.onchange=()=>{
+    const [g,v]=cb.dataset.filterValue.split(':'); toggleFilterValue(g,v);
+  });
+  overlay.querySelector('#af-apply').onclick=()=>{ close(); renderPlanner(); };
+  const clearBtn=overlay.querySelector('#af-clear');
+  if(clearBtn)clearBtn.onclick=()=>{ clearAllFilters(); close(); renderPlanner(); };
+}
+function clearAllFilters(){ state.browseFilters={saved:false,dietary:[],ingredient:[],mealType:[]}; }
+
+// Per-serving cost of an UNSCALED catalogue dish (ingredients are already per-serving in the
+// data model — see recipes-db.js's header comment — so this is just the ingredient sum, no
+// household-size division needed the way scaled week recipes need one).
+function dishServingCost(r){ return (r.ingredients||[]).reduce((s,i)=>s+priceOf(i),0); }
+
+/* §4 categories — titles are appetising, never a database word (her explicit complaint about
+   "Lunch mains"). Every carousel is skipped entirely when empty, and every pool already passes
+   through applyBrowseFilters() so filters narrow every section live. */
 function browseBodyHtml(){
-  const favs=state.favorites.slice().reverse();
-  const quick=[...DB(),...RECIPES].filter(r=>['breakfast','lunch','dinner'].includes(r.type)&&r.time<=12);
-  const bfast=[...DB(),...RECIPES].filter(r=>r.type==='breakfast');
-  const lunches=[...DB(),...RECIPES].filter(r=>r.type==='lunch');
-  const dinners=[...DB(),...RECIPES].filter(r=>r.type==='dinner');
-  return `<p class="drag-hint">↔ Drag a card onto a day in the week, or tap ⊕ to choose a day.</p>
-    ${carousel('From your favorites ♥',favs)}
-    ${carousel('Quick & easy',quick)}
-    ${carousel('Breakfasts',bfast)}
-    ${carousel('Lunch mains',lunches)}
-    ${carousel('Dinner mains',dinners)}`;
+  const pool=r=>applyBrowseFilters(r);
+  const mains=[...DB(),...RECIPES].filter(r=>{const t=dishRoles(r);return t.includes('lunch')||t.includes('dinner');});
+  const dinners=[...DB(),...RECIPES].filter(r=>dishRoles(r).includes('dinner'));
+  const starters=[...DB(),...STARTERS].filter(r=>dishRoles(r).includes('starter'));
+  const desserts=[...DB(),...DESSERTS].filter(r=>dishRoles(r).includes('dessert'));
+  const breakfasts=[...DB(),...RECIPES].filter(r=>dishRoles(r).includes('breakfast'));
+
+  const favs=pool(state.favorites.slice().reverse());
+  const weeknight=pool(mains.filter(r=>r.time<=20));
+  const budget=pool(dinners.slice().sort((a,b)=>dishServingCost(a)-dishServingCost(b)));
+  const freshLight=pool(mains.filter(r=>r.tags.some(t=>['vegetarian','vegan','fish'].includes(t))));
+  const claimed=new Set([...weeknight,...budget,...freshLight].map(r=>r.id));
+  const comfort=pool(mains.filter(r=>!claimed.has(r.id)));
+  const smallPlates=pool(starters);
+  const sweetEndings=pool(desserts);
+  const bfast=pool(breakfasts);
+
+  const sections=[
+    ['Your favourites ♥', favs],
+    ['Weeknight winners', weeknight],
+    ['Budget-friendly dinners', budget],
+    ['Fresh & light', freshLight],
+    ['Comfort classics', comfort],
+    ['Small plates to start', smallPlates],
+    ['Sweet endings', sweetEndings],
+    ['Breakfasts', bfast],
+  ];
+  const anyResults=sections.some(([,list])=>list.length);
+  return `${filterRowHtml()}
+    <p class="drag-hint">↔ Drag a card onto a day in the week, or tap ⊕ to choose a day.</p>
+    ${anyResults?sections.map(([title,list])=>carousel(title,list)).join('')
+      :`<p class="sub">No dishes match your filters right now. <a role="button" tabindex="0" id="clearFiltersEmpty" style="cursor:pointer;font-weight:600">Clear all filters</a> to see everything.</p>`}`;
 }
 /* ----- THE one-page planner (§2): tabs + sticky week sidebar + main column -----
    `review`, `recipes` and `shopping` used to be three separate screens. They are now one page:
@@ -1554,6 +1726,15 @@ function renderPlanner(){
     state.plannerTab='plan'; renderPlanner();
     app.querySelector('.planner-main')?.scrollIntoView({behavior:'smooth',block:'start'});
   });
+
+  // ---- §4 filter row ----
+  if(tab==='plan'){
+    document.getElementById('allFiltersBtn')?.addEventListener('click',openAllFiltersSheet);
+    document.querySelector('[data-toggle-saved]')?.addEventListener('click',()=>{ state.browseFilters.saved=!state.browseFilters.saved; renderPlanner(); });
+    document.getElementById('clearFiltersBtn')?.addEventListener('click',()=>{ clearAllFilters(); renderPlanner(); });
+    document.getElementById('clearFiltersEmpty')?.addEventListener('click',()=>{ clearAllFilters(); renderPlanner(); });
+    app.querySelectorAll('[data-filter-group]').forEach(b=>b.addEventListener('click',(e)=>{ e.stopPropagation(); openFilterPopover(b.dataset.filterGroup,b); }));
+  }
 
   if(tab==='shop') bindShopping();
   document.getElementById('backBtn').onclick=()=>setScreen('profile');
