@@ -1309,25 +1309,66 @@ function mealTypeLabel(meal){
   const c=meal.course; const cl=(c&&c!=='main'&&c!=='single')?' · '+COURSE_LABEL[c]:'';
   return meal.type+cl;
 }
+// Difficulty as 4 dots (filled = harder) — §3: "not the word." Shared by every card.
+function diffDots(n){
+  const d=Math.max(1,Math.min(4,Number(n)||1));
+  return `<span class="diff-dots" aria-label="Difficulty ${d} of 4">${'●'.repeat(d)}${'○'.repeat(4-d)}</span>`;
+}
+// €/serving in --gold-deep, only when at least one ingredient actually has a price (real or estimated).
+function priceLabel(r){
+  if(!r||!r.ingredients||!r.ingredients.length) return '';
+  const n=Math.max(1,peopleCount()||1);
+  const total=r.ingredients.reduce((s,i)=>s+priceOf(i),0);
+  if(total<=0) return '';
+  return `<span class="card-price">€${(total/n).toFixed(2)} / serving</span>`;
+}
+// ONE card anatomy for every context (§3): photo on top (background var(--green-wash)),
+// ♥ top-right white pill + a caller-supplied corner action bottom-right, Fraunces title,
+// desc, then Prep/Cook/Difficulty as three labelled stats — never the old side-by-side
+// thumbnail row. `o.cornerBtn` is the ⊕ add (browse) or ✕ swap (plan list) button markup;
+// `o.favAttr`/`o.topLabel`/`o.extraBadges`/`o.className`/`o.draggable` let each caller keep
+// its own data-attributes and context label without forking the template.
+function recipeCardHtml(r,o={}){
+  if(!r) return '';
+  const img=dishImageUrl(r);
+  const photo=img?`<img src="${img}" alt="" loading="lazy" onerror="this.replaceWith(Object.assign(document.createElement('div'),{className:'emoji-fill big',textContent:'${r.emoji||'🍽️'}'}))">`
+    :`<div class="emoji-fill big">${r.isLeftover?'♻️':(r.emoji||'🍽️')}</div>`;
+  const favBtn=o.showFav===false?'':`<button class="icon-btn fav ${isFavorite(r.name)?'on':''}" ${o.favAttr||''} title="Save as favorite">${isFavorite(r.name)?'♥':'♡'}</button>`;
+  const prep=(typeof r.prepTime==='number')?r.prepTime:null;
+  const cook=(typeof r.cookTime==='number')?r.cookTime:null;
+  const stat=(label,val)=>`<div class="stat"><span class="stat-label">${label}</span><span class="stat-val">${val}</span></div>`;
+  const stats=(prep!==null||cook!==null)
+    ? `${prep!==null?stat('Prep',prep+' min'):''}${cook!==null?stat('Cook',cook+' min'):''}${stat('Difficulty',diffDots(r.difficulty))}`
+    : `${stat('Time',r.time+' min')}${stat('Difficulty',diffDots(r.difficulty))}`;
+  const passive=(typeof r.passiveTime==='number'&&r.passiveTime>0)?r.passiveTime:0;
+  const passiveNote=passive?`<div class="card-passive">+ ${passive>=60?Math.round(passive/60)+' h':passive+' min'} chilling/marinating</div>`:'';
+  return `<article class="recipe-card ${o.className||''}" ${o.draggable?`draggable="true" data-rid="${r.id}"`:''}>
+    <div class="photo">${photo}${favBtn}${o.cornerBtn||''}</div>
+    <div class="body">
+      ${o.topLabel?`<span class="cat">${o.topLabel}</span>`:''}
+      <h3 class="title">${r.name}</h3>
+      ${r.desc?`<div class="desc">${r.desc}</div>`:''}
+      <div class="card-stats">${stats}</div>
+      ${passiveNote}
+      ${priceLabel(r)}
+      ${o.extraBadges?`<div class="card-extra">${o.extraBadges}</div>`:''}
+    </div>
+  </article>`;
+}
 function mealCard(meal,di,mi){
-  if(meal.loading)return `<div class="meal"><div class="thumb ${meal.type}"><div class="mini-spin"></div></div>
-    <div class="body"><div><div class="type">${mealTypeLabel(meal)}</div><div class="name" style="color:var(--muted)">finding a new dish…</div></div></div></div>`;
+  if(meal.loading)return `<div class="recipe-card loading"><div class="photo"><div class="mini-spin"></div></div>
+    <div class="body"><span class="cat">${mealTypeLabel(meal)}</span><h3 class="title" style="color:var(--muted)">finding a new dish…</h3></div></div>`;
   const r=meal.recipe;
-  if(!r)return `<div class="meal"><div class="body"><div><div class="type">${mealTypeLabel(meal)}</div><div class="name">— no option —</div></div></div></div>`;
-  const diffLabel=['','Very easy','Easy','Medium','Involved','Advanced'][r.difficulty]||'';
+  if(!r)return `<div class="recipe-card"><div class="body"><span class="cat">${mealTypeLabel(meal)}</span><h3 class="title">— no option —</h3></div></div>`;
   const extra=(r.isLeftover?'<span class="badge leftover">♻️ Leftover — just reheat</span>':'')
     +(r.batchNote?'<span class="badge batch">🍲 Cook double → tomorrow\'s lunch</span>':'');
-  return `<div class="meal ${meal.rejected?'rejected':''}">
-    <div class="thumb ${meal.type}">${r.isLeftover?'♻️':(r.emoji||'🍽️')}</div>
-    <div class="body"><div>
-      <div class="type">${mealTypeLabel(meal)}</div><div class="name">${r.name}</div><div class="desc">${r.desc}</div>
-      <div class="badges"><span class="badge">⏱ ${r.time} min</span><span class="badge diff">${diffLabel}</span>${nutriBadges(r)}${extra}</div>
-    </div>
-    <div class="side-btns">
-      <button class="swap-btn" data-swap="${di}-${mi}" title="Don't like it — swap" aria-label="Swap this ${meal.type}">✕</button>
-      <button class="fav-btn ${isFavorite(r.name)?'on':''}" data-fav="${di}-${mi}" title="Save as favorite" aria-label="Save ${r.name} as favorite">♥</button>
-    </div></div>
-  </div>`;
+  return recipeCardHtml(r,{
+    className:meal.rejected?'rejected':'',
+    topLabel:mealTypeLabel(meal),
+    favAttr:`data-fav="${di}-${mi}"`,
+    cornerBtn:`<button class="icon-btn swap" data-swap="${di}-${mi}" title="Don't like it — swap" aria-label="Swap this ${meal.type}">✕</button>`,
+    extraBadges:extra,
+  });
 }
 function dayKcal(day){
   let sum=0, any=false;
@@ -1362,18 +1403,12 @@ function railHtml(){
 }
 // browse card (recipe-card token markup) — draggable, with ⊕ add + ♥ fav
 function browseCard(r){
-  const img=dishImageUrl(r);
-  const photo=img?`<img src="${img}" alt="" loading="lazy" onerror="this.replaceWith(Object.assign(document.createElement('div'),{className:'emoji-fill big',textContent:'${r.emoji||'🍽️'}'}))">`
-    :`<div class="emoji-fill big">${r.emoji||'🍽️'}</div>`;
-  const kc=typeof r.kcal==='number'?`<span class="badge badge-tomato">${r.kcal} kcal</span>`:'';
-  const pr=typeof r.protein==='number'?`<span class="badge badge-basil">${r.protein} g</span>`:'';
-  return `<article class="recipe-card" draggable="true" data-rid="${r.id}">
-    <div class="photo">${photo}
-      <button class="icon-btn fav ${isFavorite(r.name)?'on':''}" data-bfav="${r.id}" title="Save as favorite">${isFavorite(r.name)?'♥':'♡'}</button>
-      <button class="icon-btn add" data-badd="${r.id}" title="Add to a day">＋</button></div>
-    <div class="body"><span class="cat">${r.type}</span><h3 class="title">${r.name}</h3>
-      <div class="meta"><span class="badge">⏱ ${r.time} min</span>${kc||pr}</div></div>
-  </article>`;
+  return recipeCardHtml(r,{
+    draggable:true,
+    topLabel:r.type,
+    favAttr:`data-bfav="${r.id}"`,
+    cornerBtn:`<button class="icon-btn add" data-badd="${r.id}" title="Add to a day">＋</button>`,
+  });
 }
 function carousel(title,list){
   if(!list.length) return '';

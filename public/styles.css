@@ -143,8 +143,10 @@ button { font-family: inherit; }
   transition: transform var(--dur) var(--ease), box-shadow var(--dur) var(--ease), background var(--dur) var(--ease), color var(--dur) var(--ease);
 }
 .icon-btn:hover { transform: translateY(-2px); box-shadow: var(--sh-2); }
-.icon-btn.add { background: var(--tomato); color: #fff; border-color: transparent; }
+.icon-btn.add { background: var(--basil); color: #fff; border-color: transparent; }
 .icon-btn.add:hover { filter: brightness(1.05); }
+.icon-btn.swap:hover { background: var(--reject); color: #fff; border-color: var(--reject); }
+.icon-btn.fav.on { color: var(--gold-deep); border-color: var(--gold); }
 
 /* ============================ Chips ============================ */
 .chip {
@@ -186,14 +188,28 @@ button { font-family: inherit; }
   display: flex; flex-direction: column;
 }
 .recipe-card:hover { transform: translateY(-3px); box-shadow: var(--sh-3); }
-.recipe-card .photo { position: relative; aspect-ratio: 4/3; overflow: hidden; background: var(--surface-2); }
+.recipe-card.rejected { opacity: .45; }
+.recipe-card.loading .photo { display: grid; place-items: center; }
+/* §3: every photo — real or emoji-fallback — sits on a green tint, never bare white. */
+.recipe-card .photo { position: relative; aspect-ratio: 4/3; overflow: hidden; background: var(--green-wash); }
 .recipe-card .photo img { width: 100%; height: 100%; object-fit: cover; }
+.recipe-card .photo .emoji-fill.big { width: 100%; height: 100%; display: grid; place-items: center; font-size: 52px; background: linear-gradient(135deg, var(--green-wash), #cfe6d8); }
 .recipe-card .photo .fav { position: absolute; top: 10px; right: 10px; width: 34px; height: 34px; font-size: 15px; background: rgba(255,255,255,.92); backdrop-filter: blur(6px); }
-.recipe-card .photo .add { position: absolute; bottom: -18px; right: 14px; width: 44px; height: 44px; font-size: 22px; box-shadow: var(--sh-2); }
+/* ⊕ add / ✕ swap: bottom-right, floating over the photo/body seam (§3 anatomy). */
+.recipe-card .photo .add, .recipe-card .photo .swap { position: absolute; bottom: -18px; right: 14px; width: 44px; height: 44px; font-size: 22px; box-shadow: var(--sh-2); }
 .recipe-card .body { padding: 22px 16px 16px; display: flex; flex-direction: column; gap: 8px; flex: 1; }
-.recipe-card .cat { font-size: var(--fs-xs); font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--tomato-deep); }
-.recipe-card .title { font-family: var(--font-display); font-weight: 600; font-size: var(--fs-lg); line-height: 1.15; }
-.recipe-card .meta { display: flex; flex-wrap: wrap; gap: 6px; margin-top: auto; }
+.recipe-card .cat { font-size: var(--fs-xs); font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--green-deep); }
+.recipe-card .title { font-family: var(--font-display); font-weight: 600; font-size: var(--fs-lg); line-height: 1.15; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.recipe-card .desc { font-size: var(--fs-sm); color: var(--muted); }
+/* Prep / Cook / Difficulty — three labelled stats, difficulty as 4 dots not a word (§3). */
+.recipe-card .card-stats { display: flex; gap: 16px; margin-top: 4px; }
+.recipe-card .stat { display: flex; flex-direction: column; gap: 2px; }
+.recipe-card .stat-label { font-size: 10px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; color: var(--faint); }
+.recipe-card .stat-val { font-size: var(--fs-sm); font-weight: 600; color: var(--ink); }
+.diff-dots { letter-spacing: 1px; color: var(--green-deep); }
+.card-passive { font-size: var(--fs-xs); color: var(--muted); font-style: italic; }
+.card-price { font-size: var(--fs-sm); font-weight: 700; color: var(--gold-deep); }
+.card-extra { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 2px; }
 
 /* ============================ Inputs ============================ */
 .field { display: flex; flex-direction: column; gap: 7px; }

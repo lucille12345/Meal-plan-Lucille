@@ -192,7 +192,6 @@ button.ghost.on { background: var(--tomato-wash); border-color: var(--tomato); c
 .planner-main .carousel { padding: 4px 2px 12px; }
 .planner-main .recipe-card { width: 210px; }
 .recipe-card.dragging { opacity: .5; }
-.recipe-card .photo .emoji-fill.big { width: 100%; height: 100%; display: grid; place-items: center; font-size: 52px; background: linear-gradient(135deg, var(--honey-wash), var(--blush)); }
 .recipe-card[draggable] { cursor: grab; }
 .recipe-card[draggable]:active { cursor: grabbing; }
 
@@ -202,27 +201,10 @@ button.ghost.on { background: var(--tomato-wash); border-color: var(--tomato); c
 .day-picker button { display: block; width: 100%; text-align: left; border: 0; background: transparent; padding: 9px 10px; border-radius: var(--r-sm); font-size: var(--fs-sm); font-weight: 600; color: var(--ink); cursor: pointer; font-family: var(--font-ui); }
 .day-picker button:hover { background: var(--tomato-wash); color: var(--tomato-deep); }
 
-/* ---- review: day blocks + meal rows ---- */
-.day-block { margin-bottom: var(--s-6); }
-.day-head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; margin: 0 0 10px; flex-wrap: wrap; }
-.day-title { font-size: var(--fs-h3); font-weight: 700; margin: 0; color: var(--ink); font-family: var(--font-display); }
-.day-kcal { font-size: var(--fs-xs); color: var(--muted); }
+/* ---- review: day blocks + meal cards (§3: one shared .recipe-card, image on top) ---- */
+.day-block { margin-bottom: var(--s-6); display: flex; flex-direction: column; gap: 14px; }
+.day-block .recipe-card { max-width: 420px; }
 
-.meal {
-  display: flex; align-items: stretch; border: 1px solid var(--hairline); border-radius: var(--r-card);
-  overflow: hidden; margin-bottom: 10px; background: var(--surface); box-shadow: var(--sh-1);
-  transition: transform var(--dur) var(--ease), box-shadow var(--dur) var(--ease);
-}
-.meal:hover { box-shadow: var(--sh-2); transform: translateY(-2px); }
-.meal.rejected { opacity: .45; }
-.thumb { width: 96px; min-width: 96px; display: flex; align-items: center; justify-content: center; font-size: 38px; }
-.thumb.breakfast { background: linear-gradient(135deg, var(--wood-wash), #E4CFA9); }
-.thumb.lunch     { background: linear-gradient(135deg, var(--green-wash), #bfe0c6); }
-.thumb.dinner    { background: linear-gradient(135deg, var(--wood-wash), var(--wood-mid)); }
-.meal .body { flex: 1; padding: 14px 16px; display: flex; justify-content: space-between; gap: 10px; }
-.meal .type { font-size: var(--fs-xs); text-transform: uppercase; letter-spacing: .07em; color: var(--tomato-deep); font-weight: 700; }
-.meal .name { font-weight: 600; font-size: var(--fs-lg); font-family: var(--font-display); line-height: 1.15; }
-.meal .desc { font-size: var(--fs-sm); color: var(--muted); }
 .badges { margin-top: 8px; display: flex; gap: 6px; flex-wrap: wrap; }
 
 /* ---- badges (app variants layered on the token .badge) ---- */
@@ -230,17 +212,6 @@ button.ghost.on { background: var(--tomato-wash); border-color: var(--tomato); c
 .badge.kcal { background: var(--tomato-wash); color: var(--tomato-deep); }
 .badge.leftover { background: var(--basil-wash); color: var(--basil-deep); }
 .badge.batch { background: var(--honey-wash); color: var(--honey-deep); }
-
-.side-btns { display: flex; flex-direction: column; gap: 6px; flex-shrink: 0; align-items: flex-end; }
-.swap-btn, .fav-btn {
-  border: 1px solid var(--hairline-2); background: var(--surface); border-radius: var(--r-pill);
-  width: 38px; height: 38px; cursor: pointer; font-size: 15px; line-height: 1;
-  transition: all var(--dur) var(--ease);
-}
-.swap-btn:hover { background: var(--reject); color: #fff; border-color: var(--reject); transform: translateY(-2px); }
-.fav-btn { color: var(--faint); }
-.fav-btn:hover { border-color: var(--gold-deep); color: var(--gold-deep); }
-.fav-btn.on { color: var(--gold-deep); border-color: var(--gold); background: var(--gold-wash); }
 
 /* ---- sticky action bar ---- */
 .status-bar {
@@ -418,7 +389,6 @@ button.ghost.on { background: var(--tomato-wash); border-color: var(--tomato); c
 /* ---- small screens ---- */
 @media (max-width: 560px) {
   header.app h1 { font-size: 28px; }
-  .thumb { width: 76px; min-width: 76px; font-size: 30px; }
   .cook-step-text { font-size: 21px; }
 }
 
