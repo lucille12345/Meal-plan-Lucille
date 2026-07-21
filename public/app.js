@@ -1761,9 +1761,7 @@ function renderPlanner(){
     <div class="planner">
       ${railHtml()}
       <main class="planner-main">${tab==='shop'?shoppingBodyHtml()
-        :plannerNoticesHtml()
-         +`<div class="add-dish-row"><button class="ghost add-dish-btn" id="addDishHead">＋ Add a dish I love</button></div>`
-         +browseBodyHtml()}</main>
+        :plannerNoticesHtml()+browseBodyHtml()}</main>
     </div>
     <div class="status-bar">
       <span class="count">${tab==='shop'?'Your ticks are remembered':'Drag or ⊕ to add · ♥ to save'}</span>
@@ -1818,9 +1816,10 @@ function renderPlanner(){
     document.getElementById('clearFiltersBtn')?.addEventListener('click',()=>{ clearAllFilters(); renderPlanner(); });
     document.getElementById('clearFiltersEmpty')?.addEventListener('click',()=>{ clearAllFilters(); renderPlanner(); });
     app.querySelectorAll('[data-filter-group]').forEach(b=>b.addEventListener('click',(e)=>{ e.stopPropagation(); openFilterPopover(b.dataset.filterGroup,b); }));
-    // §0.7 entry points — the `Your own dishes` block and the planner head.
+    // §0.7 entry point — it lives in the `Your own dishes` block, which sits on the
+    // My Meal Plan tab, satisfying §0.7.2's "one entry point" and §4's "discoverable from
+    // browse" at once. A second copy floating above the filters just read as a duplicate.
     document.getElementById('addDishBrowse')?.addEventListener('click',openAddDishOverlay);
-    document.getElementById('addDishHead')?.addEventListener('click',openAddDishOverlay);
   }
 
   if(tab==='shop') bindShopping();
