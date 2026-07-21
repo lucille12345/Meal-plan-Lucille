@@ -2366,9 +2366,20 @@ function openAddDishOverlay(){
       }
       // A pasted http(s) link is a different research mode from pasted recipe text.
       const isUrl=mode==='text'&&/^https?:\/\/\S+$/i.test(q);
+      // A lookup is usually a few seconds, but when Google's free tier is congested the
+      // model chain falls through and it can take a minute or more. A button that says the
+      // same thing for 90 seconds reads as broken, so say what's actually happening.
       go.disabled=true; go.textContent='Looking it up…'; msg.textContent='';
-      const out=await researchDish({mode:isUrl?'url':mode,query:q});
-      go.disabled=false; go.textContent='Look it up';
+      const waitNotes=[
+        [8000,  'Reading through the recipe…'],
+        [20000, 'Still going — the recipe service is busy right now.'],
+        [45000, "Still going. It's slow when Google is under load, but it hasn't failed."],
+      ];
+      const timers=waitNotes.map(([ms,text])=>setTimeout(()=>{ msg.textContent=text; },ms));
+      let out;
+      try { out=await researchDish({mode:isUrl?'url':mode,query:q}); }
+      finally { timers.forEach(clearTimeout); }
+      go.disabled=false; go.textContent='Look it up'; msg.textContent='';
       if(out.fail){
         msg.textContent=out.fail;
         if(out.detail) console.info('Research dish — why it failed:',out.detail);

@@ -39,7 +39,13 @@ function readKeyFile() {
 }
 
 const API_KEY = readKeyFile() || process.env.GEMINI_API_KEY;
-const MODEL   = process.env.MODEL || 'gemini-flash-latest';
+// Default to the LITE model on purpose. `gemini-flash-latest` is the free tier's most
+// contended model — on 2026-07-21 it returned 503 "high demand" for every attempt, and because
+// it led MODEL_CHAIN every lookup burned two failed calls plus backoff on it before falling
+// through, turning a ~5 s request into ~90 s. `gemini-flash-lite-latest` answered first time
+// on both occasions we've tested, and its output passed validateDish() cleanly. The heavier
+// model stays in the chain below as a fallback. Override with the MODEL env var on Render.
+const MODEL   = process.env.MODEL || 'gemini-flash-lite-latest';
 const PORT    = process.env.PORT || 8787;   // host (e.g. Render) sets PORT; default 8787 for local use
 
 if (!API_KEY) {
@@ -315,9 +321,8 @@ function sanitizeJson(text) {
 // demand") for minutes on end, and some pinned models 404 (retired) or 429 (no free quota).
 // So we try a chain and use the first that answers. MODEL env var still wins as the first choice.
 const MODEL_CHAIN = [...new Set([
-  MODEL,
-  'gemini-flash-latest',
-  'gemini-flash-lite-latest',   // verified working 2026-07-20 when the others were 503
+  MODEL,                        // gemini-flash-lite-latest by default — see the note on MODEL
+  'gemini-flash-latest',        // heavier, but the first to be throttled on the free tier
   'gemini-2.0-flash-lite',
 ])];
 const RETRYABLE = /\b(429|500|502|503|504)\b|UNAVAILABLE|overloaded|high demand/i;
