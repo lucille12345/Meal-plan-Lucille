@@ -788,7 +788,7 @@ function render(){
 function renderLoading(){
   app.innerHTML=`<div class="card" style="text-align:center;padding:48px 20px">
     <div style="font-size:44px">🍳</div><h2>Cooking up your week…</h2>
-    <p class="sub">The AI is planning meals, portions, recipes and prices around your profile. Takes several seconds.</p>
+    <p class="sub">We're picking dishes you'll love, working out portions and adding up the shopping. One moment.</p>
     <div class="spinner"></div></div>`;
 }
 
@@ -919,8 +919,8 @@ function renderLanding(){
       <div class="faq">
         <details open><summary>Is it really free? <span class="plus" aria-hidden="true">＋</span></summary><p>Yes — free forever, no card required. We built #Foodie to be genuinely useful, not to upsell you.</p></details>
         <details><summary>Do I need to cook every night? <span class="plus" aria-hidden="true">＋</span></summary><p>Not at all. Turn on "cook once, eat twice" and #Foodie plans leftovers for you, doubling the right dinners so nothing goes to waste.</p></details>
-        <details><summary>Can I swap meals I don't like? <span class="plus" aria-hidden="true">＋</span></summary><p>Tap ✕ on any dish to swap it instantly, or browse categories and add your own favorites to any day.</p></details>
-        <details><summary>Where do the recipes link to? <span class="plus" aria-hidden="true">＋</span></summary><p>Every dish links to a real recipe search — no dead links, no fabricated pages. What you see is what you can cook.</p></details>
+        <details><summary>Can I swap a dish I don't fancy? <span class="plus" aria-hidden="true">＋</span></summary><p>Tap ✕ on any dish to swap it straight away, or browse the categories and drop your own favourites onto any day.</p></details>
+        <details><summary>Where do the recipes come from? <span class="plus" aria-hidden="true">＋</span></summary><p>Real cookery sites — every dish in our cookbook links to the page it came from, with its own photo and timings. Nothing invented, no dead links. You can add dishes you love too, and they stay in your cookbook for good.</p></details>
         <details><summary>Does my data stay mine? <span class="plus" aria-hidden="true">＋</span></summary><p>Always. Your profile and plans are yours; we never sell your data. You can export or delete everything anytime.</p></details>
       </div>
     </div>
@@ -1084,7 +1084,7 @@ function renderProfile(){
       <div class="q-why">So your week feels like yours, not a spreadsheet.</div>
       <div class="field"><label for="q-name">Your name</label>
         <input class="input" id="q-name" value="${p.name||''}" placeholder="Lucille" style="font-size:var(--fs-lg)"></div>
-      ${hasSavedData()?'<div class="q-util"><button type="button" class="btn btn-ghost btn-sm" id="q-clear">Clear saved data &amp; start fresh</button></div>':''}
+      ${hasSavedData()?'<div class="q-util"><button type="button" class="btn btn-ghost btn-sm" id="q-clear">Clear everything &amp; start over</button></div>':''}
     </div>
 
     <!-- 2 · You -->
@@ -1212,7 +1212,7 @@ function renderProfile(){
           <span class="badge badge-honey">Coming soon</span></div></div>
       </div>
       <label class="q-check" style="margin-top:22px"><input type="checkbox" id="q-useAI" ${state.useAI?'checked':''}>
-        <span><b>Let AI fill any gaps</b> <span class="hint">— your week always comes from the recipe cookbook first; this lets AI invent a dish on the rare occasion the cookbook can't fill a slot uniquely. Uses a small number of your ~20 free Gemini requests/day.</span></span></label>
+        <span><b>Let AI fill any gaps</b> <span class="hint">— your week always comes from the cookbook first. This only steps in on the rare day the cookbook can't find something new, and it also powers looking up a dish you add yourself. Uses a few of your 20 free lookups a day.</span></span></label>
     </div>
 
     <div class="q-foot">
@@ -1311,7 +1311,7 @@ function renderProfile(){
   document.getElementById('q-useAI').onchange=(e)=>{ state.useAI=e.target.checked; saveState(); };
 
   const clearBtn=document.getElementById('q-clear');
-  if(clearBtn) clearBtn.onclick=()=>{ if(confirm("Clear your saved profile, week and favorites? This can't be undone.")) clearAllData(); };
+  if(clearBtn) clearBtn.onclick=()=>{ if(confirm("Clear your saved answers, your week and your favourites? This can't be undone.")) clearAllData(); };
   const signOutBtn=document.getElementById('q-signout');
   if(signOutBtn) signOutBtn.onclick=async()=>{ try{ await window.Cloud.signOut(); }catch(e){ console.warn('Sign out failed:', e&&e.message); } };
 
@@ -1371,7 +1371,7 @@ function recipeCardHtml(r,o={}){
   const img=dishImageUrl(r);
   const photo=img?`<img src="${img}" alt="" loading="lazy" onerror="this.replaceWith(Object.assign(document.createElement('div'),{className:'emoji-fill big',textContent:'${r.emoji||'🍽️'}'}))">`
     :`<div class="emoji-fill big">${r.isLeftover?'♻️':(r.emoji||'🍽️')}</div>`;
-  const favBtn=o.showFav===false?'':`<button class="icon-btn fav ${isFavorite(r.name)?'on':''}" ${o.favAttr||''} title="Save as favorite">${isFavorite(r.name)?'♥':'♡'}</button>`;
+  const favBtn=o.showFav===false?'':`<button class="icon-btn fav ${isFavorite(r.name)?'on':''}" ${o.favAttr||''} title="Save as favourite">${isFavorite(r.name)?'♥':'♡'}</button>`;
   const prep=(typeof r.prepTime==='number')?r.prepTime:null;
   const cook=(typeof r.cookTime==='number')?r.cookTime:null;
   const stat=(label,val)=>`<div class="card-stat"><span class="stat-label">${label}</span><span class="stat-val">${val}</span></div>`;
@@ -1570,19 +1570,19 @@ function plannerNoticesHtml(){
     const perLine=per?` <span class="hint">· roughly ${per.breakfast} / ${per.lunch} / ${per.dinner} kcal across breakfast, lunch & dinner</span>`:'';
     html+=`<div class="target-banner"><div class="tgt-ico">🎯</div>
       <div><div class="tgt-main">Your daily target: ~${tgt.kcal} kcal · ${tgt.protein} g protein <span class="hint">per person</span></div>
-      <div class="tgt-sub">Estimated from your height, weight, age, activity and goal (Mifflin–St Jeor).${perLine}</div></div></div>`;
+      <div class="tgt-sub">Worked out from your height, weight, age and how active you are.${perLine}</div></div></div>`;
   }
-  if(state.usedFallback)html+=`<div class="notice">⚠️ Backend offline — showing built-in meals, not AI (no budget/prices).</div>`;
-  else if(state.partialAI)html+=`<div class="notice">ℹ️ The AI returned a short week this time, so the later days come from the built-in recipes. Re-plan to try the AI again.</div>`;
-  else if(!state.useAI)html+=`<div class="notice info">ℹ️ Showing built-in meals — tick "Let AI fill any gaps" on the profile page if a week ever can't be filled uniquely.</div>`;
+  if(state.usedFallback)html+=`<div class="notice">⚠️ We couldn't reach the kitchen just now, so this week comes straight from the cookbook — without prices or your budget.</div>`;
+  else if(state.partialAI)html+=`<div class="notice">ℹ️ Only part of the week came back this time, so the later days are from the cookbook. Re-plan whenever you'd like to try again.</div>`;
+  else if(!state.useAI)html+=`<div class="notice info">ℹ️ This week comes from the cookbook. If a week ever can't be filled without repeating, tick "Let AI fill any gaps" in your answers.</div>`;
   // Be honest when the built-in recipe book simply can't fill the week without repeating —
   // even with AI on, since AI is only asked to top up specific gaps, not author the week.
   if(state.repeatedDishes&&state.repeatedDishes.length){
     const many=state.repeatedDishes.length===1?'one dish repeats':state.repeatedDishes.length+' dishes repeat';
     const suggestion=state.useAI
-      ? `AI tried to fill the gap but couldn't find a unique dish this time — re-plan to try again.`
-      : `Turning on <b>AI generation</b> lets it try to fill the gap.`;
-    html+=`<div class="notice">🔁 Your allergies and dislikes leave only a few matching dishes, so ${many} this week (${state.repeatedDishes.join(', ')}). ${suggestion}</div>`;
+      ? `We tried to find something new for those slots and came up short this time — re-plan to try again.`
+      : `Ticking <b>"Let AI fill any gaps"</b> in your answers lets us go looking for something new.`;
+    html+=`<div class="notice">🔁 What you can and can't eat leaves us a small handful of dishes to work with, so ${many} this week (${state.repeatedDishes.join(', ')}). ${suggestion}</div>`;
   }
   return html;
 }
@@ -1748,7 +1748,7 @@ function renderPlanner(){
          +browseBodyHtml()}</main>
     </div>
     <div class="status-bar">
-      <span class="count">${tab==='shop'?'Ticks are remembered':'Drag or ⊕ to add · ♥ favorite'}</span>
+      <span class="count">${tab==='shop'?'Your ticks are remembered':'Drag or ⊕ to add · ♥ to save'}</span>
       <div class="btn-row">
         <button class="ghost" id="backBtn">⚙️ Edit my answers</button>
         <button class="primary" id="replanBtn" style="margin-top:0">🔄 Re-plan this week</button>
@@ -1855,7 +1855,7 @@ function openRecipeOverlay(di,mi,recipeDirect){
         <div class="recipe-actions">
           ${(cur.steps&&cur.steps.length)?`<button class="cook-btn" data-cook>▶ Cook</button>`:''}
           <a class="recipe-link" href="${recipeUrl(cur)}" target="_blank" rel="noopener noreferrer">See full recipe ↗</a>${cur.sourceName?`<span class="sub" style="font-size:.85em">Recipe by ${cur.sourceName}</span>`:''}
-          <button class="ghost fav-inline ${isFavorite(cur.name)?'on':''}" data-favr style="padding:9px 14px">${isFavorite(cur.name)?'♥ Saved':'♡ Save as favorite'}</button>
+          <button class="ghost fav-inline ${isFavorite(cur.name)?'on':''}" data-favr style="padding:9px 14px">${isFavorite(cur.name)?'♥ Saved':'♡ Save as favourite'}</button>
           ${meal?`<button class="ghost" data-swapr style="padding:9px 14px" title="Don't like it — swap for another dish">✕ Swap this dish</button>`:''}
           ${isUserDish(cur)?`<button class="ghost" data-copydb style="padding:9px 14px" title="Copy this dish as a recipes-db.js block">📋 Copy as database entry</button>`:''}
         </div>
