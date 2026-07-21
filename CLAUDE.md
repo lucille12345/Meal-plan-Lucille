@@ -116,8 +116,9 @@ repeated dishes and pointing at AI generation. Don't "fix" that notice by hiding
    the cron job. **Until `send-feedback` is deployed the in-app feedback form fails** (the live app
    already points at that URL).
 3. ~~AI-ON test~~ ✅ **DONE 2026-07-20** — tested, three bugs found and fixed (see above). Deploy the fix by pushing.
-4. **▶️ V3 REDESIGN → `docs/V3-REDESIGN-BRIEF.md` — IN PROGRESS.** Phases 0–7 done (below);
-   **next up is phase 8 (copy pass, §6) — Sonnet — then phase 9 (final verification) on Opus.**
+4. **✅ V3 REDESIGN → `docs/V3-REDESIGN-BRIEF.md` — ALL 10 PHASES DONE (0–9), 2026-07-21.**
+   **Verified, committed, NOT pushed — awaiting Lucille's GitHub Desktop push + her word to deploy.**
+   The §9 final verification pass is written up at the end of this section.
    - **Start each phase at the brief's `§00. How to run this build`.** It holds the per-phase model
      plan, session hygiene, and the stop-don't-guess rules. **`§7` is the order to build in — the
      section numbering is historical, do not work top-to-bottom.**
@@ -344,6 +345,94 @@ repeated dishes and pointing at AI generation. Don't "fix" that notice by hiding
      - **Note for whoever runs §9:** the one AI-ON check should confirm a *real* Gemini reply
        still satisfies `validateDish()` — everything above proves the client contract, not that
        the model actually honours the prompt's shape. That is the single biggest unknown left.
+       **→ RESOLVED in phase 9: it does. See below.**
+   - **✅ PHASE 8 DONE (2026-07-21).** Copy pass (§6). Rewrote the clinical strings into the
+     Woolworths tone, keeping every notice's *information* intact — only the language changed,
+     never what is disclosed (§0.2 requires the honest notices stay honest). **Two were
+     factually wrong rather than merely cold, both left behind by phase 0:** the loading screen
+     still said *"The AI is planning meals…"* when the cookbook has planned the week since the
+     §0 precedence rule, and the FAQ still claimed every dish *"links to a real recipe search"*
+     when curated dishes have linked to their real source page since phase 0. Also: dropped
+     *"(Mifflin–St Jeor)"* from the target banner, "Backend offline"/"built-in meals"/"the
+     profile page" → language a cook would use, `meals`→`dishes` where a dish was meant, and
+     **standardised on British spelling** (the UI said "Your favourites" in one place and
+     "Save as favorite" in another).
+   - **✅ PHASE 9 DONE — FULL VERIFICATION PASS, 2026-07-21 (Opus). Result: GREEN.**
+     - **§9.1 automated — all four green.** Every JS file parses; **57 dishes / 0 data errors**
+       (no dup ids, times add up, every category/unit valid, every ingredient priced and none
+       returning €0); generated docs in sync; **`gemini-key.txt` has never been committed** and
+       no API key appears in any shipped file.
+     - **§9.2 by hand, AI OFF — all green.** 5 weeks unrestricted → **35 slots, 0 duplicates
+       every time, 33–34 of 35 from the database** (the 1–2 legacy dishes are the documented
+       time/difficulty filter, not a wiring gap). 5 weeks with 2 allergies + 2 dislikes →
+       **zero forbidden dishes on the plate**, and where the pool genuinely could not fill
+       uniquely the honest notice fired and named the dishes. Gluten ticked → bruschetta,
+       tiramisu, bolognese all gone; Soy ticked → teriyaki, Thai curry, sriracha all gone.
+       **Prices work with AI off**: €96.60/week → **€6.90/day/person**, inside the brief's
+       €4.80–€8.85 band, all 7 day-costs non-zero. Full pantry: `Red bell pepper`,
+       `Spring onions`, `Rice wine`, `Large flour tortilla` all correctly stay; `Olive oil`
+       and `Garlic` correctly hide. Favourite a `db-` dish → re-plan → still 0 duplicates.
+       `.ics` = **14 valid events, 7 real `sourceUrl`s, 0 Google-search links**. Cook mode +
+       read-aloud step through fine. Every overlay opens and closes on Esc with none left
+       behind. **All 57 curated dishes carry their own photo; 0 image failures.** 375px and
+       1280px both clean, no horizontal scroll. Questionnaire still edit-mode ("Save changes"),
+       1·2·3 step bar still gone, SW registered, both data files in `SHELL`, `CACHE` at
+       `foodie-shell-v5`. **0 console errors, 0 `/generate-*` calls with AI off.** State blob
+       round-trips (week + favourites + user dishes) and a double load dedupes.
+     - **§9.3 the one AI-ON run — the important findings are here.**
+       - **The §0 precedence rule is proven.** With AI **on** and an unrestricted profile the
+         week planned with **ZERO backend calls** — 35/35 slots, 34 from the database. Gemini
+         was never asked to author the week.
+       - **The top-up works and stays capped.** A heavily restricted profile (Nuts+Dairy+Gluten
+         + 2 dislikes) produced genuine gaps → **5 `/generate-meal` calls, 0 `/generate-week`**,
+         reusing `requestSwapAI` with **no endpoint of its own**, exactly as §0.3 step 10 asks.
+         Final week: 13 curated + 18 legacy + **4 AI top-ups**.
+       - **✅ The biggest open unknown is resolved: a REAL Gemini reply passes `validateDish()`
+         cleanly.** One live `/research-dish` call for "chicken tikka masala" returned correct
+         per-serving metric quantities, every unit and category valid, `time===prep+cook`
+         (20+25=45), `passiveTime:60` correctly separated, and — notably — **`sourceUrl:null`
+         rather than an invented link**, which is the anti-hallucination rule working on real
+         output.
+       - **🔴 REAL SAFETY BUG FOUND AND FIXED (commit `e063bff`): AI dishes were never
+         re-checked against the profile before being placed.** Both `planWeek()`'s top-up and
+         the overlay's swap took `requestSwapAI()`'s reply on trust. New **`acceptAIDish()`**
+         runs every AI dish through `passesDietFilters()` and discards it on failure — the
+         top-up keeps the repeat (already disclosed by the notice), the overlay falls back to a
+         safe local swap. Verified against the four dishes the live run actually returned plus
+         deliberately unsafe ones (cream pasta, peanut noodles, baguette, pork) — all rejected
+         for that profile.
+       - Also fixed a false positive phase 7's broadened gluten pattern introduced:
+         **"Gluten-free bread" matched `bread`**, rejecting a dish picked *because* it was
+         gluten-free. `<allergen>-free` is now honoured.
+       - **🟡 Gemini mis-categorises ingredients.** It returned **"Eggs" with `category:'Dairy'`**
+         (eggs are not dairy) and writes prep into ingredient names ("chicken breast, cubed",
+         "onion, finely chopped"), which both flows into the shopping list and stops
+         `estimateIngredientPrice()` matching. We cannot tell a mis-labelled category from a
+         genuine one, so it **fails closed** — costing a dish, never risking one. A prompt tweak
+         ("ingredient names must be shopping-list names, no preparation") is the fix if it
+         annoys her.
+       - **🟡 Google's free tier was congested throughout: `gemini-flash-latest` returned 503
+         and the `MODEL_CHAIN` fell through, making a single lookup take ~90 SECONDS.** The
+         "Looking it up…" button gives no sense of that wait. Not a bug — it is the documented
+         503 behaviour — but a real UX risk worth a progress hint if she sees it often.
+       - **🟡 §9.3's `estimatedTotal` check cannot pass by design, and this is a genuine
+         tension between two sections of the brief.** §5 says Gemini supplies the headline
+         shopping total; §0's precedence rule means `requestWeekAI()` — the only thing that
+         sets `state.estimatedTotal` — is **never called**. §00.5 rule 1 ("the database comes
+         before Gemini, always") wins, so the client-side sum is the headline and is correctly
+         labelled *"Estimated — varies by shop."* `requestWeekAI()` is live but unreferenced,
+         waiting for a future "surprise me entirely with AI" action. **Not a defect — a
+         decision to be aware of.**
+     - **🟡 Still deliberately not built:** **photo mode** for "Add a dish I love" (§7 step 7
+       explicitly allows deferring it; server accepts the image part already, the remaining work
+       is a file input + client-side downscale). And the **aggregate** totals (sidebar €/day,
+       shopping total) still under-count a user-added dish's unpriced ingredients — only the
+       per-card €/serving was made honest, because changing the shared rule would have touched
+       the verified AI-ON price path.
+     - **🟡 Pre-existing, found but not fixed:** `toggleFavorite()` stores favourites under a
+       new `fav<ts>` id, so §0.2's "dedupe by id" does not actually merge a favourite with its
+       source. No live defect — `pickMeal()` tracks used *names*, which is the real no-repeat
+       protection — but §0.2's stated guard is inaccurate about why.
 5. **Phase 11:** Tauri desktop wrapper over `/public` → `.dmg`/`.exe` via GitHub Releases.
 6. **🟡 CURATED RECIPE DATABASE — DATA BUILT, WIRING NOT DONE (2026-07-20, grown same day).**
    - **Built:** `public/recipes-db.js` (`RECIPES_DB`, **57 real dishes** — 9 breakfasts, 16 starters,
