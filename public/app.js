@@ -426,11 +426,16 @@ function passesDietFilters(recipe, profile){
   if(allergies.includes('fish')&&recipe.tags.includes('fish'))return false;
   if(allergies.includes('shellfish')&&/shrimp|prawn|crab/.test(recipe.name.toLowerCase()))return false;
   if(allergies.includes('dairy')&&recipe.ingredients.some(i=>i.category==='Dairy'))return false;
-  // The gluten list below is deliberately over-inclusive: this path only ever runs for LEGACY
-  // dishes, which carry no honest contains[] to consult, so it must fail closed (§00.4).
-  // `baguette`, `cracker` and `savoiardi` were verified leaks — legacy "Tomato bruschetta",
-  // "Garlic bread" and "Cheese & grapes" all reached a gluten-allergic user before this.
-  if(allergies.includes('gluten')&&recipe.ingredients.some(i=>/bread|pasta|tortilla|pizza|granola|oats|noodle|couscous|bagel|pita|muesli|flour|bun|baguette|spaghetti|savoiardi|ladyfinger|crouton|cracker|brioche|croissant|panko|breadcrumb|focaccia|ciabatta|pastry|filo|semolina|barley|wonton|cake|biscuit|cookie|pancake|waffle|crepe/.test(i.name.toLowerCase())))return false;
+  // The gluten list below is deliberately over-inclusive: this path only ever runs for dishes
+  // with no honest contains[] to consult (the legacy pool and AI top-ups), so it must fail
+  // closed (§00.4). `baguette`, `cracker` and `savoiardi` were verified leaks — legacy
+  // "Tomato bruschetta", "Garlic bread" and "Cheese & grapes" all reached a gluten-allergic
+  // user before this. `freeFrom` is the one exception that must be honoured: an ingredient
+  // that says "gluten-free bread" is safe, and matching `bread` inside it would wrongly
+  // reject a dish that was chosen precisely because it is gluten-free.
+  const freeFrom=(n,what)=>new RegExp(what+'[\\s-]?free','i').test(n);
+  if(allergies.includes('gluten')&&recipe.ingredients.some(i=>{const n=i.name.toLowerCase();
+    return !freeFrom(n,'gluten')&&/bread|pasta|tortilla|pizza|granola|oats|noodle|couscous|bagel|pita|muesli|flour|bun|baguette|spaghetti|savoiardi|ladyfinger|crouton|cracker|brioche|croissant|panko|breadcrumb|focaccia|ciabatta|pastry|filo|semolina|barley|wonton|cake|biscuit|cookie|pancake|waffle|crepe/.test(n);}))return false;
   if(allergies.includes('nuts')&&recipe.ingredients.some(i=>/peanut|almond|\bnut/.test(i.name.toLowerCase())))return false;
   // There was no soy rule at all (§0.2) — legacy "Beef stir-fry" carries Soy sauce and was
   // served to anyone who ticked Soy. Soy sauce also carries gluten, hence its listing above.
@@ -613,6 +618,19 @@ async function requestWeekAI(profile){
     state.partialAI=true;
   } else state.partialAI=false;
   return week.slice(0,DAYS.length);
+}
+// A dish Gemini invents is UNTRUSTED in exactly the way §0.7's researched dishes are: it has
+// no reviewed contains[], and the prompt asking it to respect allergies is a request, not a
+// guarantee. So every AI dish is re-checked against the profile before it can reach a plate,
+// and rejected if it fails. Failing closed here costs the user a repeated dish — which the
+// honest notice already discloses — instead of putting an allergen in front of them.
+function acceptAIDish(recipe,profile){
+  if(!recipe||!Array.isArray(recipe.ingredients)) return null;
+  if(!passesDietFilters(recipe,profile||{dislikes:[],allergies:[]})){
+    console.warn('Rejected an AI dish that failed the diet filter:',recipe.name);
+    return null;
+  }
+  return recipe;
 }
 async function requestSwapAI(profile,role,avoidNames){
   const res=await fetch(BACKEND_URL+'/generate-meal',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({profile,type:role,avoidNames})});
@@ -1043,8 +1061,8 @@ async function planWeek(){
       const avoidNames=[];
       state.week.forEach(d=>d.meals.forEach(m=>{ if(m.recipe) avoidNames.push(m.recipe.name); }));
       try{
-        const r=await requestSwapAI(state.profile,role,avoidNames);
-        if(r) meal.recipe=scaleRecipe(r,n);
+        const r=acceptAIDish(await requestSwapAI(state.profile,role,avoidNames),state.profile);
+        if(r) meal.recipe=scaleRecipe(r,n);   // null => keep the repeat, which the notice discloses
       }catch(e){ console.warn('AI top-up failed for a repeated slot:',e.message); }
     }
     enforceNoRepeat(state.week,state.profile);   // recompute state.repeatedDishes after patching
@@ -1874,7 +1892,10 @@ function openRecipeOverlay(di,mi,recipeDirect){
       else {
         const role=meal.course==='main'?meal.type:(meal.course||meal.type);
         const avoid=[]; state.week.forEach(d=>d.meals.forEach(m=>{if(m.recipe)avoid.push(m.recipe.name);}));
-        try { meal.recipe=await requestSwapAI(state.profile,role,avoid); }
+        // Same gate as the plan-time top-up: an AI dish that fails the profile's allergy and
+        // dislike filters is discarded, and we fall back to a safe local swap instead.
+        try { const r=acceptAIDish(await requestSwapAI(state.profile,role,avoid),state.profile);
+              if(r) meal.recipe=r; else swapMeal(di,mi); }
         catch(e){ console.warn('Swap failed, local:',e.message); swapMeal(di,mi); }
       }
       saveState(); paint(); renderPlanner();
