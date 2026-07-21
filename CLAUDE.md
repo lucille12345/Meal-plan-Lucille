@@ -116,8 +116,8 @@ repeated dishes and pointing at AI generation. Don't "fix" that notice by hiding
    the cron job. **Until `send-feedback` is deployed the in-app feedback form fails** (the live app
    already points at that URL).
 3. ~~AI-ON test~~ ✅ **DONE 2026-07-20** — tested, three bugs found and fixed (see above). Deploy the fix by pushing.
-4. **▶️ V3 REDESIGN → `docs/V3-REDESIGN-BRIEF.md` — IN PROGRESS.** Phase 0 done (below);
-   **next up is phase 1 (palette), then phase 2 (card), then switch to Opus for phase 3.**
+4. **▶️ V3 REDESIGN → `docs/V3-REDESIGN-BRIEF.md` — IN PROGRESS.** Phases 0, 1, 2 done (below);
+   **next up is phase 3 (one-page planner) — switch to Opus, thinking high, for this one.**
    - **Start each phase at the brief's `§00. How to run this build`.** It holds the per-phase model
      plan, session hygiene, and the stop-don't-guess rules. **`§7` is the order to build in — the
      section numbering is historical, do not work top-to-bottom.**
@@ -126,6 +126,13 @@ repeated dishes and pointing at AI generation. Don't "fix" that notice by hiding
    - **No line numbers anywhere in the brief — every reference is a `grep` anchor.**
    - `§9` is a full final verification pass with copy-pasteable check scripts; `§8` is the
      acceptance checklist.
+   - **⚠️ Note on git state (2026-07-21):** a commit titled "publish" appeared on `main`, authored
+     by Lucille, that already contained most of phase 2's in-progress work (the `app-screens.css`
+     side of the card-component refactor) before it was reviewed or committed as such. Nothing was
+     lost or broken by this — the remaining small fix (a class-name collision) was committed
+     normally right after — but it means **phase 2's changes are split across the "publish" commit
+     and the phase-2 commit that follows it**, not cleanly in one place. Worth knowing if `git
+     blame`/`git log` looks confusing for `app-screens.css` around this date.
    - **✅ PHASE 0 DONE + VERIFIED (2026-07-20, Sonnet).** All 11 steps of §0.3 + the §0.4 price
      wiring, committed. What changed in `public/app.js`/`index.html`/`sw.js` (`CACHE` bumped to
      `foodie-shell-v4`): `recipes-db.js` + `ingredient-prices.js` now load; `eligibleRecipes()` /
@@ -157,6 +164,41 @@ repeated dishes and pointing at AI generation. Don't "fix" that notice by hiding
      correctly, not a wiring bug — but the earlier simulation never modelled it, so treat "21/21" /
      "49/49" as an unrestricted **upper bound**, not what most real users will see. Faster/lower-
      difficulty dishes are worth prioritizing in future additions alongside the dessert/starter gap.
+   - **✅ PHASE 1 DONE + VERIFIED (2026-07-20/21, Sonnet).** Palette swap (§1). Overwrote the
+     `styles.css` token block with the new wood/green/gold table, keeping every **old token name**
+     (`--tomato`, `--honey`, `--basil-deep/-wash`, `--blush`, etc.) as an **alias** onto the new
+     equivalents instead of renaming ~130 call sites across `app-screens.css` — every screen
+     re-tints automatically. Then swept hardcoded hex the alias alone couldn't reach: 6 button/logo/
+     quote-mark glow shadows hardcoded to tomato's literal RGB; the pink favourite-heart (now gold,
+     matching "♥ active = gold spark"); the honey/peach meal-thumbnail gradients (now wood- and
+     green-toned); two peachy notice/banner borders (now a translucent gold hairline); the footer
+     rebuilt on `--wood-deep` with white text and a gold hairline divider per the brief's explicit
+     rule. **Tightened `--gold-deep`** from `#8A6B12` to `#7C5F10` after measuring contrast:
+     the original cleared AA on `--paper` (4.69) but fell short on `--gold-wash` (4.36, where
+     notice/badge text actually sits) — the new value clears both (5.61 / 5.22). **Verified live:**
+     landing/questionnaire/a full generated week all re-tinted correctly at 1280px + 375px, zero
+     tomato/honey hex remaining outside Google's own sign-in-button colors and one intentional
+     `--reject` semantic, zero console errors, zero horizontal scroll at 375px.
+   - **✅ PHASE 2 DONE + VERIFIED (2026-07-21, Sonnet).** Card component (§3). Found the app had
+     **two different card renderers** — `mealCard()` (a horizontal thumbnail-row, literally
+     Lucille's "images should be next to the meal, not on the side" complaint — and its `.thumb`
+     never even called `dishImageUrl()`, just showed an emoji) and `browseCard()` (already
+     photo-on-top). Unified both into one `recipeCardHtml(r, opts)`, matching the brief's exact
+     anatomy: photo on top (background `--green-wash`), ♥ top-right white pill, a caller-supplied
+     corner button bottom-right (⊕ add in `--basil` for browse, ✕ swap for the plan list),
+     Fraunces title (2-line clamp), desc, then **Prep/Cook/Difficulty as three labelled stats**
+     (`diffDots()` — 4 dots, never the word), `passiveTime` shown separately ("+ 8h chilling",
+     never folded into the headline time), and **`priceLabel()`** — €/serving in `--gold-deep`,
+     only when a real or estimated price exists. Deleted the now-dead `.meal`/`.thumb`/`.side-btns`/
+     `.swap-btn`/`.fav-btn` CSS (mealCard no longer emits that markup) and one duplicate
+     `.recipe-card .photo .emoji-fill.big` rule that would have silently overridden the new
+     green-wash version (app-screens.css loads after styles.css). **Real bug caught mid-build:** my
+     new `.stat` class collided with the landing page's pre-existing `.stat` (marketing stat-band —
+     "~2h saved", "−23% less spent"), which has its own padding/border/background — every
+     Prep/Cook/Difficulty stat was rendering as a bordered 30px-padded box instead of a plain
+     column. Fixed by renaming to `.card-stat`. **Verified live:** both the plan-list and browse-
+     carousel cards render the full anatomy correctly with real curated photos/prices, zero console
+     errors, zero horizontal scroll at 375px.
 5. **Phase 11:** Tauri desktop wrapper over `/public` → `.dmg`/`.exe` via GitHub Releases.
 6. **🟡 CURATED RECIPE DATABASE — DATA BUILT, WIRING NOT DONE (2026-07-20, grown same day).**
    - **Built:** `public/recipes-db.js` (`RECIPES_DB`, **57 real dishes** — 9 breakfasts, 16 starters,
