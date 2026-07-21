@@ -9,26 +9,47 @@
 
 :root {
   /* ---- Base / paper ---- */
-  --paper:      #FDFBF7;   /* app background — warm paper */
+  --paper:      #FAF7F2;   /* app background — warm ivory */
   --surface:    #FFFFFF;   /* cards, sheets */
-  --surface-2:  #F7F3EC;   /* insets, subtle fills */
-  --ink:        #1D1D1F;   /* primary text (Apple near-black) */
-  --muted:      #6E6A63;   /* secondary text */
-  --faint:      #A39E95;   /* tertiary / placeholder */
-  --hairline:   #ECE7DD;   /* borders, dividers */
-  --hairline-2: #E2DCCF;   /* stronger border */
+  --surface-2:  #F3EEE6;   /* insets — soft linen */
+  --ink:        #16241C;   /* primary text — deep green-black */
+  --muted:      #55645A;   /* secondary text */
+  --faint:      #93A099;   /* tertiary / placeholder */
+  --hairline:   #E5DED2;   /* borders, dividers */
+  --hairline-2: #D9CFBE;   /* stronger border */
 
-  /* ---- Appetite accents ---- */
-  --tomato:      #E0532F;  /* primary actions */
-  --tomato-deep: #B8401F;  /* tomato text on light (AA) */
-  --tomato-wash: #FBEDE7;  /* tomato tint fill */
-  --basil:       #2F7D5B;  /* health / success */
-  --basil-deep:  #246147;  /* basil text on light (AA) */
-  --basil-wash:  #EAF3EC;  /* cream-green soft fill */
-  --honey:       #F5B841;  /* highlights, sparing */
-  --honey-deep:  #9A6B04;  /* honey text on light (AA) */
-  --honey-wash:  #FCF2D9;
-  --blush:       #F8E8E0;  /* soft warm fill */
+  /* ---- Wood — deep & luscious ---- */
+  --wood-deep: #2E1C11;  /* espresso; dark bands, footer, nav */
+  --wood:      #5C3823;  /* rich walnut; primary wood surfaces */
+  --wood-mid:  #8A5A38;  /* warm oak; dividers/detail on wood */
+  --wood-wash: #EDE0D1;  /* pale wood tint; light section bands */
+
+  /* ---- Green — dark → emerald ---- */
+  --green-deep: #12352A;  /* darkest forest; dark sections, headings */
+  --green:      #1F6B4D;  /* primary actions — deep emerald */
+  --emerald:    #0E8055;  /* vivid emerald; highlights, success, active */
+  --basil:      #47764F;  /* softer herb green; secondary fills */
+  --green-wash: #E3EFE8;  /* green tint; photo backdrops */
+
+  /* ---- Gold — sparks only ---- */
+  --gold:        #C9A227;  /* antique gold; thin rules, price pills, ♥ active */
+  --gold-bright: #E3C463;  /* shimmer on hover/selected */
+  --gold-deep:   #7C5F10;  /* gold text on light (AA) — verified ≥4.5:1 on both --paper and --gold-wash */
+  --gold-wash:   #F7EFD8;  /* rare gold tint fill */
+
+  /* ---- Back-compat aliases (V3 palette swap — docs/V3-REDESIGN-BRIEF.md §1) ----
+     Every screen still references the old accent names below; aliasing them to the
+     new wood/green/gold tokens (instead of renaming ~130 call sites in app-screens.css)
+     means every screen re-tints automatically and nothing goes undefined. */
+  --tomato:      var(--green);
+  --tomato-deep: var(--green-deep);
+  --tomato-wash: var(--green-wash);
+  --basil-deep:  var(--green-deep);
+  --basil-wash:  var(--green-wash);
+  --honey:       var(--gold);
+  --honey-deep:  var(--gold-deep);
+  --honey-wash:  var(--gold-wash);
+  --blush:       var(--wood-wash);
 
   /* ---- Type ---- */
   --font-display: 'Fraunces', Georgia, 'Times New Roman', serif;
@@ -232,7 +253,7 @@ input[type=range].slider::-moz-range-thumb { width: 22px; height: 22px; border-r
 /* ============================ Nav (landing) ============================ */
 .glass-nav {
   position: sticky; top: 0; z-index: 50;
-  background: rgba(253,251,247,.72); backdrop-filter: saturate(180%) blur(18px);
+  background: rgba(250,247,242,.72); backdrop-filter: saturate(180%) blur(18px);
   border-bottom: 1px solid var(--hairline);
 }
 
