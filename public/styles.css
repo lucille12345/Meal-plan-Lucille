@@ -21,8 +21,19 @@
   /* ---- Wood — deep & luscious ---- */
   --wood-deep: #2E1C11;  /* espresso; dark bands, footer, nav */
   --wood:      #5C3823;  /* rich walnut; primary wood surfaces */
+  --wood-plank:#6B4228;  /* mid walnut — the base under --wood-grain (Lucille's reference) */
   --wood-mid:  #8A5A38;  /* warm oak; dividers/detail on wood */
   --wood-wash: #EDE0D1;  /* pale wood tint; light section bands */
+
+  /* Real walnut grain, generated not photographed. An inline SVG data URI, so it needs no
+     network request, survives offline in the PWA, can never 404 or hit hotlink protection,
+     and costs ~700 bytes. feTurbulence with a tiny x-frequency and a large y-frequency makes
+     the noise vary fast vertically and slowly horizontally — long streaks running ACROSS the
+     band, which is how a plank actually lies in a header or footer. Lay it over
+     --wood-plank; it paints only the dark grain, so the base colour shows through.
+     (This deliberately overrides §1's "wood is flat colour, no grain textures" — Lucille
+     asked for real wood on 2026-07-21 after seeing the flat version.) */
+  --wood-grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1400' height='260' preserveAspectRatio='none'%3E%3Cfilter id='g' x='0' y='0' width='100%25' height='100%25' color-interpolation-filters='sRGB'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.004 0.62' numOctaves='5' seed='24' result='n'/%3E%3CfeComponentTransfer in='n' result='c'%3E%3CfeFuncA type='table' tableValues='0 0.4 0.62 0.76 0.86 0.93 1'/%3E%3C/feComponentTransfer%3E%3CfeColorMatrix in='c' type='matrix' values='0 0 0 0 0.13 0 0 0 0 0.06 0 0 0 0 0.03 0 0 0 0.62 0'/%3E%3C/filter%3E%3Crect width='1400' height='260' filter='url(%23g)'/%3E%3C/svg%3E");
 
   /* ---- Green — dark → emerald ---- */
   --green-deep: #12352A;  /* darkest forest; dark sections, headings */

@@ -21,7 +21,9 @@ header.app {
   text-align: center;
   margin: -28px calc(50% - 50vw) 22px;      /* cancel .app-shell's top padding, then full-bleed */
   padding: 30px 20px 26px;
-  background: var(--wood-deep);
+  background-color: var(--wood-plank);
+  background-image: var(--wood-grain);
+  background-size: 100% 100%;               /* stretch one plank across, never tile visibly */
   border-bottom: 1px solid var(--gold);
   color: #fff;
 }
@@ -556,7 +558,13 @@ section.sec { position: relative; padding: 72px 0; z-index: 1; }
 .faq details p { color: var(--muted); margin-top: 12px; max-width: 62ch; }
 
 /* footer */
-footer.fat { background: var(--wood-deep); color: rgba(255,255,255,.92); margin-top: 40px; }
+footer.fat {
+  background-color: var(--wood-plank);
+  background-image: var(--wood-grain);
+  background-size: 100% 100%;
+  color: rgba(255,255,255,.92);
+  margin-top: 40px;
+}
 .foot-grid { display: grid; grid-template-columns: 1.4fr 1fr 1fr 1fr; gap: 32px; padding: 64px 0 44px; }
 @media (max-width: 760px) { .foot-grid { grid-template-columns: 1fr 1fr; gap: 28px; } }
 footer.fat .logo { color: #fff; }
