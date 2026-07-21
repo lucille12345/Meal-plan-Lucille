@@ -172,12 +172,18 @@ ${pricing}
 ${coursesShape}
 ${shape}
 
+Also include a top-level "estimatedTotal": the sum of every ingredient "price" across the whole
+week, in EUR, for ${people} ${people === 1 ? 'person' : 'people'} — add up the numbers you already
+priced per ingredient rather than inventing a separate figure; it must be internally consistent
+with them.
+
 Return ONLY this JSON structure (breakfast is a RECIPE; lunch & dinner hold a "courses" object with ${courseList}):
 { "week": [ { "day": "Monday", "meals": [
     { "type": "breakfast", ...RECIPE fields... },
     { "type": "lunch",  "courses": { ${courses.map(c => `"${c}": <RECIPE>`).join(', ')} } },
     { "type": "dinner", "courses": { ${courses.map(c => `"${c}": <RECIPE>`).join(', ')} } }
-] }, ... 7 days Monday..Sunday ] }`;
+] }, ... 7 days Monday..Sunday ],
+  "estimatedTotal": <number, EUR, whole week, for ${people} ${people === 1 ? 'person' : 'people'}> }`;
   }
 
   const role = avoid.type || 'dinner';

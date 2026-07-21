@@ -558,6 +558,8 @@ async function requestWeekAI(profile){
   if(!res.ok)throw new Error('backend '+res.status);
   const data=await res.json();
   if(!data.week)throw new Error('bad response');
+  // §5: Gemini's own whole-week total, shown as the shopping headline when present.
+  state.estimatedTotal=(typeof data.estimatedTotal==='number'&&isFinite(data.estimatedTotal)&&data.estimatedTotal>0)?data.estimatedTotal:undefined;
   // AI shape v3: breakfast is a recipe; lunch/dinner carry a `courses` object. Flatten to slots.
   const week=data.week.map((day,i)=>{
     const meals=[];
@@ -994,6 +996,10 @@ async function planWeek(){
   setScreen('loading');
   state.week=generateWeek(state.profile);      // sets state.repeatedDishes via enforceNoRepeat
   state.usedFallback=false;
+  // Only a full requestWeekAI() call supplies a whole-week estimate (§5) — the per-slot
+  // top-up below can't produce one, so there is nothing coherent to show until that future
+  // "regenerate entirely with AI" action exists. Clear any stale figure from a previous week.
+  state.estimatedTotal=undefined;
   if(state.useAI && state.repeatedDishes && state.repeatedDishes.length){
     const n=Math.max(1,Number(state.profile.people)||1);
     const toFix=[];
@@ -1868,30 +1874,35 @@ function sumPrices(items){ return items.reduce((s,i)=>s+(typeof i.price==='numbe
 function dayChip(items){ const t=sumPrices(items); return t>0?`<span class="day-total">€${t.toFixed(2)}</span>`:''; }
 /* The `Shop Ingredients` tab body (§2 — no longer its own screen). */
 function shoppingBodyHtml(){
-  const { pantry, fresh, total, anyPrice, skipped }=buildShoppingList();
+  const { pantry, fresh, total:clientTotal, anyPrice, skipped }=buildShoppingList();
   const buyOrder=['Sunday (before the week)',...DAYS];
   const freshDays=Object.keys(fresh).sort((a,b)=>buyOrder.indexOf(a)-buyOrder.indexOf(b));
+  // §5: Gemini's own whole-week figure is the headline when a full AI week supplied one;
+  // the client-side ingredient sum is always the fallback (and the only figure with AI off).
+  const usingAiTotal=typeof state.estimatedTotal==='number';
+  const total=usingAiTotal?state.estimatedTotal:clientTotal;
+  const haveTotal=usingAiTotal||anyPrice;
   // Budget is now per-day (§4): compare the week's average day against it.
   const budgetPerDay=Number(state.profile?.budgetPerDay)|| (state.profile?.budget?Math.round(Number(state.profile.budget)/7):0);
   const perDay=total/7;
   const city=(state.profile?.city&&state.profile.city.trim())?state.profile.city.trim():'Paris';
+  // §5: the total moves to the BOTTOM of the list, as a summary card.
   let totalBar='';
-  if(anyPrice){
+  if(haveTotal){
     let pill='';
     if(budgetPerDay>0){ const under=perDay<=budgetPerDay; pill=`<span class="pill ${under?'under':'over'}">${under?'within':'over'} your €${budgetPerDay}/day</span>`; }
     totalBar=`<div class="total-bar">
-      <div><div class="sub" style="margin:0">Roughly · ${city}${peopleCount()>1?` · ${peopleCount()} people`:''}</div>
-        <div class="big">€${perDay.toFixed(2)} <span class="per">/ day</span></div>
-        <div class="sub" style="margin:4px 0 0">€${total.toFixed(2)} for the whole week</div></div>
+      <div><div class="sub" style="margin:0">Estimated total · ${city}${peopleCount()>1?` · ${peopleCount()} people`:''}</div>
+        <div class="big">€${total.toFixed(2)}</div>
+        <div class="sub" style="margin:4px 0 0">≈ €${perDay.toFixed(2)} / day</div></div>
       ${pill}</div>
-      <p class="sub" style="margin:0 0 14px">Prices are rough estimates and will vary by shop.</p>`;
+      <p class="sub" style="margin:8px 0 0">Estimated — varies by shop.</p>`;
   }
   return `
     <div class="card">
       <h2>Your shopping list</h2>
       <p class="sub">Built from ${mealCount()} dishes across the week. Repeated items are added up automatically. Ticks are remembered — even if you close the page.</p>
       ${skipped?`<p class="list-note">🧺 Hiding ${skipped} item${skipped===1?'':'s'} you said ${skipped===1?'is':'are'} already in your cupboard.</p>`:''}
-      ${totalBar}
       <div class="btn-row no-print" style="margin-bottom:16px">
         <button class="ghost" id="copyList">📋 Copy list</button>
         <button class="ghost" id="printList">🖨 Print / PDF</button>
@@ -1908,6 +1919,7 @@ function shoppingBodyHtml(){
         ${freshDays.length?freshDays.map(bd=>{ const items=[...fresh[bd].values()]; return `<div class="buyday"><div class="head">📅 ${bd} ${anyPrice?dayChip(items):''}</div>
           ${items.sort((a,b)=>a.name.localeCompare(b.name)).map(i=>itemRow(i)).join('')}</div>`;}).join(''):'<p class="sub">Nothing perishable this week.</p>'}
       </div>
+      ${totalBar}
       <p class="sub no-print" style="text-align:center;margin:18px 0 0">
         <a role="button" tabindex="0" id="fbLink" style="cursor:pointer;font-weight:600">💬 A thought? Tell Lucille</a></p>
     </div>`;
