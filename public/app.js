@@ -184,6 +184,9 @@ const COURSE_LABEL = { starter:'Starter', main:'Main', dessert:'Dessert', single
 // screens were merged into it: shopping is the second tab, recipes are a detail overlay.
 const state = { screen:'profile', profile:null, week:[], usedFallback:false, selectedDay:0,
   useAI:false, favorites:[], checked:{}, plannerTab:'plan',   // plannerTab: 'plan' | 'shop'
+  // §0.7 "Add a dish I love" — dishes the user researched into their own database.
+  // Only `verified:true` ones (allergens confirmed by the user) ever reach generation.
+  userDishes:[], researchCallsToday:{ date:'', n:0 },
   // §4 browse filters — ephemeral (not persisted): saved is a toggle, the rest are checklists.
   browseFilters:{ saved:false, dietary:[], ingredient:[], mealType:[] } };
 // Where to reach the backend:
@@ -215,13 +218,14 @@ const STORAGE_KEY = 'mealPlannerState';
 let cloudUser = null;                       // set once signed in (cloud mode only)
 function saveState(){
   try { localStorage.setItem(STORAGE_KEY, JSON.stringify({ profile: state.profile, week: state.week,
-    useAI: state.useAI, favorites: state.favorites, checked: state.checked })); }
+    useAI: state.useAI, favorites: state.favorites, checked: state.checked,
+    userDishes: state.userDishes, researchCallsToday: state.researchCallsToday })); }
   catch(e){ console.warn('Could not save progress:', e.message); }
   cloudSave();                              // also push to Supabase when signed in (debounced)
 }
 function cloudEnabled(){ return !!(window.Cloud && window.Cloud.enabled && cloudUser); }
 function currentBlob(){ return { profile: state.profile, week: state.week, useAI: state.useAI,
-  favorites: state.favorites, checked: state.checked }; }
+  favorites: state.favorites, checked: state.checked, userDishes: state.userDishes }; }
 let _cloudTimer = null;
 function cloudSave(){
   if(!cloudEnabled()) return;
@@ -244,6 +248,9 @@ function loadState(){
       state.useAI = !!saved.useAI;
       state.favorites = Array.isArray(saved.favorites) ? saved.favorites : [];
       state.checked = (saved.checked && typeof saved.checked === 'object') ? saved.checked : {};
+      state.userDishes = Array.isArray(saved.userDishes) ? saved.userDishes : [];
+      state.researchCallsToday = (saved.researchCallsToday && typeof saved.researchCallsToday === 'object')
+        ? saved.researchCallsToday : { date:'', n:0 };
       if (state.week.length) state.screen = 'review';
     }
   } catch(e){ console.warn('Could not load saved progress:', e.message); }
@@ -264,6 +271,7 @@ function clearAllData(){
   state.selectedDay = 0;
   state.favorites = [];
   state.checked = {};
+  state.userDishes = [];
   setScreen('profile');
 }
 
@@ -388,7 +396,15 @@ function toggleFavorite(recipe){
 // The curated database (§0 of docs/V3-REDESIGN-BRIEF.md) — primary source of dishes.
 // A function, not a frozen array: §0.7 (user-researched dishes) appends to the effective
 // pool later, and callers must see that without re-reading this file.
-function DB(){ return (typeof RECIPES_DB !== 'undefined') ? RECIPES_DB : []; }
+// §0.7.7: user-researched dishes join the pool in EXACTLY this one place, so every downstream
+// consumer (generation, browse carousels, findBrowseRecipe, filters) picks them up unchanged.
+// Only `verified` ones — a dish whose allergens the user hasn't confirmed must never be picked.
+function DB(){
+  const shipped = (typeof RECIPES_DB !== 'undefined') ? RECIPES_DB : [];
+  const mine = (state.userDishes || []).filter(d => d && d.verified);
+  return mine.length ? [...shipped, ...mine] : shipped;
+}
+const isUserDish = r => typeof r?.id === 'string' && r.id.startsWith('user-');
 const dishRoles = r => r.types || [r.type];      // legacy pool dishes only have .type
 const isCurated = r => typeof r.id === 'string' && r.id.startsWith('db-');
 
@@ -410,8 +426,15 @@ function passesDietFilters(recipe, profile){
   if(allergies.includes('fish')&&recipe.tags.includes('fish'))return false;
   if(allergies.includes('shellfish')&&/shrimp|prawn|crab/.test(recipe.name.toLowerCase()))return false;
   if(allergies.includes('dairy')&&recipe.ingredients.some(i=>i.category==='Dairy'))return false;
-  if(allergies.includes('gluten')&&recipe.ingredients.some(i=>/bread|pasta|tortilla|pizza|granola|oats|noodle|couscous|bagel|pita|muesli|flour|bun/.test(i.name.toLowerCase())))return false;
+  // The gluten list below is deliberately over-inclusive: this path only ever runs for LEGACY
+  // dishes, which carry no honest contains[] to consult, so it must fail closed (§00.4).
+  // `baguette`, `cracker` and `savoiardi` were verified leaks — legacy "Tomato bruschetta",
+  // "Garlic bread" and "Cheese & grapes" all reached a gluten-allergic user before this.
+  if(allergies.includes('gluten')&&recipe.ingredients.some(i=>/bread|pasta|tortilla|pizza|granola|oats|noodle|couscous|bagel|pita|muesli|flour|bun|baguette|spaghetti|savoiardi|ladyfinger|crouton|cracker|brioche|croissant|panko|breadcrumb|focaccia|ciabatta|pastry|filo|semolina|barley|wonton|cake|biscuit|cookie|pancake|waffle|crepe/.test(i.name.toLowerCase())))return false;
   if(allergies.includes('nuts')&&recipe.ingredients.some(i=>/peanut|almond|\bnut/.test(i.name.toLowerCase())))return false;
+  // There was no soy rule at all (§0.2) — legacy "Beef stir-fry" carries Soy sauce and was
+  // served to anyone who ticked Soy. Soy sauce also carries gluten, hence its listing above.
+  if(allergies.includes('soy')&&recipe.ingredients.some(i=>/\bsoy|tofu|edamame|miso|tempeh|teriyaki/.test(i.name.toLowerCase())))return false;
   return true;
 }
 // `role` is breakfast|lunch|dinner|starter|dessert. Starters/desserts have their own pools.
@@ -425,7 +448,15 @@ function eligibleRecipes(role,profile){
   const strict=base.filter(r=>r.difficulty<=maxDiff&&r.time<=maxTime);
   return strict.length?strict:base;
 }
-const preferCurated = list => { const c = list.filter(isCurated); return c.length ? c : list; };
+// §0 + §0.7.7 precedence: THE DATABASE COMES FIRST — and "the database" means the shipped
+// dishes AND the user's own verified ones, which is what DB() returns. `isCurated()` keeps
+// its narrower "shipped and reviewed" meaning on purpose (§0.7.4 relies on it), so the
+// preference test is deliberately the wider one: without this, a user's own dish could never
+// be picked while any shipped dish remained eligible.
+const preferCurated = list => {
+  const c = list.filter(r => isCurated(r) || isUserDish(r));
+  return c.length ? c : list;
+};
 // usedNames (lowercased dish names) enforces the hard "no dish twice a week" rule (§3) across ALL types.
 function pickMeal(type,profile,usedIds,usedNames){
   const pool=eligibleRecipes(type,profile);
@@ -1315,10 +1346,17 @@ function diffDots(n){
   return `<span class="diff-dots" aria-label="Difficulty ${d} of 4">${'●'.repeat(d)}${'○'.repeat(4-d)}</span>`;
 }
 // €/serving in --gold-deep, only when at least one ingredient actually has a price (real or estimated).
+// EXCEPTION for §0.7 user-added dishes: they must be priced in FULL or not at all. §0.4's table
+// covers the 172 ingredients the shipped dishes use, so a dish the user added can easily contain
+// something unpriced — and a chicken curry reading "€0.27 / serving" because two of its four lines
+// silently cost €0 is a lie, not an estimate. Shipped dishes are unaffected (§0.4 verified all 57
+// price every ingredient), and the verified AI-ON path is deliberately left on the lenient rule.
 function priceLabel(r){
   if(!r||!r.ingredients||!r.ingredients.length) return '';
   const n=Math.max(1,peopleCount()||1);
-  const total=r.ingredients.reduce((s,i)=>s+priceOf(i),0);
+  const prices=r.ingredients.map(priceOf);
+  if(isUserDish(r)&&prices.some(p=>!(p>0))) return '';
+  const total=prices.reduce((s,p)=>s+p,0);
   if(total<=0) return '';
   return `<span class="card-price">€${(total/n).toFixed(2)} / serving</span>`;
 }
@@ -1644,6 +1682,7 @@ function browseBodyHtml(){
   const breakfasts=[...DB(),...RECIPES].filter(r=>dishRoles(r).includes('breakfast'));
 
   const favs=pool(state.favorites.slice().reverse());
+  const ownDishes=pool((state.userDishes||[]).filter(d=>d&&d.verified).slice().reverse());
   const weeknight=pool(mains.filter(r=>r.time<=20));
   const budget=pool(dinners.slice().sort((a,b)=>dishServingCost(a)-dishServingCost(b)));
   const freshLight=pool(mains.filter(r=>r.tags.some(t=>['vegetarian','vegan','fish'].includes(t))));
@@ -1653,8 +1692,9 @@ function browseBodyHtml(){
   const sweetEndings=pool(desserts);
   const bfast=pool(breakfasts);
 
+  // `Your favourites` and `Your own dishes` are rendered separately below (the latter needs an
+  // empty state, which carousel() deliberately has no concept of).
   const sections=[
-    ['Your favourites ♥', favs],
     ['Weeknight winners', weeknight],
     ['Budget-friendly dinners', budget],
     ['Fresh & light', freshLight],
@@ -1663,11 +1703,28 @@ function browseBodyHtml(){
     ['Sweet endings', sweetEndings],
     ['Breakfasts', bfast],
   ];
-  const anyResults=sections.some(([,list])=>list.length);
+  const anyResults=sections.some(([,list])=>list.length)||favs.length||ownDishes.length;
   return `${filterRowHtml()}
     <p class="drag-hint">↔ Drag a card onto a day in the week, or tap ⊕ to choose a day.</p>
+    ${carousel('Your favourites ♥', favs)}
+    ${ownDishesBlockHtml(ownDishes)}
     ${anyResults?sections.map(([title,list])=>carousel(title,list)).join('')
       :`<p class="sub">No dishes match your filters right now. <a role="button" tabindex="0" id="clearFiltersEmpty" style="cursor:pointer;font-weight:600">Clear all filters</a> to see everything.</p>`}`;
+}
+/* §0.7 + §4: `Your own dishes` sits directly beneath `Your favourites`. Unlike every other
+   carousel it still renders when empty — its empty state IS the entry point, which is what
+   makes the feature discoverable from browse as well as from the planner. */
+function ownDishesBlockHtml(list){
+  if(list.length) return `<div class="cat-block"><div class="cat-head">
+      <h3>Your own dishes</h3>
+      <button class="ghost add-dish-btn" id="addDishBrowse">＋ Add a dish I love</button>
+    </div>
+    <div class="carousel">${list.map(browseCard).join('')}</div></div>`;
+  return `<div class="cat-block"><div class="cat-head"><h3>Your own dishes</h3></div>
+    <p class="sub">Nothing here yet. Tell us a dish you love and we'll look up the recipe,
+      the times and the ingredients so it joins your cookbook for good.</p>
+    <button class="ghost add-dish-btn" id="addDishBrowse" style="margin-top:8px">＋ Add a dish I love</button>
+  </div>`;
 }
 /* ----- THE one-page planner (§2): tabs + sticky week sidebar + main column -----
    `review`, `recipes` and `shopping` used to be three separate screens. They are now one page:
@@ -1685,7 +1742,10 @@ function renderPlanner(){
     </div>
     <div class="planner">
       ${railHtml()}
-      <main class="planner-main">${tab==='shop'?shoppingBodyHtml():plannerNoticesHtml()+browseBodyHtml()}</main>
+      <main class="planner-main">${tab==='shop'?shoppingBodyHtml()
+        :plannerNoticesHtml()
+         +`<div class="add-dish-row"><button class="ghost add-dish-btn" id="addDishHead">＋ Add a dish I love</button></div>`
+         +browseBodyHtml()}</main>
     </div>
     <div class="status-bar">
       <span class="count">${tab==='shop'?'Ticks are remembered':'Drag or ⊕ to add · ♥ favorite'}</span>
@@ -1740,6 +1800,9 @@ function renderPlanner(){
     document.getElementById('clearFiltersBtn')?.addEventListener('click',()=>{ clearAllFilters(); renderPlanner(); });
     document.getElementById('clearFiltersEmpty')?.addEventListener('click',()=>{ clearAllFilters(); renderPlanner(); });
     app.querySelectorAll('[data-filter-group]').forEach(b=>b.addEventListener('click',(e)=>{ e.stopPropagation(); openFilterPopover(b.dataset.filterGroup,b); }));
+    // §0.7 entry points — the `Your own dishes` block and the planner head.
+    document.getElementById('addDishBrowse')?.addEventListener('click',openAddDishOverlay);
+    document.getElementById('addDishHead')?.addEventListener('click',openAddDishOverlay);
   }
 
   if(tab==='shop') bindShopping();
@@ -1777,6 +1840,7 @@ function openRecipeOverlay(di,mi,recipeDirect){
         ${meal?`<div class="rtype">${mealTypeLabel(meal)}</div>`:`<div class="rtype">${cur.type}</div>`}
         <h2 class="rname">${cur.emoji||''} ${cur.name}</h2>
         <div class="rdesc">${cur.desc||''}</div>
+        ${isUserDish(cur)?`<p class="list-note">Added by you — nutrition is an estimate.${(cur.contains&&cur.contains.length)?` Contains: ${cur.contains.join(', ')}.`:''}</p>`:''}
         ${cur.isLeftover?`<p class="list-note">You already bought and cooked this — nothing extra to shop for. Just reheat until piping hot.</p>`:`
         <div class="ing-head">🧾 Ingredients ${peopleCount()>1?`<span class="hint">(for ${peopleCount()} people)</span>`:''}${cur.batchNote?' <span class="hint">— double batch, half becomes tomorrow\'s lunch</span>':''}</div>
         <ul class="ing-list">
@@ -1793,6 +1857,7 @@ function openRecipeOverlay(di,mi,recipeDirect){
           <a class="recipe-link" href="${recipeUrl(cur)}" target="_blank" rel="noopener noreferrer">See full recipe ↗</a>${cur.sourceName?`<span class="sub" style="font-size:.85em">Recipe by ${cur.sourceName}</span>`:''}
           <button class="ghost fav-inline ${isFavorite(cur.name)?'on':''}" data-favr style="padding:9px 14px">${isFavorite(cur.name)?'♥ Saved':'♡ Save as favorite'}</button>
           ${meal?`<button class="ghost" data-swapr style="padding:9px 14px" title="Don't like it — swap for another dish">✕ Swap this dish</button>`:''}
+          ${isUserDish(cur)?`<button class="ghost" data-copydb style="padding:9px 14px" title="Copy this dish as a recipes-db.js block">📋 Copy as database entry</button>`:''}
         </div>
       </div>
     </div>`;
@@ -1800,6 +1865,8 @@ function openRecipeOverlay(di,mi,recipeDirect){
     const cookBtn=overlay.querySelector('[data-cook]');
     if(cookBtn)cookBtn.onclick=()=>openCookMode(cur);
     overlay.querySelector('[data-favr]').onclick=()=>{ toggleFavorite(cur); paint(); renderPlanner(); };
+    const cp=overlay.querySelector('[data-copydb]');
+    if(cp)cp.onclick=()=>copyAsDatabaseEntry(cur);
     const sw=overlay.querySelector('[data-swapr]');
     if(sw)sw.onclick=async()=>{
       sw.disabled=true; sw.textContent='Finding another…';
@@ -1983,6 +2050,357 @@ function renderCategories(items){
 function formatQty(qty,unit){ const q=Math.round(qty*100)/100; return unit?`${q} ${unit}`:`${q}`; }
 
 /* ============================================================
+   5b. "ADD A DISH I LOVE" (§0.7) — Gemini researches a dish INTO the database
+   ------------------------------------------------------------
+   Gemini is a RESEARCHER here, not an author: it fills in a permanent database row for a
+   dish the user named, and once saved that dish is picked ahead of anything generated on
+   the fly. Every dish added this way makes the database bigger and Gemini's plan-time role
+   smaller — this strengthens the §0 precedence rule rather than weakening it.
+
+   The whole reply is UNTRUSTED. validateDish() rejects rather than repairs, and the user
+   must confirm the allergen list before anything is saved. An under-listed allergen here
+   reaches a real plate, so both gates are non-negotiable.
+   ============================================================ */
+const DISH_COURSES  = ['breakfast','lunch','dinner','starter','dessert'];
+const DISH_CATS     = ['Produce','Meat & Fish','Dairy','Bakery','Frozen','Pantry'];
+const DISH_UNITS    = ['g','ml','tsp','tbsp','piece','clove','slice','stalk','pinch'];
+const DISH_ALLERGENS= ['gluten','dairy','nuts','eggs','soy','shellfish','fish','sesame'];
+const RESEARCH_DAILY_CAP = 20;          // Gemini free tier, shared with week generation (§0.7.6)
+
+/* Reject, never repair (§0.7.4). A malformed dish doesn't just look wrong — it silently
+   breaks allergy filtering, the shopping list and the no-repeat rule. Returns
+   {ok:true, dish} with an id WE assigned, or {ok:false, errors:[…]}. */
+function validateDish(obj){
+  const e=[];
+  const d=(obj&&typeof obj==='object')?obj:{};
+  const num=v=>typeof v==='number'&&isFinite(v);
+  const int=v=>num(v)&&Number.isInteger(v);
+
+  if(!d.name||typeof d.name!=='string'||!d.name.trim()) e.push('missing a name');
+  if(!DISH_COURSES.includes(d.type)) e.push('bad course type');
+  if(!Array.isArray(d.types)||!d.types.length||!d.types.every(t=>DISH_COURSES.includes(t))) e.push('bad course list');
+  else if(!d.types.includes(d.type)) e.push('course type is not in its own course list');
+  if(!int(d.difficulty)||d.difficulty<1||d.difficulty>4) e.push('difficulty must be 1-4');
+  ['time','prepTime','cookTime','servings','kcal','protein'].forEach(k=>{
+    if(!num(d[k])||d[k]<0) e.push(`${k} is missing or not a number`);
+  });
+  if(num(d.time)&&num(d.prepTime)&&num(d.cookTime)&&d.time!==d.prepTime+d.cookTime)
+    e.push('time does not equal prep + cook');
+  if(d.passiveTime!=null&&(!num(d.passiveTime)||d.passiveTime<0)) e.push('passiveTime is not a number');
+  if(d.nutrition!=='source'&&d.nutrition!=='estimated') e.push('nutrition must be "source" or "estimated"');
+  if(!Array.isArray(d.tags)) e.push('tags must be a list');
+  if(!Array.isArray(d.contains)||!d.contains.every(a=>DISH_ALLERGENS.includes(a)))
+    e.push('allergen list is missing or has unknown entries');
+  if(!Array.isArray(d.ingredients)||!d.ingredients.length) e.push('no ingredients');
+  else d.ingredients.forEach((i,n)=>{
+    const where=`ingredient ${n+1}${i&&i.name?` (${i.name})`:''}`;
+    if(!i||typeof i!=='object'){ e.push(`${where} is malformed`); return; }
+    if(!i.name||typeof i.name!=='string'||!i.name.trim()) e.push(`${where} has no name`);
+    if(!num(i.qty)||i.qty<=0) e.push(`${where} has no usable quantity`);
+    if(!DISH_UNITS.includes(i.unit)) e.push(`${where} has an invalid unit`);
+    if(!DISH_CATS.includes(i.category)) e.push(`${where} has an invalid category`);
+  });
+  if(!Array.isArray(d.steps)||!d.steps.length||!d.steps.every(s=>typeof s==='string'&&s.trim()))
+    e.push('no method steps');
+
+  if(e.length) return {ok:false,errors:e};
+
+  // The id is OURS, never Gemini's. `user-` (not `db-`) keeps isCurated() meaning
+  // "shipped and reviewed", and keeps state.favorites' `fav` prefix unambiguous.
+  const id='user-'+(crypto.randomUUID?crypto.randomUUID():String(Date.now())+Math.random().toString(16).slice(2));
+  return {ok:true, dish:{
+    id, type:d.type, types:d.types.slice(),
+    name:d.name.trim(), desc:(d.desc||'').trim(),
+    sourceUrl:typeof d.sourceUrl==='string'&&/^https?:\/\//.test(d.sourceUrl)?d.sourceUrl:null,
+    sourceName:(typeof d.sourceName==='string'&&d.sourceName.trim())?d.sourceName.trim():null,
+    photo:null,                                 // never trust a model-supplied image URL (§0.7.3)
+    emoji:(typeof d.emoji==='string'&&d.emoji.trim())?d.emoji.trim():'🍽️',
+    prepTime:d.prepTime, cookTime:d.cookTime, time:d.time,
+    passiveTime:num(d.passiveTime)?d.passiveTime:0,
+    difficulty:d.difficulty, servings:d.servings, kcal:d.kcal, protein:d.protein,
+    nutrition:d.nutrition, tags:d.tags.slice(), contains:d.contains.slice(),
+    ingredients:d.ingredients.map(i=>({name:i.name.trim(),qty:i.qty,unit:i.unit,
+      category:i.category,buyDayBefore:!!i.buyDayBefore})),
+    steps:d.steps.map(s=>s.trim()),
+    userAdded:true, verified:false,             // verified only once the user confirms allergens
+  }};
+}
+
+/* ---- quota (§0.7.6): one call per add, against a 20/day free tier ---- */
+function todayKey(){ return new Date().toISOString().slice(0,10); }
+function researchCallsUsed(){
+  const r=state.researchCallsToday||{};
+  return r.date===todayKey()?(Number(r.n)||0):0;
+}
+function researchCallsLeft(){ return Math.max(0, RESEARCH_DAILY_CAP-researchCallsUsed()); }
+function noteResearchCall(){
+  state.researchCallsToday={date:todayKey(), n:researchCallsUsed()+1};
+  saveState();
+}
+// Spend nothing when we already have the dish (§0.7.6). Loose match: case/punctuation-insensitive
+// containment either way, so "tikka masala" finds "Chicken tikka masala".
+function findCloseNameMatch(query){
+  const norm=s=>String(s||'').toLowerCase().replace(/[^a-z0-9 ]+/g,'').replace(/\s+/g,' ').trim();
+  const q=norm(query); if(q.length<3) return null;
+  const pool=[...DB(),...RECIPES,...STARTERS,...DESSERTS];
+  return pool.find(r=>{const n=norm(r.name); return n===q||n.includes(q)||q.includes(n);})||null;
+}
+
+/* ---- the network call, with a specific message for every failure (§0.7.6) ---- */
+async function researchDish({mode,query,imageBase64,mimeType}){
+  if(!navigator.onLine) return {fail:"You're offline — this needs a connection."};
+  if(!state.useAI) return {fail:'Turn on AI generation to research dishes automatically, or add one by hand.'};
+  if(researchCallsLeft()<=0) return {fail:"You've used today's recipe lookups. You can still add a dish by hand.",quota:true};
+
+  let out;
+  try{
+    const res=await fetch(BACKEND_URL+'/research-dish',{method:'POST',
+      headers:{'content-type':'application/json'},
+      body:JSON.stringify({mode,query,imageBase64,mimeType,profile:state.profile})});
+    noteResearchCall();                          // a call was genuinely spent, however it ends
+    out=await res.json().catch(()=>({}));
+    if(!res.ok){
+      const msg=String(out&&out.error||'');
+      if(/\b(429|quota|RESOURCE_EXHAUSTED)\b/i.test(msg))
+        return {fail:"You've used today's recipe lookups. You can still add a dish by hand.",quota:true};
+      if(/\b(503|502|500|504|UNAVAILABLE|overloaded|high demand)\b/i.test(msg))
+        return {fail:'The recipe service is busy. Try again in a minute.'};
+      return {fail:msg||'The recipe service could not be reached.'};
+    }
+  }catch(e){
+    return {fail:'The recipe service could not be reached. Try again in a minute.'};
+  }
+
+  if(!out||out.ok===false)
+    return {fail:"I couldn't find a reliable recipe for that. Try a more specific name, or paste the recipe text.",
+            detail:out&&out.reason};
+  const v=validateDish(out.dish);
+  if(!v.ok) return {fail:"I found it but couldn't get the details right. Nothing was saved.",detail:v.errors.join('; ')};
+  return {dish:v.dish};
+}
+
+/* ---- saving (local mirror + the user_dishes table) ---- */
+async function persistUserDish(dish){
+  state.userDishes=mergeUserDishes([dish],state.userDishes);
+  saveState();                                   // localStorage + the profiles.state blob
+  if(cloudEnabled()&&window.Cloud.saveUserDish){
+    try{ await window.Cloud.saveUserDish(cloudUser.id,dish); }
+    catch(e){ console.warn('User dish cloud save failed (kept locally):',e&&e.message); }
+  }
+}
+
+/* ---- §0.7.5: promote a good dish into the shipped database, by hand ---- */
+function nextDbId(dish){
+  const letter={breakfast:'b',lunch:'m',dinner:'m',starter:'s',dessert:'d'}[dish.type]||'m';
+  const used=DB().map(r=>r.id).filter(id=>new RegExp(`^db-${letter}\\d+$`).test(id))
+    .map(id=>Number(id.slice(letter.length+3)));
+  return `db-${letter}${(used.length?Math.max(...used):0)+1}`;
+}
+function dishAsDatabaseEntry(dish){
+  const q=s=>`'${String(s).replace(/\\/g,'\\\\').replace(/'/g,"\\'")}'`;
+  const ing=dish.ingredients.map(i=>
+    `    {name:${q(i.name)}, qty:${i.qty}, unit:${q(i.unit)}, category:${q(i.category)}, buyDayBefore:${!!i.buyDayBefore}},`
+  ).join('\n');
+  const steps=dish.steps.map(s=>`    ${q(s)},`).join('\n');
+  return `  {
+    id:${q(nextDbId(dish))}, type:${q(dish.type)}, types:[${dish.types.map(q).join(',')}],
+    name:${q(dish.name)}, desc:${q(dish.desc||'')},
+    sourceUrl:${dish.sourceUrl?q(dish.sourceUrl):'null'}, sourceName:${dish.sourceName?q(dish.sourceName):'null'},
+    photo:null,
+    emoji:${q(dish.emoji||'🍽️')}, img:'',
+    prepTime:${dish.prepTime}, cookTime:${dish.cookTime}, time:${dish.time}, passiveTime:${dish.passiveTime||0},
+    difficulty:${dish.difficulty}, servings:${dish.servings}, kcal:${dish.kcal}, protein:${dish.protein},
+    nutrition:${q(dish.nutrition)},
+    tags:[${dish.tags.map(q).join(',')}], contains:[${dish.contains.map(q).join(',')}],
+    ingredients:[
+${ing}
+    ],
+    steps:[
+${steps}
+    ],
+  },`;
+}
+function copyAsDatabaseEntry(dish){
+  const text=dishAsDatabaseEntry(dish);
+  const done=()=>showToast('✓ Copied — paste it into public/recipes-db.js');
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+    navigator.clipboard.writeText(text).then(done).catch(()=>fallbackCopy(text,done));
+  } else fallbackCopy(text,done);
+}
+function fallbackCopy(text,done){
+  const ta=document.createElement('textarea'); ta.value=text;
+  ta.style.cssText='position:fixed;top:-1000px'; document.body.appendChild(ta);
+  ta.select(); try{ document.execCommand('copy'); done(); }catch(e){ showToast('Could not copy'); }
+  ta.remove();
+}
+
+/* ---- the entry point overlay: name / pasted text / link ----
+   Photo mode is deliberately NOT shipped in this phase (§7 step 7: "ship name/text modes
+   before photo mode"). The server already accepts an image part, so adding it later is a
+   client-side change only — a file input, a canvas downscale, and a fourth mode button. */
+function openAddDishOverlay(){
+  const overlay=document.createElement('div');
+  overlay.className='sheet-overlay';
+  overlay.setAttribute('role','dialog'); overlay.setAttribute('aria-modal','true');
+  overlay.setAttribute('aria-label','Add a dish I love');
+  let mode='name';
+  function close(){ document.removeEventListener('keydown',onKey); overlay.remove(); }
+  function onKey(e){ if(e.key==='Escape')close(); }
+
+  function body(){
+    const left=researchCallsLeft();
+    return `<div class="sheet">
+      <button class="sheet-close" aria-label="Close">✕</button>
+      <div class="sheet-body">
+        <h2 class="rname" style="margin-top:0">Add a dish you love</h2>
+        <p class="sub">Tell us the dish and we'll look up the recipe, the times and the
+          ingredients so it joins your own cookbook.</p>
+        <div class="tabs" role="tablist" style="margin-bottom:14px">
+          <button role="tab" data-mode="name" aria-selected="${mode==='name'}" class="${mode==='name'?'on':''}">By name</button>
+          <button role="tab" data-mode="text" aria-selected="${mode!=='name'}" class="${mode!=='name'?'on':''}">Paste a recipe or link</button>
+        </div>
+        ${mode==='name'
+          ? `<label class="ing-head" for="ad-q">Dish name</label>
+             <input id="ad-q" type="text" placeholder="e.g. chicken tikka masala" autocomplete="off">`
+          : `<label class="ing-head" for="ad-q">Recipe text, or a link to one</label>
+             <textarea id="ad-q" rows="7" placeholder="Paste the full recipe here — or just a link to it."></textarea>`}
+        <p class="sub" id="ad-msg" style="min-height:1.2em"></p>
+        <div class="recipe-actions" style="margin-top:12px">
+          <button class="primary" id="ad-go" style="margin-top:0" ${left<=0?'disabled':''}>Look it up</button>
+          <button class="ghost" id="ad-cancel">Cancel</button>
+        </div>
+        <p class="sub" style="margin-top:10px;font-size:.85em">
+          ${left>0?`${left} recipe lookup${left===1?'':'s'} left today.`
+                  :`You've used today's recipe lookups.`}
+          You can always <a href="docs/HOW-TO-ADD-A-DISH.md" target="_blank" rel="noopener">add a dish by hand</a>.
+        </p>
+      </div>
+    </div>`;
+  }
+
+  function bind(){
+    overlay.querySelector('.sheet-close').onclick=close;
+    overlay.querySelector('#ad-cancel').onclick=close;
+    overlay.querySelectorAll('[data-mode]').forEach(b=>b.onclick=()=>{
+      mode=b.dataset.mode==='name'?'name':'text';
+      overlay.innerHTML=body(); bind();
+    });
+    const input=overlay.querySelector('#ad-q');
+    const msg=overlay.querySelector('#ad-msg');
+    const go=overlay.querySelector('#ad-go');
+    input.focus();
+
+    go.onclick=async()=>{
+      const q=(input.value||'').trim();
+      if(!q){ msg.textContent='Type a dish name first.'; return; }
+
+      // Don't spend a lookup on something we already have (§0.7.6).
+      if(mode==='name'){
+        const hit=findCloseNameMatch(q);
+        if(hit){
+          msg.innerHTML=`We already have <strong>${hit.name}</strong> in the cookbook — no lookup needed.`;
+          go.textContent='Open it'; go.onclick=()=>{ close(); openRecipeOverlay(null,null,hit); };
+          return;
+        }
+      }
+      // A pasted http(s) link is a different research mode from pasted recipe text.
+      const isUrl=mode==='text'&&/^https?:\/\/\S+$/i.test(q);
+      go.disabled=true; go.textContent='Looking it up…'; msg.textContent='';
+      const out=await researchDish({mode:isUrl?'url':mode,query:q});
+      go.disabled=false; go.textContent='Look it up';
+      if(out.fail){
+        msg.textContent=out.fail;
+        if(out.detail) console.info('Research dish — why it failed:',out.detail);
+        if(out.quota) go.disabled=true;
+        return;
+      }
+      close();
+      openConfirmDishOverlay(out.dish, isUrl?'url':mode);
+    };
+    input.onkeydown=e=>{ if(e.key==='Enter'&&mode==='name'){ e.preventDefault(); go.click(); } };
+  }
+
+  overlay.innerHTML=body();
+  overlay.addEventListener('click',e=>{ if(e.target===overlay)close(); });
+  document.addEventListener('keydown',onKey);
+  document.body.appendChild(overlay);
+  bind();
+}
+
+/* ---- the allergen confirmation gate (§0.7.4) — THE safety-critical step ----
+   This data was written by a model. The dish stays `verified:false` — and therefore out of
+   meal generation entirely — until the person looking at it confirms what's in it. */
+function openConfirmDishOverlay(dish,source){
+  const overlay=document.createElement('div');
+  overlay.className='sheet-overlay';
+  overlay.setAttribute('role','dialog'); overlay.setAttribute('aria-modal','true');
+  overlay.setAttribute('aria-label','Confirm this dish');
+  const picked=new Set(dish.contains);
+  function close(){ document.removeEventListener('keydown',onKey); overlay.remove(); }
+  function onKey(e){ if(e.key==='Escape')close(); }
+
+  const containsWords=()=>picked.size?[...picked].join(', '):'nothing from the common allergens';
+  const people=peopleCount();
+
+  overlay.innerHTML=`<div class="sheet">
+    <button class="sheet-close" aria-label="Close">✕</button>
+    <div class="sheet-body">
+      <h2 class="rname" style="margin-top:0">${dish.emoji} ${dish.name}</h2>
+      <p class="sub">${dish.desc||''}</p>
+      <p class="sub"><strong>Added by you — nutrition is an estimate.</strong></p>
+      <ul class="ing-list" style="margin:12px 0">
+        <li><span>Prep</span><span class="iq">${dish.prepTime} min</span></li>
+        <li><span>Cook</span><span class="iq">${dish.cookTime} min</span></li>
+        <li><span>Difficulty</span><span class="iq">${diffDots(dish.difficulty)}</span></li>
+        ${dish.passiveTime?`<li><span>Unattended (chilling or resting)</span><span class="iq">+ ${dish.passiveTime>=60?`${Math.round(dish.passiveTime/60)} h`:`${dish.passiveTime} min`}</span></li>`:''}
+      </ul>
+      <p class="sub">About ${dish.kcal} kcal and ${dish.protein} g protein per serving.
+        Quantities below are per person — we'll scale them to ${people}.</p>
+
+      <div class="ing-head">Contains: <span id="cd-contains">${containsWords()}</span></div>
+      <p class="sub">We checked this automatically. <strong>Please confirm it before saving</strong> —
+        tick anything that's missing.</p>
+      <div class="filter-grid" id="cd-allergens">
+        ${DISH_ALLERGENS.map(a=>`<label class="filter-opt">
+          <input type="checkbox" data-allergen="${a}" ${picked.has(a)?'checked':''}><span>${a}</span>
+        </label>`).join('')}
+      </div>
+
+      <div class="ing-head" style="margin-top:16px">Ingredients (per person)</div>
+      <ul class="ing-list">${dish.ingredients.map(i=>`<li><span>${i.name}</span><span class="iq">${formatQty(i.qty,i.unit)}</span></li>`).join('')}</ul>
+      <div class="ing-head">Method</div>
+      <ol class="step-list">${dish.steps.map(s=>`<li>${s}</li>`).join('')}</ol>
+
+      <div class="recipe-actions" style="margin-top:16px">
+        <button class="primary" id="cd-save" style="margin-top:0">Save to my cookbook</button>
+        <button class="ghost" id="cd-cancel">Discard</button>
+      </div>
+    </div>
+  </div>`;
+
+  overlay.addEventListener('click',e=>{ if(e.target===overlay)close(); });
+  document.addEventListener('keydown',onKey);
+  document.body.appendChild(overlay);
+  overlay.querySelector('.sheet-close').onclick=close;
+  overlay.querySelector('#cd-cancel').onclick=close;
+  overlay.querySelectorAll('[data-allergen]').forEach(cb=>cb.onchange=()=>{
+    const a=cb.dataset.allergen;
+    if(cb.checked)picked.add(a); else picked.delete(a);
+    overlay.querySelector('#cd-contains').textContent=containsWords();
+  });
+  overlay.querySelector('#cd-save').onclick=async()=>{
+    // The user's confirmed list wins over the model's — this is the whole point of the step.
+    dish.contains=[...picked];
+    dish.verified=true;
+    dish.source=source||'name';
+    await persistUserDish(dish);
+    close();
+    showToast(`✓ ${dish.name} added to your cookbook`);
+    renderPlanner();
+  };
+}
+
+/* ============================================================
    6. BOOT — local-only by default; cloud (Supabase) when configured
    ============================================================ */
 function applyBlob(s){
@@ -1991,7 +2409,16 @@ function applyBlob(s){
   state.useAI = !!s.useAI;
   state.favorites = Array.isArray(s.favorites) ? s.favorites : [];
   state.checked = (s.checked && typeof s.checked==='object') ? s.checked : {};
+  state.userDishes = Array.isArray(s.userDishes) ? s.userDishes : [];
   state.screen = state.week.length ? 'review' : 'profile';
+}
+// Merge user dishes arriving from two places (the user_dishes table AND the profiles.state
+// blob) into one list, deduped by the dish's own stable `user-…` id. §0.2: the ids are
+// assigned once by us and never regenerated, which is exactly what makes this safe.
+function mergeUserDishes(...lists){
+  const seen=new Set(); const out=[];
+  lists.flat().forEach(d=>{ if(d&&d.id&&!seen.has(d.id)){ seen.add(d.id); out.push(d); } });
+  return out;
 }
 async function afterSignIn(session){
   cloudUser = session.user;
@@ -2005,6 +2432,12 @@ async function afterSignIn(session){
     if(state.profile || state.week.length || state.favorites.length) cloudSaveNow();
     else state.screen = 'profile';
   }
+  // §0.7: user dishes also have their own table. Merge it with whatever the blob carried
+  // (and, on a first login, with this browser's local mirror) — deduped by dish id.
+  try {
+    const rows = await window.Cloud.loadUserDishes(cloudUser.id);
+    state.userDishes = mergeUserDishes(rows, state.userDishes);
+  } catch(e){ console.warn('User dishes load failed (keeping local):', e && e.message); }
   render();
 }
 function startBoot(){

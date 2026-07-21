@@ -116,8 +116,8 @@ repeated dishes and pointing at AI generation. Don't "fix" that notice by hiding
    the cron job. **Until `send-feedback` is deployed the in-app feedback form fails** (the live app
    already points at that URL).
 3. ~~AI-ON test~~ ✅ **DONE 2026-07-20** — tested, three bugs found and fixed (see above). Deploy the fix by pushing.
-4. **▶️ V3 REDESIGN → `docs/V3-REDESIGN-BRIEF.md` — IN PROGRESS.** Phases 0–6 done (below);
-   **next up is phase 7 ("Add a dish I love", §0.7) — switch to Opus, thinking high.**
+4. **▶️ V3 REDESIGN → `docs/V3-REDESIGN-BRIEF.md` — IN PROGRESS.** Phases 0–7 done (below);
+   **next up is phase 8 (copy pass, §6) — Sonnet — then phase 9 (final verification) on Opus.**
    - **Start each phase at the brief's `§00. How to run this build`.** It holds the per-phase model
      plan, session hygiene, and the stop-don't-guess rules. **`§7` is the order to build in — the
      section numbering is historical, do not work top-to-bottom.**
@@ -271,6 +271,79 @@ repeated dishes and pointing at AI generation. Don't "fix" that notice by hiding
      gaps via `requestSwapAI`), so `estimatedTotal` is wired and ready but stays empty until a
      future "regenerate entirely with AI" action calls `requestWeekAI()` directly — not a bug,
      documented so nobody wonders why it's unpopulated today.
+   - **✅ PHASE 7 DONE + VERIFIED (2026-07-21, Opus).** "Add a dish I love" (§0.7) — the
+     feature that lets Gemini *research a dish into the database* rather than author one at
+     plan time. New `user_dishes` table in `supabase/schema.sql` (owner-only RLS, added to the
+     `do $$` array) + `loadUserDishes`/`saveUserDish` in `cloud.js`; `state.userDishes` rides
+     the existing `profiles.state` blob **and** the table, merged by dish id on sign-in
+     (`mergeUserDishes()`) so both sources can load without duplicating. New `POST
+     /research-dish` in `server.js` with `buildResearchPrompt()` (demands the exact
+     `recipes-db.js` shape: per-serving metric quantities, valid category/unit, full
+     `contains[]`, `time===prep+cook`, never an invented `sourceUrl`/`photo`, and an explicit
+     `{ok:false,reason}` refusal path). `callAIonce()`/`callAI()` now thread an optional
+     `inlineData` image part. Client: `validateDish()` **rejects rather than repairs** (16
+     cases tested), assigns its own `user-<uuid>` id, drops any model-supplied photo URL, and
+     forces `verified:false`; the **allergen-confirmation overlay** is the gate — the user's
+     ticked list overwrites the model's before saving. `Your own dishes` carousel sits under
+     `Your favourites` and (uniquely) renders when empty because its empty state is the entry
+     point; a second entry point sits above the carousels. "📋 Copy as database entry" emits a
+     paste-ready block with the next free `db-…` id. All six §0.7.6 failure messages verified.
+     - **🔴 Two real bugs found and fixed while verifying — both would have shipped silently:**
+       1. **Verified user dishes could never be picked.** `preferCurated()` tested `isCurated()`
+          (`db-` prefix only), so while *any* shipped dish remained eligible a user's own dish
+          was filtered out of the preferred set — the exact opposite of §0.7.7. It now prefers
+          `isCurated(r) || isUserDish(r)`. `isCurated()` deliberately keeps its narrower
+          "shipped and reviewed" meaning because §0.7.4/§0.7.5 depend on that distinction.
+          Verified after the fix: the dish survives `preferCurated` (23 of 34 preferred) and
+          lands in **16 of 30 generated weeks**, never twice in one.
+       2. **🔴 ALLERGEN LEAK IN THE LEGACY POOL (pre-existing, NOT caused by phase 7 — but
+          fixed here because §00.5 rule 2 and §00.4 both say fail closed).** Legacy dishes have
+          no `contains[]` so they fall to the old name regex, which missed **`Baguette`** and
+          **`Crackers`** (so *Tomato bruschetta*, *Garlic bread* and *Cheese & grapes* reached
+          a gluten-allergic user) and had **no soy rule at all** (so *Beef stir-fry* with Soy
+          sauce reached anyone who ticked Soy). The gluten pattern is now deliberately
+          over-inclusive and a soy rule was added. Verified: 0 leaks for either allergen across
+          the whole pool, and **0 forbidden dishes on the plate even with Gluten+Soy both set**.
+          *Note the curated `db-s2` bruschetta was always correctly blocked — phase 0's
+          `contains[]` work was sound; only the legacy pool had the hole.*
+     - **🟡 Judgement call worth reviewing:** a user-added dish can contain ingredients absent
+       from `ingredient-prices.js` (which only covers the 172 the shipped dishes use), so
+       `priceOf()` returns €0 for them and the card showed a chicken curry at **"€0.27 /
+       serving"** — a partial sum presented as a price. `priceLabel()` now shows **nothing**
+       rather than a wrong number, but **only for `user-` dishes**: applying the stricter rule
+       globally would have changed the *verified* AI-ON path, which §0.2 forbids touching
+       without an AI-ON re-test. **The aggregate totals (sidebar €/day, shopping total) still
+       under-count a user dish's unpriced lines** — deliberately left alone, flag for §9.
+     - **🟡 Deferred on purpose:** **photo mode is not shipped** (§7 step 7 explicitly allows
+       this — "ship name/text modes before photo mode"). The server already accepts the image
+       part and enforces the 4 MB cap; what's missing is client-side only (file input + canvas
+       downscale + a fourth mode button).
+     - **🟡 Pre-existing, found but NOT fixed (out of scope, no live defect):** `toggleFavorite()`
+       stores the favourite under a **new `fav<timestamp>` id**, so §0.2's "dedupe by `id`"
+       does *not* actually merge a favourited dish with its source — the pool holds both copies
+       under one name. Confirmed identical for shipped `db-` dishes, so this predates phase 7.
+       No-repeat still holds because `pickMeal()` also tracks used **names**, which is the real
+       protection; §0.2's stated guard is simply inaccurate about *why*. Verified 0 duplicates
+       across 10 weeks with a favourited user dish in the pool.
+     - **Verified live (AI OFF, `/research-dish` stubbed so zero quota was spent — the method
+       CLAUDE.md recommends):** validateDish accepts a good dish and rejects all 15 broken
+       variants (bad category/unit, zero qty, missing/unknown allergens, time mismatch,
+       difficulty 5, type∉types, no steps/ingredients, garbage, null) with **nothing saved**;
+       a Gemini-supplied `id` and `photo` are both discarded; the confirm gate showed
+       `Contains: dairy` for a dish containing Naan bread, ticking **gluten** corrected it and
+       the saved dish carries `['dairy','gluten']`; DB 57→58; survives reload via localStorage;
+       browsable in `Your own dishes` **and** its category, opens its detail overlay
+       (`findBrowseRecipe` resolves `user-` ids), shows "Added by you — nutrition is an
+       estimate", links its real `sourceUrl`, cook mode available; **a gluten allergy and an
+       unverified flag each keep it out of the pool, browse and 5 generated weeks (0 leaks,
+       tested with the time filter relaxed so the test wasn't vacuous — it was, at first)**;
+       an existing close name match is offered **without spending a lookup**; all four endpoint
+       guards (bad mode, empty query, no image, >4 MB) reject **before** any Gemini call; 57
+       dishes/0 data errors; `.ics` 14 events; 0 console errors; 0 `/generate-*` calls; 375px
+       with no h-scroll; `CACHE` bumped `foodie-shell-v4` → **`foodie-shell-v5`**.
+     - **Note for whoever runs §9:** the one AI-ON check should confirm a *real* Gemini reply
+       still satisfies `validateDish()` — everything above proves the client contract, not that
+       the model actually honours the prompt's shape. That is the single biggest unknown left.
 5. **Phase 11:** Tauri desktop wrapper over `/public` → `.dmg`/`.exe` via GitHub Releases.
 6. **🟡 CURATED RECIPE DATABASE — DATA BUILT, WIRING NOT DONE (2026-07-20, grown same day).**
    - **Built:** `public/recipes-db.js` (`RECIPES_DB`, **57 real dishes** — 9 breakfasts, 16 starters,

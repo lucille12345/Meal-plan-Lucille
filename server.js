@@ -200,6 +200,93 @@ Return ONLY this JSON structure:
 { "meal": <a single RECIPE object> }`;
 }
 
+/* ---- 2b. "Add a dish I love" — research one dish INTO the database (V3 §0.7) ----
+   This is a RESEARCHER, not an author: it fills in a permanent database row for a dish the
+   user already named, rather than inventing a meal at plan time. The output shape is
+   `recipes-db.js`'s, NOT buildPrompt()'s recipe shape — they are deliberately different
+   (per-serving metric quantities, prep/cook split, explicit contains[]).
+   The client re-validates everything here with validateDish(); this prompt is the first line
+   of defence, not the only one. */
+function buildResearchPrompt({ mode, query, profile } = {}) {
+  const p = profile || {};
+  const people = Math.min(8, Math.max(1, Number(p.people) || 1));
+  const ask = {
+    name: `The user says they love this dish: "${query}".
+Research the classic, widely-recognised version of it and produce a standard recipe.`,
+    text: `The user pasted the following recipe. EXTRACT and convert what is actually written here.
+Do NOT substitute a different recipe, and do NOT add ingredients that aren't present:
+"""
+${String(query || '').slice(0, 12000)}
+"""`,
+    url: `The user gave this recipe link: ${query}
+Use what you reliably know about that page's recipe. If you do not actually know its contents,
+return the refusal object rather than guessing at it.`,
+    photo: `The user photographed a recipe card or cookbook page (attached as an image).
+READ the image and convert only what is legibly written there. Do not fill gaps by invention —
+if too much is unreadable, return the refusal object.`,
+  }[mode] || '';
+
+  return `You are a careful recipe librarian filling in ONE row of a curated recipe database.
+
+${ask}
+
+Return a single JSON object in EXACTLY this shape (no extra fields, no missing fields):
+{
+  "ok": true,
+  "dish": {
+    "type": one of "breakfast" | "lunch" | "dinner" | "starter" | "dessert",
+    "types": array of EVERY role this dish can fill, drawn from the same five words, and it MUST include "type",
+    "name": "short dish name",
+    "desc": "4-6 word ingredient summary",
+    "sourceUrl": the real recipe URL if and only if you are certain of it, otherwise null,
+    "sourceName": the site or book name if known, otherwise null,
+    "emoji": one food emoji that suits the dish,
+    "prepTime": integer minutes of ACTIVE preparation,
+    "cookTime": integer minutes of ACTIVE cooking,
+    "time": integer, MUST equal prepTime + cookTime exactly,
+    "passiveTime": integer minutes of unattended chilling/marinating/rising (0 if none),
+    "difficulty": integer 1-4 (1 = very easy, 4 = advanced),
+    "servings": integer the ORIGINAL recipe yields (informational only),
+    "kcal": integer calories PER SERVING,
+    "protein": integer grams of protein PER SERVING,
+    "nutrition": "source" if you read real published nutrition figures, otherwise "estimated",
+    "tags": array of any of "vegetarian" "vegan" "fish" "quick" "comfort" (may be empty),
+    "contains": array of allergens, see the ALLERGEN RULE below,
+    "ingredients": [ { "name": "...", "qty": positive number, "unit": "...", "category": "...", "buyDayBefore": true|false }, ... ],
+    "steps": [ "step 1", "step 2", ... ]
+  }
+}
+
+THE RULES THAT MATTER MOST — a row breaking any of these is useless and will be rejected:
+
+1. QUANTITIES ARE PER SINGLE SERVING, in metric. The app multiplies by household size
+   afterwards (it is currently cooking for ${people}), so never give a whole-recipe amount.
+   If the source recipe serves 4, DIVIDE every quantity by 4.
+2. "unit" must be EXACTLY one of: "g" "ml" "tsp" "tbsp" "piece" "clove" "slice" "stalk" "pinch".
+3. "category" must be EXACTLY one of: "Produce" "Meat & Fish" "Dairy" "Bakery" "Frozen" "Pantry".
+4. ALLERGEN RULE — "contains" must list EVERY allergen present, drawn only from:
+   "gluten" "dairy" "nuts" "eggs" "soy" "shellfish" "fish" "sesame".
+   When you are unsure whether an ingredient carries an allergen, INCLUDE IT.
+   Over-listing costs the user one dish. Under-listing can put them in hospital.
+   Remember the non-obvious ones: soy sauce contains gluten AND soy; bread, pasta, couscous,
+   ladyfingers and most baked goods contain gluten; pesto often contains nuts and dairy;
+   hummus and tahini contain sesame; Worcestershire sauce contains fish.
+5. "time" must equal "prepTime" + "cookTime". Chilling, marinating and proving are NOT active
+   time — they belong in "passiveTime".
+6. NEVER invent a "sourceUrl" or any image URL. If you are not certain of a real one, return
+   null. A guessed link is worse than no link.
+7. "buyDayBefore" is true only for genuinely perishable fresh items (fresh fish, fresh herbs,
+   salad leaves, fresh bread); false for pantry staples and anything that keeps a week.
+
+IF YOU CANNOT DO THIS HONESTLY, refuse. Return exactly:
+{ "ok": false, "reason": "<one short sentence saying why>" }
+Refuse when: the request is not a real dish, the pasted text is not a recipe, the image is not
+legible enough, or you would have to invent the recipe rather than recall or read it.
+A refusal is a correct answer. A fabricated dish is not.
+
+Return ONLY the JSON object, nothing else.`;
+}
+
 /* ---- 3. Call the Gemini API ---- */
 function sanitizeJson(text) {
   let t = text.trim().replace(/^```(json)?/i, '').replace(/```\s*$/, '').trim();
@@ -217,13 +304,17 @@ const MODEL_CHAIN = [...new Set([
 ])];
 const RETRYABLE = /\b(429|500|502|503|504)\b|UNAVAILABLE|overloaded|high demand/i;
 
-async function callAIonce(prompt, model = MODEL) {
+// `imageBase64` is optional and only used by /research-dish photo mode (V3 §0.7.2): Gemini
+// takes an image as a second `inlineData` part alongside the text prompt.
+async function callAIonce(prompt, model = MODEL, imageBase64 = null, mimeType = 'image/jpeg') {
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`;
+  const parts = [{ text: prompt }];
+  if (imageBase64) parts.push({ inlineData: { mimeType, data: imageBase64 } });
   const res = await fetch(url, {
     method: 'POST',
     headers: { 'content-type': 'application/json', 'x-goog-api-key': API_KEY },
     body: JSON.stringify({
-      contents: [{ parts: [{ text: prompt }] }],
+      contents: [{ parts }],
       generationConfig: { temperature: 0.4, maxOutputTokens: 32768, responseMimeType: 'application/json' },
     }),
   });
@@ -237,12 +328,12 @@ async function callAIonce(prompt, model = MODEL) {
 }
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
-async function callAI(prompt) {
+async function callAI(prompt, imageBase64 = null, mimeType = 'image/jpeg') {
   let lastErr;
   for (const model of MODEL_CHAIN) {
     for (let attempt = 1; attempt <= 2; attempt++) {
       try {
-        const out = await callAIonce(prompt, model);
+        const out = await callAIonce(prompt, model, imageBase64, mimeType);
         if (model !== MODEL) console.log(`(used fallback model: ${model})`);
         return out;
       } catch (e) {
@@ -318,6 +409,23 @@ const server = http.createServer(async (req, res) => {
     if (!API_KEY) return sendJson(res, 500, { error: 'No API key configured on the server.' });
     try { const { profile, type, avoidNames } = await readBody(req); return sendJson(res, 200, await callAI(buildPrompt(profile, 'meal', { type, names: avoidNames }))); }
     catch (e) { console.error(e.message); return sendJson(res, 500, { error: e.message }); }
+  }
+  // "Add a dish I love" (V3 §0.7): research ONE dish into a database row. Distinct from the
+  // §0.3 step-10 top-up, which reuses /generate-meal and must not come here.
+  if (req.method === 'POST' && req.url === '/research-dish') {
+    if (!API_KEY) return sendJson(res, 500, { error: 'No API key configured on the server.' });
+    try {
+      const { mode, query, imageBase64, mimeType, profile } = await readBody(req);
+      if (!['name', 'text', 'url', 'photo'].includes(mode)) return sendJson(res, 400, { error: 'Unknown mode.' });
+      if (mode !== 'photo' && !String(query || '').trim()) return sendJson(res, 400, { error: 'Nothing to look up.' });
+      if (mode === 'photo' && !imageBase64) return sendJson(res, 400, { error: 'No image supplied.' });
+      // 4 MB cap (§0.7.2) — base64 is ~4/3 the byte size of the original.
+      if (imageBase64 && imageBase64.length > 4 * 1024 * 1024 * 1.37) {
+        return sendJson(res, 413, { error: 'That photo is too large. Try a smaller one.' });
+      }
+      const out = await callAI(buildResearchPrompt({ mode, query, profile }), imageBase64 || null, mimeType || 'image/jpeg');
+      return sendJson(res, 200, out);
+    } catch (e) { console.error(e.message); return sendJson(res, 500, { error: e.message }); }
   }
   // Any other GET → serve the app-shell from /public (index.html, styles.css, app.js, assets…).
   if (req.method === 'GET') return sendStatic(res, req.url.split('?')[0]);

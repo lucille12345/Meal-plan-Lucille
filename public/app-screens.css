@@ -218,6 +218,12 @@ button.ghost.on { background: var(--tomato-wash); border-color: var(--tomato); c
 .cat-block { margin-bottom: 22px; }
 .cat-head { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 10px; }
 .cat-head h3 { font-size: var(--fs-h3); font-family: var(--font-display); margin: 0; }
+/* §0.7 "Add a dish I love" — the entry point, above the carousels and in the
+   `Your own dishes` block. A gold hairline marks it as a spark, never a gold fill (§1). */
+.add-dish-row { display: flex; justify-content: flex-end; margin: 0 0 12px; }
+.add-dish-btn { border-color: var(--gold); color: var(--gold-deep); font-weight: 600; white-space: nowrap; }
+.add-dish-btn:hover { background: var(--gold-wash); }
+.cat-head .add-dish-btn { padding: 6px 12px; font-size: var(--fs-xs); }
 .planner-main .carousel { padding: 4px 2px 12px; }
 .planner-main .recipe-card { width: 210px; }
 .recipe-card.dragging { opacity: .5; }

@@ -20,7 +20,8 @@ function ready(obj) {
 // Build the per-user state document we store in profiles.state (a single JSON
 // blob for Phase 3 — later phases can normalize week/favorites into their tables).
 function stateBlob(s) {
-  return { profile: s.profile, week: s.week, useAI: s.useAI, favorites: s.favorites, checked: s.checked };
+  return { profile: s.profile, week: s.week, useAI: s.useAI, favorites: s.favorites,
+           checked: s.checked, userDishes: s.userDishes };
 }
 
 if (!cfg.url || !cfg.anonKey) {
@@ -57,6 +58,24 @@ if (!cfg.url || !cfg.anonKey) {
         const { error } = await client
           .from('profiles')
           .upsert({ user_id: uid, state, updated_at: new Date().toISOString() });
+        if (error) throw error;
+      },
+
+      // ---- user-added dishes ("Add a dish I love", V3 §0.7) ----
+      // The dish's own stable `user-…` id is stored INSIDE the jsonb, not as the row's
+      // primary key, so the same dish arriving from here and from the state blob dedupes
+      // cleanly by that id (V3 §0.2 — this is what protects the no-repeat rule).
+      loadUserDishes: async (uid) => {
+        const { data, error } = await client
+          .from('user_dishes').select('dish, source, verified').eq('user_id', uid)
+          .order('created_at', { ascending: false });
+        if (error) throw error;
+        return (data || []).map(r => ({ ...r.dish, source: r.source, verified: r.verified }));
+      },
+      saveUserDish: async (uid, dish) => {
+        const { error } = await client.from('user_dishes').insert({
+          user_id: uid, dish, source: dish.source || null, verified: !!dish.verified,
+        });
         if (error) throw error;
       },
 

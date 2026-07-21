@@ -8,6 +8,7 @@
 --   • weeks      — saved weeks history (used by later phases)
 --   • favorites  — saved recipes    (used by later phases)
 --   • photos     — metadata for user dish photos (files live in Storage)
+--   • user_dishes — dishes the user added themselves ("Add a dish I love", V3 §0.7)
 --   • Row-Level Security so each user can only ever see/change their OWN rows
 --   • a private "dish-photos" Storage bucket + owner-only access policies
 -- ============================================================================
@@ -48,18 +49,32 @@ create table if not exists public.photos (
 );
 create index if not exists photos_user_idx on public.photos (user_id, created_at desc);
 
+-- ---- user_dishes: dishes the user added via "Add a dish I love" (V3 §0.7) ----
+-- One row per dish, stored in the recipes-db.js shape. `verified` means the user
+-- confirmed the allergen list — an unverified dish must NEVER enter meal generation.
+create table if not exists public.user_dishes (
+  id          uuid primary key default gen_random_uuid(),
+  user_id     uuid not null references auth.users (id) on delete cascade,
+  dish        jsonb not null,          -- one object in the recipes-db.js shape
+  source      text,                    -- 'name' | 'text' | 'url' | 'photo'
+  verified    boolean not null default false,   -- user confirmed the allergens
+  created_at  timestamptz not null default now()
+);
+create index if not exists user_dishes_user_idx on public.user_dishes (user_id, created_at desc);
+
 -- ============================================================================
 -- Row-Level Security: owner-only access on every table
 -- ============================================================================
-alter table public.profiles  enable row level security;
-alter table public.weeks     enable row level security;
-alter table public.favorites enable row level security;
-alter table public.photos    enable row level security;
+alter table public.profiles     enable row level security;
+alter table public.weeks        enable row level security;
+alter table public.favorites    enable row level security;
+alter table public.photos       enable row level security;
+alter table public.user_dishes  enable row level security;
 
 do $$
 declare t text;
 begin
-  foreach t in array array['profiles','weeks','favorites','photos'] loop
+  foreach t in array array['profiles','weeks','favorites','photos','user_dishes'] loop
     execute format('drop policy if exists "owner_all_%1$s" on public.%1$I;', t);
     execute format($f$
       create policy "owner_all_%1$s" on public.%1$I
