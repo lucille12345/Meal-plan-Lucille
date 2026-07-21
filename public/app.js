@@ -1336,7 +1336,7 @@ function recipeCardHtml(r,o={}){
   const favBtn=o.showFav===false?'':`<button class="icon-btn fav ${isFavorite(r.name)?'on':''}" ${o.favAttr||''} title="Save as favorite">${isFavorite(r.name)?'♥':'♡'}</button>`;
   const prep=(typeof r.prepTime==='number')?r.prepTime:null;
   const cook=(typeof r.cookTime==='number')?r.cookTime:null;
-  const stat=(label,val)=>`<div class="stat"><span class="stat-label">${label}</span><span class="stat-val">${val}</span></div>`;
+  const stat=(label,val)=>`<div class="card-stat"><span class="stat-label">${label}</span><span class="stat-val">${val}</span></div>`;
   const stats=(prep!==null||cook!==null)
     ? `${prep!==null?stat('Prep',prep+' min'):''}${cook!==null?stat('Cook',cook+' min'):''}${stat('Difficulty',diffDots(r.difficulty))}`
     : `${stat('Time',r.time+' min')}${stat('Difficulty',diffDots(r.difficulty))}`;

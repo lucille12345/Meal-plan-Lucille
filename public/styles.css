@@ -203,7 +203,7 @@ button { font-family: inherit; }
 .recipe-card .desc { font-size: var(--fs-sm); color: var(--muted); }
 /* Prep / Cook / Difficulty — three labelled stats, difficulty as 4 dots not a word (§3). */
 .recipe-card .card-stats { display: flex; gap: 16px; margin-top: 4px; }
-.recipe-card .stat { display: flex; flex-direction: column; gap: 2px; }
+.recipe-card .card-stat { display: flex; flex-direction: column; gap: 2px; }
 .recipe-card .stat-label { font-size: 10px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; color: var(--faint); }
 .recipe-card .stat-val { font-size: var(--fs-sm); font-weight: 600; color: var(--ink); }
 .diff-dots { letter-spacing: 1px; color: var(--green-deep); }
