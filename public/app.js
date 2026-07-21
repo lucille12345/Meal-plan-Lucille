@@ -381,7 +381,10 @@ function toggleFavorite(recipe){
   else {
     const n = peopleCount();
     // store scaled back to 1 person so it can be re-scaled for any future week
-    const base = { ...recipe, id:'fav'+Date.now(),
+    // `sourceId` remembers where the copy came from so `isCurated()`/`isUserDish()` keep working
+    // on it — the pool dedupe drops the original (see `eligibleRecipes`), so without this a
+    // favourited curated dish would silently stop counting as curated for §0's precedence rule.
+    const base = { ...recipe, id:'fav'+Date.now(), sourceId:recipe.sourceId||recipe.id,
       ingredients:(recipe.ingredients||[]).map(ing=>({ ...ing, qty:ing.qty/n,
         ...(typeof ing.price==='number' ? {price:ing.price/n} : {}) })) };
     state.favorites.push(base);
@@ -404,10 +407,25 @@ function DB(){
   const mine = (state.userDishes || []).filter(d => d && d.verified);
   return mine.length ? [...shipped, ...mine] : shipped;
 }
-const isUserDish = r => typeof r?.id === 'string' && r.id.startsWith('user-');
+// Provenance reads `sourceId` when present: a favourite is a re-scaled COPY under a `fav<ts>` id,
+// and it is the copy that survives the pool dedupe, so it must still answer these honestly.
+const dishOrigin = r => String(r?.sourceId ?? r?.id ?? '');
+const isUserDish = r => dishOrigin(r).startsWith('user-');
 const dishRoles = r => r.types || [r.type];      // legacy pool dishes only have .type
-const isCurated = r => typeof r.id === 'string' && r.id.startsWith('db-');
+const isCurated = r => dishOrigin(r).startsWith('db-');
 
+// Shelved in the Dairy aisle but carrying no dairy allergen. Plant "milks" are the common
+// trap: a dairy-allergic person is often steered TOWARDS oat/almond/soy milk, so excluding
+// their dishes is exactly backwards. (Their own allergens — nuts, soy — are caught by the
+// nut and soy rules, so nothing is waved through here.)
+// Egg matching is deliberately narrow — a loose /\begg/ would wave through "Eggnog", which is
+// very much dairy. A dish with eggs AND milk is still excluded: the milk is its own ingredient
+// row and does not match, so only the egg row is exempted.
+const DAIRY_AISLE_NON_DAIRY = new RegExp([
+  '^(?:large |medium |small |free[- ]range |organic |fresh )*eggs?(?: whites?| yolks?)?$',
+  '^(?:almond|soy|soya|oat|rice|coconut|cashew|hemp) (?:milk|cream|yogurt|yoghurt)$',
+  'dairy[- ]free', '^vegan ',
+].join('|'), 'i');
 function maxDifficultyFor(l){ if(l<=3)return 2; if(l<=6)return 3; if(l<=8)return 4; return 5; }
 function maxTimeFor(s){ return {student:25,working:30,parent:40,flexible:999}[s] ?? 999; }
 function passesDietFilters(recipe, profile){
@@ -417,15 +435,20 @@ function passesDietFilters(recipe, profile){
     const n=ing.name.toLowerCase();
     if(dislikes.some(d=>n.includes(d.replace(' food',''))))return false;
   }
-  // Curated dishes carry an explicit, honest allergen list — trust it completely and skip
-  // the regex guesses below (which miss things like "Baguette" or "Soy sauce" for gluten/soy).
-  if(Array.isArray(recipe.contains)){
-    if(allergies.some(a=>recipe.contains.includes(a)))return false;
-    return true;
-  }
+  // An explicit allergen list always gets to VETO a dish.
+  if(Array.isArray(recipe.contains)&&allergies.some(a=>recipe.contains.includes(a)))return false;
+  // But only a REVIEWED list gets to clear one. Shipped dishes were checked by hand and a
+  // §0.7 user dish had its allergens confirmed by the person who'll eat it, so for those
+  // contains[] is the whole answer (§00.5 rule 2) and the guesses below are skipped — they
+  // miss things like "Baguette" or "Soy sauce". A model-written list on an AI top-up dish is
+  // neither reviewed nor confirmed, so it falls through for a second opinion.
+  if(Array.isArray(recipe.contains)&&(isCurated(recipe)||(isUserDish(recipe)&&recipe.verified)))return true;
   if(allergies.includes('fish')&&recipe.tags.includes('fish'))return false;
   if(allergies.includes('shellfish')&&/shrimp|prawn|crab/.test(recipe.name.toLowerCase()))return false;
-  if(allergies.includes('dairy')&&recipe.ingredients.some(i=>i.category==='Dairy'))return false;
+  // `category` is the SUPERMARKET AISLE, not an allergen — the Dairy aisle also holds eggs and
+  // almond milk, and reading it as "contains dairy" threw away perfectly safe dishes. Same
+  // shape of fix as PANTRY_FALSE_MATCHES: name the things shelved there that aren't dairy.
+  if(allergies.includes('dairy')&&recipe.ingredients.some(i=>i.category==='Dairy'&&!DAIRY_AISLE_NON_DAIRY.test(i.name)))return false;
   // The gluten list below is deliberately over-inclusive: this path only ever runs for dishes
   // with no honest contains[] to consult (the legacy pool and AI top-ups), so it must fail
   // closed (§00.4). `baguette`, `cracker` and `savoiardi` were verified leaks — legacy
@@ -445,8 +468,16 @@ function passesDietFilters(recipe, profile){
 // `role` is breakfast|lunch|dinner|starter|dessert. Starters/desserts have their own pools.
 function eligibleRecipes(role,profile){
   const seen=new Set();
-  const pool=[...DB(), ...RECIPES, ...STARTERS, ...DESSERTS, ...state.favorites]
-    .filter(r=>r && !seen.has(r.id) && seen.add(r.id));   // dedupe: a favourited DB dish re-enters via state.favorites
+  // Dedupe by NAME, not id. A favourite is a re-scaled copy under a fresh `fav<ts>` id, so an id
+  // dedupe never merged it with its source and the pool held the same dish twice (§0.2). Name is
+  // already this app's dish identity — `isFavorite()`, `toggleFavorite()` and the no-repeat rule
+  // in `pickMeal()`/`enforceNoRepeat()` all key on it — so it is the key that actually merges.
+  // FAVOURITES COME FIRST so the copy wins the dedupe: it carries the user's per-person base
+  // quantities and the `fav` id that `pickMeal()` boosts on, and `sourceId` preserves its
+  // provenance for `preferCurated()`. Curated then beats legacy on the two shipped duplicate
+  // names ("Banana pancakes", "Tomato bruschetta"), which is the precedence §0 already wants.
+  const pool=[...state.favorites, ...DB(), ...RECIPES, ...STARTERS, ...DESSERTS]
+    .filter(r=>{ const k=r&&r.name&&r.name.toLowerCase(); return k && !seen.has(k) && seen.add(k); });
   const base=pool.filter(r=>dishRoles(r).includes(role)&&passesDietFilters(r,profile));
   const maxDiff=maxDifficultyFor(profile.cookingLevel);
   const maxTime=Number(profile.timePerMeal)>0 ? Number(profile.timePerMeal) : maxTimeFor(profile.lifeStage);
@@ -582,10 +613,20 @@ function dishImageUrl(recipe){
    ============================================================ */
 let nextId=1;
 function normalizeRecipe(r){
+  // Keep the model's allergen list, filtered to words we recognise. Dropping it (as this
+  // used to) forced every AI dish onto the aisle-based regex below, which reads the
+  // supermarket *aisle* as if it were an allergen — and the Dairy aisle holds eggs and
+  // almond milk. Note passesDietFilters() does NOT trust an AI contains[] on its own: it is
+  // model-written and unreviewed, so it is used as an extra veto, never as a clean bill.
+  const contains=Array.isArray(r.contains)
+    ? r.contains.filter(a=>typeof a==='string'&&DISH_ALLERGENS.includes(a.toLowerCase()))
+                .map(a=>a.toLowerCase())
+    : undefined;
   return { id:'ai'+(nextId++), type:r.type, name:r.name, desc:r.desc, time:r.time,
     difficulty:r.difficulty, emoji:r.emoji||'🍽️', img:r.img||'food', tags:r.tags||[],
     kcal:(typeof r.kcal==='number'?Math.round(r.kcal):undefined),
     protein:(typeof r.protein==='number'?Math.round(r.protein):undefined),
+    ...(contains?{contains}:{}),
     ingredients:(r.ingredients||[]).map(i=>({...i})), steps:r.steps||[] };
 }
 function aiSlot(mealType,course,r){ return {type:mealType,course,recipe:normalizeRecipe({...r,type:mealType}),rejected:false}; }

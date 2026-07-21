@@ -166,7 +166,7 @@ the specific way each could break, and the guard. **This table is the regression
 
 | Already working | How §0 could break it | Guard |
 |---|---|---|
-| **Hard no-repeat rule** (0 duplicates, 288-profile test) | A favourited database dish appears in the pool **twice** — once from `RECIPES_DB`, once from `state.favorites` — with the same `id`. `usedIds` gets satisfied by one copy while the other still supplies the name. | Dedupe the pool by `id` in `eligibleRecipes()` (step 4). Re-run the duplicate check after. |
+| **Hard no-repeat rule** (0 duplicates, 288-profile test) | A favourited database dish appears in the pool **twice** — once from `RECIPES_DB`, once from `state.favorites`. The favourite is a re-scaled **copy under a fresh `fav<ts>` id**, so the two entries share a *name* but never an *id*. `usedIds` is satisfied by one copy while the other still supplies the name. | **Two guards, and the order matters.** (1) The one that actually enforces it: `pickMeal()` tracks used **names** (lowercased) across the whole week, and `enforceNoRepeat()` sweeps for name collisions afterwards. That is what delivers 0 duplicates. (2) Belt-and-braces: `eligibleRecipes()` (step 4) dedupes the pool by **name**, so the twin never enters. **An `id` dedupe cannot work here** — the ids differ by construction. It was this table's stated guard until 2026-07-21 and merged nothing; the rule survived only on guard (1). Re-run the duplicate check after touching either. |
 | **Allergy filtering** | The existing regex misses gluten in `Baguette`, `Spaghetti`, `Savoiardi ladyfingers`, and has no soy rule at all — several dishes would reach someone who ticked that allergy. | `contains[]` early-return (step 3). Verified: Gluten drops bruschetta/tiramisu/bolognese; Soy drops teriyaki salmon/Thai curry/sriracha chicken. |
 | **AI-ON path** (verified: 49 dishes, 0 dupes, real prices, €107.30 shopping list) | Database dishes carry **no per-ingredient prices**. Swap AI dishes for database dishes and the shopping total, the €/day budget pill, the per-day € chips and §4's "Budget-friendly dinners" all go blank. **This is the one genuine conflict in §0** — see §0.4. | The price table in §0.4. Do not skip it. |
 | **`state.partialAI` top-up** | Nothing — it already fills short AI weeks from `generateWeek()`, which after §0 returns database dishes. It silently gets better. | Leave it alone. Keep the notice. |
@@ -178,7 +178,7 @@ the specific way each could break, and the guard. **This table is the regression
 | **PWA** | New file isn't cached; installed users get `RECIPES_DB is not defined`. | Add to `SHELL` **and** bump `CACHE` (step 1). |
 | **Supabase sync** | `profiles.state` stores the whole week inline. Database recipes are much fatter (photo URL, sourceUrl, full steps) — a 49-slot week could bloat the row badly. | Store `{id}` references for `db-` dishes and rehydrate on load; keep inlining AI dishes, which have no other home. |
 | **Allergy filtering, again — via §0.7** | A user-researched dish enters the same pool as reviewed data, but its `contains[]` was written by a model. An under-listed allergen here reaches a real plate. **The single most safety-critical thing in §0.** | `validateDish()` rejects malformed rows outright, the user confirms the allergen list before saving (`verified:true`), and only `verified` dishes enter `DB` (§0.7.4, §0.7.7). |
-| **Hard no-repeat rule, again — via §0.7** | User dishes arriving from both Supabase and the `localStorage` mirror can double up in the pool. | The `eligibleRecipes()` `id` dedupe from step 4 already covers it — provided user dish `id`s are stable UUIDs assigned by us, not regenerated on each load. |
+| **Hard no-repeat rule, again — via §0.7** | User dishes arriving from both Supabase and the `localStorage` mirror can double up in the pool. | The `eligibleRecipes()` **name** dedupe from step 4 already covers it, and unlike the old `id` dedupe it holds even if a mirrored copy comes back under a different id. Still assign user dishes stable ids of our own (never regenerated on load) — `mergeDishes()` and `findBrowseRecipe()` key on them. |
 
 ### 0.3 The method — ordered, each step verifiable on its own
 
@@ -225,8 +225,10 @@ curry, sriracha chicken gone.
 ```js
 function eligibleRecipes(role, profile){
   const seen = new Set();
-  const pool = [...DB, ...RECIPES, ...STARTERS, ...DESSERTS, ...state.favorites]
-    .filter(r => r && !seen.has(r.id) && seen.add(r.id));      // ← dedupe: favourites re-enter
+  // favourites FIRST, deduped by NAME — see below for why both halves matter
+  const pool = [...state.favorites, ...DB, ...RECIPES, ...STARTERS, ...DESSERTS]
+    .filter(r => { const k = r && r.name && r.name.toLowerCase();
+                   return k && !seen.has(k) && seen.add(k); });
   const base = pool.filter(r => dishRoles(r).includes(role) && passesDietFilters(r, profile));
   const maxDiff = maxDifficultyFor(profile.cookingLevel);
   const maxTime = Number(profile.timePerMeal) > 0 ? Number(profile.timePerMeal)
@@ -235,8 +237,28 @@ function eligibleRecipes(role, profile){
   return strict.length ? strict : base;
 }
 ```
-The favourites `.filter(f => f.type === role)` is gone — `dishRoles()` covers it. The dedupe is
-what protects the no-repeat rule.
+The favourites `.filter(f => f.type === role)` is gone — `dishRoles()` covers it.
+
+**Why the dedupe is by name and favourites come first** (corrected 2026-07-21 — it was an `id`
+dedupe with favourites last, which merged nothing):
+
+- **Name, not id.** `toggleFavorite()` stores a favourite as a *copy* under a fresh `fav<ts>` id —
+  deliberately, because it re-scales the ingredients back to one person so any future week can
+  re-scale them for any household size. Different id, same dish. Name is already this app's dish
+  identity (`isFavorite()`, `toggleFavorite()`, `pickMeal()`'s no-repeat, `enforceNoRepeat()` all
+  key on it), so name is the only key that actually merges the two.
+- **Favourites first**, so the *copy* wins the dedupe rather than being dropped by its source. The
+  copy is the one carrying the user's per-person base quantities, and its `fav` id prefix is what
+  `pickMeal()`'s favourite boost tests for. Drop the copy and favourites silently stop being
+  preferred.
+- **`sourceId` keeps provenance.** Since the copy now survives and its id starts with `fav`,
+  `isCurated()`/`isUserDish()` read `r.sourceId ?? r.id` (via `dishOrigin()`). Without that, a
+  favourited curated dish would fall out of `preferCurated()` and quietly lose §0's precedence.
+- This also collapses the two names shipped in both the curated and legacy pools (**Banana
+  pancakes**, **Tomato bruschetta**), keeping the `db-` one — which is what §0 wants anyway.
+
+The name dedupe is a **second** line of defence, not the primary one: the no-repeat rule is
+enforced by `pickMeal()`'s used-names set and `enforceNoRepeat()`. See §0.2's first row.
 
 **Step 5 — pick curated first.** This is the step that actually delivers "use the database first".
 Add beside `pickMeal()`:
@@ -588,8 +610,9 @@ const DB = [
 ];
 ```
 `state.userDishes` loads from Supabase on sign-in and from `localStorage` otherwise, and syncs
-through the existing `profiles.state` blob mechanism. The `eligibleRecipes()` dedupe from §0.3
-step 4 already protects the no-repeat rule if the same dish arrives twice.
+through the existing `profiles.state` blob mechanism. The `eligibleRecipes()` **name** dedupe from
+§0.3 step 4 keeps the same dish arriving twice out of the pool, and `pickMeal()`'s used-names set
+is what enforces the no-repeat rule itself.
 
 **Ordering, stated once and plainly:** a week is filled from `RECIPES_DB` and verified user dishes
 first; only slots that genuinely cannot be filled fall through to Gemini (§0.3 step 10). Adding
@@ -812,7 +835,8 @@ One phase per session (§00.3). The model column repeats §00.1 so you don't hav
   `Spring onions`, `Rice wine` and `Large flour tortilla` all stay on the list, while `Olive oil`
   and `Garlic` still hide.
 ☐ **No-repeat survives favouriting.** Favourite a database dish, re-plan, confirm still 0 duplicates
-  (the pool dedupe in §0.3 step 4 is what protects this).
+  (`pickMeal()`'s used-names set is what protects this; §0.3 step 4's name dedupe backs it up).
+  Check the favourite is still *preferred* too — it must keep its `fav` id and its `sourceId`.
 ☐ Gemini is only called to *top up* what the database can't fill, never to author a week from
   scratch — and the top-up reuses `requestSwapAI`, adding **no endpoint of its own** and ≤5 calls
   per week. (§0.7's `/research-dish` is the one genuinely new endpoint in V3.)
@@ -914,7 +938,8 @@ be broken by a *later* phase than the one that introduced them:
   outside that range means §0.4 is mis-wired.
 ☐ **Full pantry ticked**: `Red bell pepper`, `Spring onions`, `Rice wine`, `Large flour tortilla`
   all still on the list; `Olive oil` and `Garlic` correctly hidden.
-☐ **Favourite a database dish → re-plan → still 0 duplicates** (the §0.3 step-4 dedupe).
+☐ **Favourite a database dish → re-plan → still 0 duplicates**, and the dish appears in the pool
+  **once** (§0.3 step 4's name dedupe), still counting as curated via its `sourceId`.
 ☐ **Every surface at 375px and 1280px.** No horizontal scroll at 375px. Zero console errors on any
   screen, including after opening/closing every overlay.
 ☐ **Cook mode + read-aloud** on a database dish, start to finish.

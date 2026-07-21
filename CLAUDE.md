@@ -138,7 +138,9 @@ repeated dishes and pointing at AI generation. Don't "fix" that notice by hiding
      wiring, committed. What changed in `public/app.js`/`index.html`/`sw.js` (`CACHE` bumped to
      `foodie-shell-v4`): `recipes-db.js` + `ingredient-prices.js` now load; `eligibleRecipes()` /
      `pickMeal()` / `enforceNoRepeat()` prefer curated (`db-`) dishes via a `preferCurated()` helper,
-     with the pool deduped by `id` so a favourited curated dish can't double-count;
+     with the pool deduped so a favourited curated dish can't double-count (originally by `id`,
+     which never actually merged anything — **corrected to a name dedupe on 2026-07-21**, see the
+     phase-7/§0.7 note below);
      `passesDietFilters()` now trusts a dish's `contains[]` over the old regex; `recipeUrl()` /
      `dishImageUrl()` use a dish's real `sourceUrl`/`photo` when present; `priceOf()` falls back to
      `estimateIngredientPrice()` so prices work with AI off; **`pantryHas()` rewritten** with an
@@ -319,13 +321,29 @@ repeated dishes and pointing at AI generation. Don't "fix" that notice by hiding
        this — "ship name/text modes before photo mode"). The server already accepts the image
        part and enforces the 4 MB cap; what's missing is client-side only (file input + canvas
        downscale + a fourth mode button).
-     - **🟡 Pre-existing, found but NOT fixed (out of scope, no live defect):** `toggleFavorite()`
-       stores the favourite under a **new `fav<timestamp>` id**, so §0.2's "dedupe by `id`"
-       does *not* actually merge a favourited dish with its source — the pool holds both copies
-       under one name. Confirmed identical for shipped `db-` dishes, so this predates phase 7.
-       No-repeat still holds because `pickMeal()` also tracks used **names**, which is the real
-       protection; §0.2's stated guard is simply inaccurate about *why*. Verified 0 duplicates
-       across 10 weeks with a favourited user dish in the pool.
+     - **✅ FIXED 2026-07-21 (was: pre-existing, found but not fixed).** `toggleFavorite()` stores
+       the favourite under a **new `fav<timestamp>` id**, so §0.2's old "dedupe by `id`" did *not*
+       merge a favourited dish with its source — the pool held both copies under one name. Never a
+       live defect (`pickMeal()` tracks used **names**, which is the real no-repeat protection), but
+       §0.2 claimed the id dedupe was the guard, which was false. **The fix, in `app.js`:**
+       `eligibleRecipes()` now dedupes the pool by **lowercased name** with `state.favorites`
+       placed **first**, so the favourite copy wins — it carries the user's per-person base
+       quantities and the `fav` id prefix that `pickMeal()`'s boost tests for, both of which are
+       lost if the source wins instead. `toggleFavorite()` also stamps `sourceId` on the copy, and
+       `isCurated()`/`isUserDish()` read it via a new `dishOrigin()` helper, so a favourited dish
+       keeps its provenance for `preferCurated()` (§0's database-first rule) now that the original
+       is deduped away.
+       **Verified in-browser, AI OFF:** favouriting `db-m4` keeps it at **1** entry in
+       `eligibleRecipes('dinner')` (was 2) and the pool total unchanged at 33; the surviving entry
+       has `sourceId:'db-m4'`, `isCurated()===true` and per-person quantities identical to the
+       source; **0 duplicates across 20 generated weeks** with a favourited curated dish *and* a
+       favourited `user-` dish in the pool; allergy filtering unaffected (gluten still drops
+       bruschetta/tiramisu, soy still drops teriyaki, including via a favourited copy); zero
+       console errors.
+       **Side effect, intended:** the two names shipped in both the curated and legacy pools —
+       "Banana pancakes" (`db-b3`/`b11`) and "Tomato bruschetta" (`db-s2`/`s2`) — now collapse to
+       the `db-` entry, which is the precedence §0 wants. Breakfast and starter pools each shrink
+       by one dish. No cross-role name collisions exist in the shipped data, so nothing else moved.
      - **Verified live (AI OFF, `/research-dish` stubbed so zero quota was spent — the method
        CLAUDE.md recommends):** validateDish accepts a good dish and rejects all 15 broken
        variants (bad category/unit, zero qty, missing/unknown allergens, time mismatch,
@@ -429,10 +447,10 @@ repeated dishes and pointing at AI generation. Don't "fix" that notice by hiding
        shopping total) still under-count a user-added dish's unpriced ingredients — only the
        per-card €/serving was made honest, because changing the shared rule would have touched
        the verified AI-ON price path.
-     - **🟡 Pre-existing, found but not fixed:** `toggleFavorite()` stores favourites under a
-       new `fav<ts>` id, so §0.2's "dedupe by id" does not actually merge a favourite with its
-       source. No live defect — `pickMeal()` tracks used *names*, which is the real no-repeat
-       protection — but §0.2's stated guard is inaccurate about why.
+     - **✅ Fixed 2026-07-21:** `toggleFavorite()` stores favourites under a new `fav<ts>` id, so
+       §0.2's old "dedupe by id" never merged a favourite with its source. `eligibleRecipes()` now
+       dedupes by **name** with favourites first, plus a `sourceId` for provenance. Full write-up
+       at the phase-7/§0.7 entry above; §0.2 and §0.3 step 4 corrected to match.
 5. **Phase 11:** Tauri desktop wrapper over `/public` → `.dmg`/`.exe` via GitHub Releases.
 6. **🟡 CURATED RECIPE DATABASE — DATA BUILT, WIRING NOT DONE (2026-07-20, grown same day).**
    - **Built:** `public/recipes-db.js` (`RECIPES_DB`, **57 real dishes** — 9 breakfasts, 16 starters,

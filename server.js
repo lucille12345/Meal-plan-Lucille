@@ -142,6 +142,7 @@ A RECIPE object has EXACTLY these fields:
   "img": "1-2 lowercase photo keywords, e.g. salmon,dinner",
   "kcal": integer, estimated calories PER PERSON for this course,
   "protein": integer, estimated grams of protein PER PERSON for this course,
+  "contains": [ every allergen in this dish, from "gluten" "dairy" "nuts" "eggs" "soy" "shellfish" "fish" "sesame" ],
   "ingredients": [
     { "name": "Ingredient", "qty": number, "unit": "g|ml|tbsp|can|slices or '' for a count",
       "category": "Produce" | "Meat & Fish" | "Dairy" | "Bakery" | "Frozen" | "Pantry",
@@ -150,6 +151,18 @@ A RECIPE object has EXACTLY these fields:
   ],
   "steps": [ "short step 1", "short step 2", ... 3 to 6 clear cooking steps ]
 }
+ALLERGENS — "contains" is the field the app actually trusts to keep someone safe, so fill it
+honestly and completely. When unsure whether an ingredient carries an allergen, INCLUDE it:
+over-listing costs one dish, under-listing can put someone in hospital. The non-obvious ones:
+soy sauce contains gluten AND soy; bread, pasta, couscous and most baked goods contain gluten;
+pesto often contains nuts and dairy; hummus and tahini contain sesame; Worcestershire sauce
+contains fish. Note "category" is the SUPERMARKET AISLE, not an allergen — eggs are shelved
+under "Dairy" but their allergen is "eggs", so a dish with eggs and no milk lists "eggs" only.
+
+INGREDIENT NAMES are shopping-list names: what you'd write on a list, with no preparation.
+"Chicken breast" not "chicken breast, cubed". "Onion" not "onion, finely chopped".
+The preparation belongs in "steps".
+
 Rules: portions per ONE person (see PORTION SIZES). Match difficulty/time to cooking confidence and time-per-meal. Realistic quantities, categories, and EUR prices (see PRICING). Do NOT include any "url"/"link" field — never invent recipe links. Output valid JSON only. No trailing commas.`;
 
   // Which courses lunch & dinner get for this person's goal.
@@ -264,6 +277,11 @@ THE RULES THAT MATTER MOST — a row breaking any of these is useless and will b
    If the source recipe serves 4, DIVIDE every quantity by 4.
 2. "unit" must be EXACTLY one of: "g" "ml" "tsp" "tbsp" "piece" "clove" "slice" "stalk" "pinch".
 3. "category" must be EXACTLY one of: "Produce" "Meat & Fish" "Dairy" "Bakery" "Frozen" "Pantry".
+   This is the SUPERMARKET AISLE, not an allergen: eggs are shelved under "Dairy", coconut milk
+   and soy sauce under "Pantry". Allergens go in "contains" and nowhere else.
+3b. "name" is a shopping-list name — what you'd write on a list, with no preparation.
+   "Chicken breast" not "chicken breast, cubed". "Onion" not "onion, finely chopped".
+   Preparation belongs in "steps".
 4. ALLERGEN RULE — "contains" must list EVERY allergen present, drawn only from:
    "gluten" "dairy" "nuts" "eggs" "soy" "shellfish" "fish" "sesame".
    When you are unsure whether an ingredient carries an allergen, INCLUDE IT.
