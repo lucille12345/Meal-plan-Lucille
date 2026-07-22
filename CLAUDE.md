@@ -53,6 +53,55 @@ _Last updated: 2026-07-21. This file is auto-loaded by Claude Code every session
 session blocks below still say Table). The `_template:'table'` string in `app.js` is a FormSubmit
 leftover parameter, not the brand — leave it.
 
+> ## 🆕 V4 FIXES — ALL 9 PHASES DONE (2026-07-22), COMMITTED, NOT PUSHED
+> Brief: **`docs/V4-FIXES-BRIEF.md`** (from Lucille's feedback after using the live V3 app).
+> Committed to `main`, **awaiting Lucille's GitHub Desktop push + her word to deploy.** `sw.js`
+> `CACHE` bumped `foodie-shell-v5` → **`foodie-shell-v7`** across the batch.
+> - **§1 Password sign-in** (`cloud.js` + `renderSignIn`): email+password is now primary (no email
+>   rate limit); Sign in / Create account tabs, 8-char check, friendly Supabase errors, forgot-
+>   password reset. **Remembers last email on this browser** (email only, never password) and
+>   focuses the password field. Magic link kept as a hidden recovery fallback.
+>   **⚠️ Lucille must turn OFF Supabase's "Confirm email"** (Auth → Providers → Email) or first
+>   sign-up still needs an emailed link — steps in `SUPABASE-SETUP.md §5`. Google sign-in is NOT a
+>   code bug — it needs her Google Cloud setup (`SUPABASE-SETUP.md §7`).
+> - **§2 Colour rebalance**: every colour now appears ≥2× per screen. Wood was on the planner once
+>   (masthead); it now also forms the **week-label band** (`.rail-head`) and the **shopping total
+>   card** (`.total-bar`). Green reinforced (active tab, day-row hover). White-on-walnut 8.6:1.
+> - **§3 Photos**: 11 legacy dishes got real, **eye-checked + curl-200-verified** photos.
+>   **12 dishes still need a photo → `docs/PHOTOS-NEEDED.md`** (she sends links or says drop them);
+>   they show emoji tiles meanwhile. `DISH_IMG` kept (NOT deleted per brief) — ~53 other legacy
+>   dishes still rely on its keyword fallback.
+> - **§4 Prices**: filled all 63 €0 gaps (`ingredient-prices.js`, now 235 covered, 0 zero-price).
+>   **Whole-item rounding at shopping-list AGGREGATION** (`buildShoppingList`/`finalizeLine`): three
+>   half-onions → buy 2 (€0.60), not 3-per-row nor 1.5; only piece-priced items round, weight/volume
+>   (200 g flour) stay exact; rows show "you need ½". AI-priced rows unchanged. Per-day/€ stay exact.
+> - **§5 Day cards** (`railDishRow`/`railDayDishes`): grouped by meal type — bold **display-font**
+>   BREAKFAST/LUNCH/DINNER header, then photo+name, then **♥ and ✕ under the name**. ♥ favourites,
+>   ✕ instant random swap, neither opens the overlay (row tap does). **NB dr-main is a `<div>`, not
+>   a button — nested `<button>`s are invalid and get reparented.**
+> - **§6 Drag anywhere** (`placeDishAt`/`moveSlot`/`applyDrop`): any dish → any slot on any day. The
+>   **slot** carries placement (a dessert on breakfast renders under BREAKFAST); `recipe.type` is
+>   never rewritten. Per-slot drop = replace (gold), per-group ＋ = append (green), plan dishes drag
+>   day-to-day (move). **Phone: two-step day-picker (day → meal).** Allergen filter refuses unsafe
+>   drops; `manual:true` slots are skipped by `enforceNoRepeat`; replacing a leftover un-doubles its
+>   source (`undoubleSourceFor`) so the shopping list can't over-buy.
+> - **§7 Swap = two options**: the bare ✕ stays instant random. The overlay swap reveals **🎲
+>   Surprise me** (random, safe, `acceptAIDish` when AI on) and **✋ Choose it myself** → **pick
+>   mode** (`state.pickMode`): held slot highlighted, persistent green bar with Cancel, place by drag
+>   OR tap (phone). Esc/Cancel leave the original. Fallback message when nothing's eligible.
+> - **§8 Calendar/reminders**: reminders + feedback form are **undeployed Edge Functions** (Lucille's
+>   deploy steps now in `SUPABASE-SETUP.md §8`, incl. pg_net + GMT-cron + the Resend-403 gotcha).
+>   **Google OAuth deliberately NOT built** — improved the `.ics` instead (Europe/Paris VTIMEZONE +
+>   TZID, **stable UIDs** so re-import updates not duplicates; works with Apple Calendar too).
+> - **§9 verification GREEN (AI OFF)**: all JS parses; 57 curated ids/0 dups/57 photos; **0 of 235
+>   ingredients price €0**; docs in sync; key never committed & absent from shipped files; a
+>   49-slot week has **0 duplicates**, Gluten+Soy → **0 leaks**, week €78/≈€11/day; 375px & 1280px
+>   clean; **0 console errors, 0 `/generate-*` calls**. The 7–12 emoji-tile dishes are the
+>   `PHOTOS-NEEDED.md` list, not a regression.
+> - **Deliberately NOT done** (same as V3): AI-ON re-test of V4 (no quota spent — client contracts
+>   verified by stubbing/direct calls); photo mode for "Add a dish I love"; multi-week storage (week
+>   arrows still disabled); unit consolidation on the shopping list; Google Calendar OAuth.
+
 **Code:** V2 (Phases 1–10a) is **DEPLOYED AND LIVE** as of 2026-07-20. Lucille pushed `main` via
 GitHub Desktop and Render auto-deployed.
 **Live: https://meal-planner-km6f.onrender.com — verified serving `#Foodie`,** all assets 200 over
