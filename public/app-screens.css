@@ -280,6 +280,7 @@ button.ghost.on { background: var(--tomato-wash); border-color: var(--tomato); c
 .item .nm { flex: 1; }
 .item.checked .nm { text-decoration: line-through; color: var(--faint); }
 .item .qty { color: var(--muted); font-size: var(--fs-sm); }
+.item .qty-note { display: block; color: var(--faint); font-size: var(--fs-xs); }
 .item .pr { color: var(--ink); font-size: var(--fs-sm); font-variant-numeric: tabular-nums; min-width: 56px; text-align: right; }
 .list-col { margin-bottom: var(--s-6); }
 .list-col h3 { margin: 0 0 4px; font-size: var(--fs-h3); font-family: var(--font-display); }

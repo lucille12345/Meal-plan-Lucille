@@ -47,6 +47,7 @@ const UNIT_TO_BASE = {
   slice:35,       // one slice of bread ≈ 35 g
   stalk:40,       // one celery stalk ≈ 40 g
   scoop:30,       // one protein scoop ≈ 30 g
+  scoops:50,      // a dessert scoop (sorbet/ice cream) ≈ 50 g — 2 scoops ≈ 100 g
 };
 
 const INGREDIENT_PRICES = {
@@ -240,6 +241,81 @@ const INGREDIENT_PRICES = {
   'ground ginger':           {per:'100g',  eur:3.50},
   'garam masala':            {per:'100g',  eur:3.50},
   'nutmeg':                  {per:'100g',  eur:5.00},
+
+  /* ---------- V4 §4: legacy-pool + common AI ingredients that used to price €0 ----------
+     Same basis (French supermarket, mid-range own-brand, 2026). These close the 63 gaps
+     found by the coverage test so the shopping total, €/day and budget pill are never
+     under-counted. Piece-priced items (per:'piece' etc.) get rounded UP to whole items at
+     shopping-list aggregation time — see buildShoppingList in app.js. */
+  /* fruit & veg — per piece */
+  'tomato':                  {per:'piece', eur:0.35},
+  'carrot':                  {per:'piece', eur:0.15},
+  'potato':                  {per:'piece', eur:0.25},
+  'sweet potato':            {per:'piece', eur:0.60},
+  'zucchini':                {per:'piece', eur:0.60},
+  'corn cob':                {per:'piece', eur:0.60},
+  'radish':                  {per:'piece', eur:0.08},
+  'melon':                   {per:'piece', eur:1.80},
+  'clementine':              {per:'piece', eur:0.25},
+  'pear':                    {per:'piece', eur:0.45},
+  'peach':                   {per:'piece', eur:0.50},
+  'orange':                  {per:'piece', eur:0.40},
+  'plums':                   {per:'piece', eur:0.35},
+  'figs':                    {per:'piece', eur:0.55},
+  /* fruit & veg — per 100 g */
+  'mixed berries':           {per:'100g',  eur:1.60},
+  'strawberries':            {per:'100g',  eur:0.90},
+  'blueberries':             {per:'100g',  eur:1.80},
+  'grapes':                  {per:'100g',  eur:0.55},
+  'watermelon':              {per:'100g',  eur:0.25},
+  'pineapple':               {per:'100g',  eur:0.30},
+  'mixed fruit':             {per:'100g',  eur:0.60},
+  'salad greens':            {per:'100g',  eur:1.20},
+  'lettuce':                 {per:'100g',  eur:0.60},
+  'sweetcorn':               {per:'100g',  eur:0.40},
+  'asparagus':               {per:'100g',  eur:1.60},
+  'mixed veg':               {per:'100g',  eur:0.35},
+  'cooked beetroot':         {per:'100g',  eur:0.55},
+  'olives':                  {per:'100g',  eur:1.40},
+  'ginger':                  {per:'100g',  eur:0.80},
+  /* fresh herbs — per bunch (piece) */
+  'fresh dill':              {per:'piece', eur:1.00},
+  'parsley':                 {per:'piece', eur:0.90},
+  /* grains, pulses, bakery */
+  'oats':                    {per:'100g',  eur:0.20},
+  'granola':                 {per:'100g',  eur:0.80},
+  'muesli':                  {per:'100g',  eur:0.55},
+  'quinoa':                  {per:'100g',  eur:0.90},
+  'rice':                    {per:'100g',  eur:0.20},
+  'risotto rice':            {per:'100g',  eur:0.45},
+  'flour':                   {per:'100g',  eur:0.10},
+  'red lentils':             {per:'100g',  eur:0.35},
+  'cooked lentils':          {per:'100g',  eur:0.45},
+  'bagel':                   {per:'piece', eur:0.50},
+  'bread':                   {per:'slice', eur:0.10},
+  'rye bread':               {per:'slice', eur:0.15},
+  'crackers':                {per:'piece', eur:0.06},
+  'tortilla wrap':           {per:'piece', eur:0.30},
+  'pizza base':              {per:'piece', eur:1.20},
+  'falafel':                 {per:'piece', eur:0.25},
+  /* dairy & protein */
+  'cheese':                  {per:'100g',  eur:1.50},
+  'mozzarella':              {per:'100g',  eur:1.10},
+  'cottage cheese':          {per:'100g',  eur:0.65},
+  'vanilla yogurt':          {per:'100g',  eur:0.40},
+  'cream':                   {per:'100ml', eur:0.35},
+  'hummus':                  {per:'100g',  eur:0.90},
+  'salsa':                   {per:'100g',  eur:0.80},
+  'protein powder':          {per:'100g',  eur:3.00},
+  'ham':                     {per:'100g',  eur:1.80},
+  'beef strips':             {per:'100g',  eur:1.40},
+  'turkey mince':            {per:'100g',  eur:1.15},
+  'cod fillet':              {per:'100g',  eur:2.20},
+  'canned tuna':             {per:'piece', eur:0.95},
+  'chopped tomatoes':        {per:'piece', eur:0.70},
+  /* frozen desserts — per 100 g (2 scoops ≈ 100 g via UNIT_TO_BASE) */
+  'lemon sorbet':            {per:'100g',  eur:0.60},
+  'mango sorbet':            {per:'100g',  eur:0.60},
 };
 
 /* ----------------------------------------------------------------------------
@@ -274,10 +350,30 @@ function estimateIngredientPrice(ing){
   return entry.eur * (qty * factor) / 100;
 }
 
+/* ----------------------------------------------------------------------------
+   piecePriceOf(ing) → {eur} when this ingredient is bought as whole items
+   (per:piece/clove/slice/stalk) and can therefore be rounded UP to a whole
+   count at shopping-list aggregation (V4 §4.3: half an onion costs a whole
+   onion). Returns null for weight/volume ingredients (which must NOT round —
+   nobody buys a whole 1 kg bag because a recipe needs 200 g) and for anything
+   the table doesn't price. AI-supplied per-row prices bypass this entirely,
+   handled in app.js by only rounding when the ingredient has no AI price.
+---------------------------------------------------------------------------- */
+function piecePriceOf(ing){
+  if (!ing || !ing.name) return null;
+  const entry = INGREDIENT_PRICES[String(ing.name).trim().toLowerCase()];
+  if (!entry) return null;
+  const unit = (ing.unit || 'piece').trim().toLowerCase();
+  if ((entry.per==='piece'||entry.per==='clove'||entry.per==='slice'||entry.per==='stalk') && unit!=='g' && unit!=='ml')
+    return { eur: entry.eur };
+  return null;
+}
+
 /* Browser global + Node export, so the app and the doc generator share one file. */
 if (typeof module !== 'undefined' && module.exports)
-  module.exports = { INGREDIENT_PRICES, UNIT_TO_BASE, estimateIngredientPrice };
+  module.exports = { INGREDIENT_PRICES, UNIT_TO_BASE, estimateIngredientPrice, piecePriceOf };
 if (typeof window !== 'undefined') {
   window.INGREDIENT_PRICES = INGREDIENT_PRICES;
   window.estimateIngredientPrice = estimateIngredientPrice;
+  window.piecePriceOf = piecePriceOf;
 }

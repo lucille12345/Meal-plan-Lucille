@@ -793,27 +793,48 @@ function openFeedback(){
   };
 }
 
+// V4 §4.3: whole-item rounding happens HERE, after every recipe's quantity has been summed —
+// never inside estimateIngredientPrice. Three recipes each using half an onion sum to 1.5
+// onions → you buy 2 (€3.00), not 3 rounded-per-row (€4.50) and not 1.5 (€2.25). Only
+// piece-priced table items round; weight/volume and AI-priced rows keep their exact price.
+function finalizeLine(line){
+  const pp = (typeof piecePriceOf==='function') ? piecePriceOf(line) : null;
+  // Round only when the table prices this as whole items AND no AI price was supplied.
+  if(pp && !line._hasAIPrice){
+    const bought=Math.max(1,Math.ceil(line.qty - 1e-9));
+    line.boughtQty=bought;
+    if(bought > line.qty + 1e-9) line.roundedFrom=line.qty;   // flag so the UI can say "(you need 1½)"
+    line.price=pp.eur*bought;
+  }
+  return line;
+}
+function addTo(map,key,ing,pr){
+  if(map.has(key)){ const l=map.get(key); l.qty+=ing.qty; l._sumPrice+=pr; if(typeof ing.price==='number')l._hasAIPrice=true; }
+  else map.set(key,{...ing,_sumPrice:pr,_hasAIPrice:(typeof ing.price==='number'),price:pr});
+}
 function buildShoppingList(){
-  const pantry=new Map(); const fresh={}; let total=0; let anyPrice=false; let skipped=0;
+  const pantry=new Map(); const fresh={}; let anyPrice=false; let skipped=0;
   state.week.forEach((day,di)=>{
     day.meals.forEach(meal=>{
       if(meal.rejected||!meal.recipe||meal.recipe.isLeftover)return;   // leftovers: nothing new to buy
       meal.recipe.ingredients.forEach(ing=>{
         if(pantryHas(ing.name)){ skipped++; return; }                  // already in your pantry
         const key=itemKey(ing);
-        const pr=priceOf(ing); if(pr>0)anyPrice=true; total+=pr;
+        const pr=priceOf(ing); if(pr>0)anyPrice=true;
         if(ing.buyDayBefore){
           const bd=buyDayFor(di); (fresh[bd]??=new Map());
-          if(fresh[bd].has(key)){ fresh[bd].get(key).qty+=ing.qty; fresh[bd].get(key).price+=pr; }
-          else fresh[bd].set(key,{...ing,price:pr});
-        } else {
-          if(pantry.has(key)){ pantry.get(key).qty+=ing.qty; pantry.get(key).price+=pr; }
-          else pantry.set(key,{...ing,price:pr});
-        }
+          addTo(fresh[bd],key,ing,pr);
+        } else addTo(pantry,key,ing,pr);
       });
     });
   });
-  return { pantry:[...pantry.values()], fresh, total, anyPrice, skipped };
+  // Finalise each aggregated line (exact-sum by default, whole-item rounded for piece items),
+  // then total from the finalised lines so the headline matches what's on the list.
+  let total=0;
+  const seal=l=>{ l.price=l._sumPrice; finalizeLine(l); total+=l.price; return l; };
+  const pantryLines=[...pantry.values()].map(seal);
+  for(const bd in fresh) fresh[bd]=new Map([...fresh[bd]].map(([k,l])=>[k,seal(l)]));
+  return { pantry:pantryLines, fresh, total, anyPrice, skipped };
 }
 
 /* ============================================================
@@ -2127,12 +2148,22 @@ function bindShopping(){
   on('icsBtn',downloadICS);
   on('fbLink',openFeedback);
 }
+// V4 §4.3: a piece item rounded up to whole items shows the whole count you actually buy,
+// with a quiet "(you need 1½)" so the maths doesn't look wrong.
+function niceFrac(q){ const r=Math.round(q*100)/100; const f=r-Math.floor(r);
+  if(Math.abs(f-0.5)<0.02) return (Math.floor(r)>0?Math.floor(r):'')+'½';
+  if(Math.abs(f-0.25)<0.02) return (Math.floor(r)>0?Math.floor(r):'')+'¼';
+  if(Math.abs(f-0.75)<0.02) return (Math.floor(r)>0?Math.floor(r):'')+'¾';
+  return String(r); }
 function itemRow(i){
   const key=itemKey(i);
   const done=!!state.checked[key];
   const pr=(typeof i.price==='number'&&i.price>0)?`<span class="pr">€${i.price.toFixed(2)}</span>`:'<span class="pr"></span>';
+  const rounded = typeof i.boughtQty==='number';
+  const qtyTxt = rounded ? formatQty(i.boughtQty,i.unit) : formatQty(i.qty,i.unit);
+  const note = (rounded && i.roundedFrom!=null) ? `<span class="qty-note">you need ${niceFrac(i.roundedFrom)}</span>` : '';
   return `<label class="item ${done?'checked':''}"><input type="checkbox" data-check="${key}" ${done?'checked':''}><span class="nm">${i.name}</span>
-    <span class="qty">${formatQty(i.qty,i.unit)}</span>${pr}</label>`;
+    <span class="qty">${qtyTxt}${note}</span>${pr}</label>`;
 }
 function bindChecks(){
   app.querySelectorAll('[data-check]').forEach(cb=>{
