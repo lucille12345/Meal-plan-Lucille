@@ -209,6 +209,14 @@ button.ghost.on { background: var(--tomato-wash); border-color: var(--tomato); c
 .meal-group:hover .group-add { opacity: 1; }
 .group-add.drop { opacity: 1; border-color: var(--green); border-style: solid; background: var(--green-wash); color: var(--green); }
 .dp-back { color: var(--muted) !important; font-weight: 500 !important; margin-top: 4px; border-top: 1px solid var(--hairline) !important; border-radius: 0 !important; }
+/* V4 §7: pick mode — always-visible bar + the held slot highlighted, and the overlay's two swap options */
+.pick-bar { position: sticky; top: 0; z-index: 40; display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  background: var(--green-deep); color: #fff; padding: 12px 16px; border-radius: var(--r-card); margin: 0 0 16px; box-shadow: var(--sh-2); }
+.pick-bar b { color: var(--gold-bright); }
+.pick-bar .btn { background: rgba(255,255,255,.15); color: #fff; border: 1px solid rgba(255,255,255,.35); }
+.dish-row.picking { outline: 2px dashed var(--gold); outline-offset: -2px; background: var(--gold-wash); }
+.swap-choices { display: flex; flex-direction: column; gap: 8px; width: 100%; margin-top: 4px; }
+.swap-choices .btn { width: 100%; }
 .day-row .dh { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; margin-bottom: 8px; }
 .day-row .dh b { font-size: var(--fs-sm); }
 .day-row .dh .kcal { font-size: var(--fs-xs); color: var(--muted); font-variant-numeric: tabular-nums; text-align: right; }

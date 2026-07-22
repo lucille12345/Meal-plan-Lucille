@@ -188,7 +188,8 @@ const state = { screen:'profile', profile:null, week:[], usedFallback:false, sel
   // Only `verified:true` ones (allergens confirmed by the user) ever reach generation.
   userDishes:[], researchCallsToday:{ date:'', n:0 },
   // §4 browse filters — ephemeral (not persisted): saved is a toggle, the rest are checklists.
-  browseFilters:{ saved:false, dietary:[], ingredient:[], mealType:[] } };
+  browseFilters:{ saved:false, dietary:[], ingredient:[], mealType:[] },
+  pickMode:null };   // V4 §7: {di,mi} while the user is choosing a replacement for a held slot
 // Where to reach the backend:
 //  - opened as a local file (double-click) → talk to the local Node server on :8787
 //  - served over http(s) (local `node server.js`, or hosted on Render) → same origin, no host needed
@@ -572,7 +573,44 @@ function swapMeal(di,mi){
     if(m!==meal) usedNames.add(m.recipe.name.toLowerCase());   // avoid every OTHER dish in the week
   }));
   const r=pickMeal(role,state.profile,usedIds,usedNames);
-  if(r)meal.recipe=scaleRecipe(r,peopleCount());
+  if(r){ meal.recipe=scaleRecipe(r,peopleCount()); return true; }
+  return false;
+}
+// V4 §7: "Surprise me" — a random eligible swap that respects allergies/dislikes, the time/
+// difficulty filter and no-repeat, and (AI on) runs any AI dish through acceptAIDish. Returns
+// true only if the dish actually changed, so the caller can offer "Choose it myself" otherwise.
+async function doSurpriseSwap(di,mi){
+  const meal=state.week[di]&&state.week[di].meals[mi]; if(!meal) return false;
+  const before=meal.recipe&&meal.recipe.name;
+  if(state.useAI){
+    const role=meal.course==='main'?meal.type:(meal.course||meal.type);
+    const avoid=[]; state.week.forEach(d=>d.meals.forEach(m=>{if(m.recipe)avoid.push(m.recipe.name);}));
+    try{ const r=acceptAIDish(await requestSwapAI(state.profile,role,avoid),state.profile);
+         if(r){ meal.recipe=r; } else swapMeal(di,mi); }
+    catch(e){ console.warn('Swap failed, local:',e.message); swapMeal(di,mi); }
+  } else swapMeal(di,mi);
+  return !!(meal.recipe&&meal.recipe.name!==before);
+}
+// Pick mode: the target slot is held while the user picks a replacement from the browse column,
+// by drag OR tap (the phone path). Cancel / Esc leaves the original dish untouched.
+function enterPickMode(di,mi){
+  state.pickMode={di,mi};
+  state.plannerTab='plan';
+  renderPlanner();
+  document.addEventListener('keydown',pickModeKey);
+  app.querySelector('.planner-main')?.scrollIntoView({behavior:'smooth',block:'start'});
+}
+function exitPickMode(){
+  state.pickMode=null;
+  document.removeEventListener('keydown',pickModeKey);
+  renderPlanner();
+}
+function pickModeKey(e){ if(e.key==='Escape') exitPickMode(); }
+// place the chosen dish into the held slot (shared by tap and drop while in pick mode)
+function pickModePlace(recipe){
+  const pm=state.pickMode; if(!pm||!recipe) return;
+  const ok=placeDishAt(recipe,pm.di,{slotMi:pm.mi});
+  if(ok) exitPickMode();     // placeDishAt already refused + toasted if it clashed
 }
 
 /* ============================================================
@@ -1970,6 +2008,15 @@ function ownDishesBlockHtml(list){
 function renderPlanner(){
   const nm=(state.profile?.name||'').trim();
   const tab=state.plannerTab==='shop'?'shop':'plan';
+  // V4 §7 pick-mode bar: a persistent, always-visible way out while choosing a replacement.
+  let pickBar='';
+  if(state.pickMode){
+    const pm=state.pickMode; const d=state.week[pm.di]; const meal=d&&d.meals[pm.mi];
+    if(meal){ pickBar=`<div class="pick-bar" role="status">
+      <span>Choosing a new dish for <b>${d.day} ${meal.type}</b> — tap or drag one below.</span>
+      <button class="btn btn-sm" id="pickCancel">Cancel</button></div>`; }
+    else state.pickMode=null;   // slot vanished (e.g. re-plan) → drop pick mode
+  }
   app.innerHTML=`
     <div class="planner-head">
       <h2>${nm?nm+"'s week":'Your week'}</h2>
@@ -1978,6 +2025,7 @@ function renderPlanner(){
         <button role="tab" data-tab="shop" aria-selected="${tab==='shop'}" class="${tab==='shop'?'on':''}">Shop Ingredients</button>
       </div>
     </div>
+    ${pickBar}
     <div class="planner">
       ${railHtml()}
       <main class="planner-main">${tab==='shop'?shoppingBodyHtml()
@@ -2009,15 +2057,25 @@ function renderPlanner(){
     swapMeal(di,mi); saveState(); renderPlanner();       // ✕ = immediate random swap (§7 keeps this fast path)
   });
 
-  // ---- browse: ⊕ add / ♥ fav / tap card → detail overlay ----
+  // ---- V4 §7 pick mode: highlight the held slot + the always-visible Cancel ----
+  document.getElementById('pickCancel')?.addEventListener('click',exitPickMode);
+  if(state.pickMode){
+    const held=app.querySelector(`.dish-row[data-drop-slot="${state.pickMode.di}-${state.pickMode.mi}"]`);
+    held?.classList.add('picking');
+  }
+
+  // ---- browse: ⊕ add / ♥ fav / tap card → detail overlay (or place into held slot in pick mode) ----
   app.querySelectorAll('[data-badd]').forEach(b=>b.onclick=(e)=>{ e.stopPropagation();
-    const r=findBrowseRecipe(b.dataset.badd); if(r)openDayPicker(r,b); });
+    const r=findBrowseRecipe(b.dataset.badd); if(!r)return;
+    if(state.pickMode) pickModePlace(r); else openDayPicker(r,b); });
   app.querySelectorAll('[data-bfav]').forEach(b=>b.onclick=(e)=>{ e.stopPropagation();
     const r=findBrowseRecipe(b.dataset.bfav); if(r){ toggleFavorite(r); renderPlanner(); } });
   app.querySelectorAll('.recipe-card[data-rid]').forEach(card=>{
     card.addEventListener('click',e=>{
       if(e.target.closest('.icon-btn')) return;          // ⊕ / ♥ have their own handlers
-      const r=findBrowseRecipe(card.dataset.rid); if(r)openRecipeOverlay(null,null,r);
+      const r=findBrowseRecipe(card.dataset.rid); if(!r)return;
+      if(state.pickMode) pickModePlace(r);               // tap = place into the held slot (phone path)
+      else openRecipeOverlay(null,null,r);
     });
   });
 
@@ -2136,20 +2194,26 @@ function openRecipeOverlay(di,mi,recipeDirect){
     overlay.querySelector('[data-favr]').onclick=()=>{ toggleFavorite(cur); paint(); renderPlanner(); };
     const cp=overlay.querySelector('[data-copydb]');
     if(cp)cp.onclick=()=>copyAsDatabaseEntry(cur);
+    // V4 §7: the overlay's swap offers TWO choices — a random "Surprise me" (default, primary)
+    // and "Choose it myself" (pick mode). The bare ✕ on the day card stays an instant random swap.
     const sw=overlay.querySelector('[data-swapr]');
-    if(sw)sw.onclick=async()=>{
-      sw.disabled=true; sw.textContent='Finding another…';
-      if(!state.useAI){ swapMeal(di,mi); }
-      else {
-        const role=meal.course==='main'?meal.type:(meal.course||meal.type);
-        const avoid=[]; state.week.forEach(d=>d.meals.forEach(m=>{if(m.recipe)avoid.push(m.recipe.name);}));
-        // Same gate as the plan-time top-up: an AI dish that fails the profile's allergy and
-        // dislike filters is discarded, and we fall back to a safe local swap instead.
-        try { const r=acceptAIDish(await requestSwapAI(state.profile,role,avoid),state.profile);
-              if(r) meal.recipe=r; else swapMeal(di,mi); }
-        catch(e){ console.warn('Swap failed, local:',e.message); swapMeal(di,mi); }
-      }
-      saveState(); paint(); renderPlanner();
+    if(sw)sw.onclick=()=>{
+      const box=document.createElement('div'); box.className='swap-choices';
+      box.innerHTML=`<button class="btn btn-primary btn-sm" data-surprise>🎲 Surprise me</button>
+        <button class="btn btn-sm ghost" data-choose>✋ Choose it myself</button>`;
+      sw.replaceWith(box);
+      box.querySelector('[data-surprise]').onclick=async(ev)=>{
+        const b=ev.currentTarget; b.disabled=true; b.textContent='Finding another…';
+        const changed=await doSurpriseSwap(di,mi);
+        if(changed){ saveState(); paint(); renderPlanner(); }
+        else {
+          // §7.3 fallback: nothing eligible left → say so honestly, offer Choose it myself.
+          box.innerHTML=`<p class="list-note">No other dish fits what you can eat here. Try choosing one yourself.</p>
+            <button class="btn btn-sm ghost" data-choose>✋ Choose it myself</button>`;
+          box.querySelector('[data-choose]').onclick=()=>{ close(); enterPickMode(di,mi); };
+        }
+      };
+      box.querySelector('[data-choose]').onclick=()=>{ close(); enterPickMode(di,mi); };
     };
   }
   overlay.addEventListener('click',e=>{ if(e.target===overlay)close(); });
