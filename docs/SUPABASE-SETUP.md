@@ -117,3 +117,39 @@ Google project. This is a one-time, free setup. Do it in order:
 - **Nothing breaks if you skip all this.** Leave `public/config.js` empty and the app stays in
   local-only mode exactly as before.
 - **Don't share** your database password. The **anon key is fine** to be in the code.
+
+---
+
+## 8. Shopping reminders + the feedback form (V4 §8)
+
+Both of these are **written and waiting** — they just need you to deploy them once. **Until you
+do, the in-app "Tell Lucille" feedback form silently fails** (the live app already points at it).
+
+1. Supabase dashboard → **Edge Functions** → deploy **both** `send-reminders` and
+   `send-feedback` from this repo (`supabase/functions/`).
+2. **Edge Functions → Secrets** → add **`RESEND_API_KEY`** (from your Resend account,
+   `llucillespam@gmail.com`).
+3. **Database → Extensions** → enable **`pg_net`**. A cron job cannot call an Edge Function
+   without it.
+4. **Database → Cron Jobs** → new job calling `send-reminders`.
+   **⚠️ The schedule box is in GMT.** Paris is GMT+2 in summer, so `0 16 * * *` = **6 pm Paris**.
+
+**⚠️ The Resend limit you WILL hit:** on the free tier with no verified domain, Resend **only
+delivers to `llucillespam@gmail.com`**. The first test came back `{"sent":false,"status":403}`
+for exactly this — the function worked, Resend just refused the recipient. Options: use the
+`TEST_EMAIL_TO` env override, sign in to #Foodie with that gmail, or verify a domain in Resend.
+Pick one before you spend time thinking the function is broken.
+
+## 9. Google Calendar — the honest recommendation
+
+The **"Add to calendar" button already works** — it downloads a `.ics` file your calendar app
+imports, and V4 improved it: correct **Europe/Paris** times and **stable event IDs**, so
+re-planning your week **updates** the same events instead of creating a second copy. This works
+with **Apple Calendar too**, which matters since you use an iCloud address.
+
+**Full two-way Google Calendar sync (OAuth) was deliberately NOT built.** It needs a Google Cloud
+project, the Calendar API, a consent screen that **Google reviews** because calendar access is a
+sensitive scope, and token storage/refresh — disproportionate for a personal meal planner, and
+the `.ics` gives you the same result (dinners + shopping reminders on your calendar) with no
+accounts and no review. If after using the `.ics` version you still want live Google sync, say so
+and it can be built as its own phase.

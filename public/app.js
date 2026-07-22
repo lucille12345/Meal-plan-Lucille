@@ -751,14 +751,23 @@ function icsStamp(date,h,min){
   return `${d.getFullYear()}${p(d.getMonth()+1)}${p(d.getDate())}T${p(d.getHours())}${p(d.getMinutes())}00`;
 }
 function icsEsc(s){ return String(s||'').replace(/\\/g,'\\\\').replace(/;/g,'\\;').replace(/,/g,'\\,').replace(/\n/g,'\\n'); }
+// V4 §8.3: a Europe/Paris VTIMEZONE so events land at the right local time (not floating), and
+// STABLE UIDs keyed to the week's Monday + event identity so re-importing after a re-plan UPDATES
+// the same events rather than piling up duplicates.
+const ICS_VTIMEZONE=[
+  'BEGIN:VTIMEZONE','TZID:Europe/Paris',
+  'BEGIN:DAYLIGHT','TZOFFSETFROM:+0100','TZOFFSETTO:+0200','TZNAME:CEST','DTSTART:19700329T020000','RRULE:FREQ=YEARLY;BYMONTH=3;BYDAY=-1SU','END:DAYLIGHT',
+  'BEGIN:STANDARD','TZOFFSETFROM:+0200','TZOFFSETTO:+0100','TZNAME:CET','DTSTART:19701025T030000','RRULE:FREQ=YEARLY;BYMONTH=10;BYDAY=-1SU','END:STANDARD',
+  'END:VTIMEZONE'];
 function buildICS(){
   const mon=weekMonday();
-  const lines=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//#Foodie//Meal Planner//EN','CALSCALE:GREGORIAN'];
-  let uid=0; const stampNow=icsStamp(new Date(),new Date().getHours(),new Date().getMinutes());
-  const ev=(dayOffset,startH,startMin,endH,endMin,summary,desc)=>{
+  const wk=`${mon.getFullYear()}${String(mon.getMonth()+1).padStart(2,'0')}${String(mon.getDate()).padStart(2,'0')}`;
+  const lines=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//#Foodie//Meal Planner//EN','CALSCALE:GREGORIAN','METHOD:PUBLISH',...ICS_VTIMEZONE];
+  const stampNow=icsStamp(new Date(),new Date().getHours(),new Date().getMinutes());
+  const ev=(dayOffset,startH,startMin,endH,endMin,summary,desc,uidKey)=>{
     const date=new Date(mon.getFullYear(),mon.getMonth(),mon.getDate()+dayOffset);
-    lines.push('BEGIN:VEVENT',`UID:table-${Date.now()}-${uid++}@table.app`,`DTSTAMP:${stampNow}`,
-      `DTSTART:${icsStamp(date,startH,startMin)}`,`DTEND:${icsStamp(date,endH,endMin)}`,
+    lines.push('BEGIN:VEVENT',`UID:foodie-${wk}-${uidKey}@foodie.app`,`DTSTAMP:${stampNow}`,
+      `DTSTART;TZID=Europe/Paris:${icsStamp(date,startH,startMin)}`,`DTEND;TZID=Europe/Paris:${icsStamp(date,endH,endMin)}`,
       `SUMMARY:${icsEsc(summary)}`,`DESCRIPTION:${icsEsc(desc)}`,'END:VEVENT');
   };
   // dinner events (19:00) — main dish name + full-course list + real recipe link
@@ -767,7 +776,7 @@ function buildICS(){
     if(!dinnerMain)return;
     const courses=day.meals.filter(m=>m.type==='dinner'&&m.recipe&&!m.rejected).map(m=>m.recipe.name);
     const desc=`Tonight's dinner: ${courses.join(', ')}.\nRecipe: ${recipeUrl(dinnerMain.recipe)}`;
-    ev(di,19,0,19,45,`🍽 ${dinnerMain.recipe.name}`,desc);
+    ev(di,19,0,19,45,`🍽 ${dinnerMain.recipe.name}`,desc,`dinner-${di}`);
   });
   // shopping reminders (17:00) on each buy-day
   const { fresh }=buildShoppingList();
@@ -776,7 +785,8 @@ function buildICS(){
   Object.keys(fresh).forEach(bd=>{
     const items=[...fresh[bd].values()].map(i=>i.name).sort();
     if(!items.length)return;
-    ev(buyOffset[bd]??0,17,0,17,15,'🛒 Buy fresh for tomorrow',`Pick up: ${items.join(', ')}.`);
+    const off=buyOffset[bd]??0;
+    ev(off,17,0,17,15,'🛒 Buy fresh for tomorrow',`Pick up: ${items.join(', ')}.`,`shop-${off}`);
   });
   lines.push('END:VCALENDAR');
   return lines.join('\r\n');
