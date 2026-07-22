@@ -543,6 +543,7 @@ function enforceNoRepeat(week,profile){
   week.forEach(day=>day.meals.forEach(meal=>{
     if(!meal.recipe) return;
     const nm=meal.recipe.name.toLowerCase();
+    if(meal.manual){ seen.add(nm); return; }   // V4 §6: never clobber a deliberate hand-placed dish
     if(!seen.has(nm)){ seen.add(nm); return; }
     // collision → try to find an eligible recipe (same course role) whose name isn't used yet
     const role=meal.course==='main'?meal.type:(meal.course||meal.type);
@@ -1600,7 +1601,9 @@ function railDayDishes(day,di){
   const order=['breakfast','lunch','dinner'];
   return order.filter(t=>groups[t]).map(t=>{
     const rows=groups[t].map(({m,mi})=>railDishRow(m,di,mi)).join('');
-    return `<div class="meal-group"><div class="meal-type">${t}</div>${rows}</div>`;
+    // a slim ＋ target under each meal group: drop here to ADD a dish to this meal (§6)
+    const add=`<div class="group-add" data-add-group="${di}|${t}" title="Drop a dish here to add it to ${t}">＋</div>`;
+    return `<div class="meal-group"><div class="meal-type">${t}</div>${rows}${add}</div>`;
   }).join('');
 }
 function railHtml(){
@@ -1706,29 +1709,94 @@ function carousel(title,list){
 function findBrowseRecipe(id){
   return [...DB(),...RECIPES,...STARTERS,...DESSERTS,...state.favorites].find(r=>String(r.id)===String(id));
 }
-// place a browsed dish onto a day at its natural meal (breakfast/lunch/dinner main)
-function addDishToDay(recipe,di){
-  const day=state.week[di]; if(!day) return;
-  const mealType=(recipe.type==='breakfast'||recipe.type==='lunch'||recipe.type==='dinner')?recipe.type:'dinner';
-  let slot=day.meals.find(m=>m.type===mealType&&(m.course==='main'||m.course==='single'||!m.course));
-  const scaled=scaleRecipe({...recipe},peopleCount());
-  if(slot){ slot.recipe=scaled; slot.rejected=false; }
-  else { day.meals.push({type:mealType,course:'main',recipe:scaled,rejected:false}); }
-  saveState(); showToast(`✓ ${recipe.name} → ${day.day}`); renderPlanner();
+// ---- V4 §6: drag (and tap) a dish into ANY slot on ANY day ----
+// A slot's `type` is the PLACEMENT (which meal it shows under); a dish's own `recipe.type`
+// is its nature and is never rewritten — a dessert dropped on breakfast is still a dessert in
+// the database, it just sits in the breakfast slot. `manual:true` marks a hand-placed slot so
+// enforceNoRepeat leaves a deliberate duplicate alone.
+function naturalMeal(recipe){
+  return (recipe.type==='breakfast'||recipe.type==='lunch'||recipe.type==='dinner')?recipe.type:'dinner';
 }
+// A leftover lunch reheats a doubled dinner main. If that leftover slot is removed/replaced, its
+// source is still bought 2× → un-double it so the shopping list doesn't over-buy (V4 §6.3).
+function undoubleSourceFor(leftoverRecipe){
+  const srcName=String(leftoverRecipe&&leftoverRecipe.name||'').replace(/^Leftover /,'');
+  for(const day of state.week) for(const m of day.meals){
+    if(m.recipe&&m.recipe.batchNote&&m.recipe.name===srcName){
+      m.recipe.ingredients=(m.recipe.ingredients||[]).map(i=>({...i,qty:i.qty/2,
+        ...(typeof i.price==='number'?{price:i.price/2}:{})}));
+      m.recipe.batchNote=false; return;
+    }
+  }
+}
+// The one place a dish is put down. `opts.slotMi` → replace that slot (keep its placement type);
+// `opts.mealType` → append a new slot under that meal; neither → natural meal. Refuses (and
+// says why) when the dish clashes with the profile's allergies/dislikes (§00.4 rule 2).
+function placeDishAt(recipe,di,opts={}){
+  const day=state.week[di]; if(!day||!recipe) return false;
+  if(!passesDietFilters(recipe,state.profile)){ showToast(`✕ ${recipe.name} clashes with what you can't eat`); return false; }
+  const scaled=scaleRecipe({...recipe},peopleCount());
+  if(typeof opts.slotMi==='number' && day.meals[opts.slotMi]){
+    const slot=day.meals[opts.slotMi];
+    if(slot.recipe&&slot.recipe.isLeftover) undoubleSourceFor(slot.recipe);
+    slot.recipe=scaled; slot.rejected=false; slot.manual=true;      // slot.type (placement) kept
+  } else {
+    day.meals.push({type:opts.mealType||naturalMeal(recipe),course:'main',recipe:scaled,rejected:false,manual:true});
+  }
+  saveState(); showToast(`✓ ${recipe.name} → ${day.day}`); renderPlanner();
+  return true;
+}
+// Move an existing slot to another day/slot (source empties). Leftover reheated dishes aren't
+// moveable — they're derived from a dinner main, not standalone.
+function moveSlot(fromDi,fromMi,toDi,opts={}){
+  const from=state.week[fromDi]&&state.week[fromDi].meals[fromMi];
+  if(!from||!from.recipe) return false;
+  if(from.recipe.isLeftover){ showToast('Leftovers follow their dinner — swap the dinner instead'); return false; }
+  if(fromDi===toDi && opts.slotMi===fromMi) return false;          // dropped on itself
+  const recipe=from.recipe;
+  // clear the source first so a same-day move doesn't collide with its own index
+  from.recipe=null; from.rejected=false; from.manual=false;
+  const ok=placeDishAt(recipe,toDi,opts);
+  if(!ok){ from.recipe=recipe; return false; }                     // blocked → put it back
+  // drop now-empty source slots so the day doesn't show a hole (keep at least the shape)
+  state.week[fromDi].meals=state.week[fromDi].meals.filter(m=>m.recipe);
+  saveState(); renderPlanner();
+  return true;
+}
+// A drop payload is "rid:<id>" (copy from browse) or "slot:<di>-<mi>" (move within the plan).
+function applyDrop(data,toDi,opts={}){
+  if(!data) return;
+  if(data.startsWith('slot:')){
+    const [fromDi,fromMi]=data.slice(5).split('-').map(Number);
+    moveSlot(fromDi,fromMi,toDi,opts);
+  } else {
+    const id=data.startsWith('rid:')?data.slice(4):data;
+    const r=findBrowseRecipe(id); if(r) placeDishAt(r,toDi,opts);
+  }
+}
+// Two-step picker (the tap path for phones, where HTML5 drag doesn't work — V4 §6.2):
+// pick a day, then pick which meal it goes in.
 function openDayPicker(recipe,anchor){
   document.querySelectorAll('.day-picker').forEach(el=>el.remove());
   const menu=document.createElement('div'); menu.className='day-picker';
-  menu.innerHTML=`<div class="dp-head">Add “${recipe.name}” to…</div>`+
-    state.week.map((d,di)=>`<button data-pick="${di}">${d.day}</button>`).join('');
-  document.body.appendChild(menu);
-  const r=anchor.getBoundingClientRect();
-  menu.style.top=(window.scrollY+r.bottom+6)+'px';
-  menu.style.left=Math.min(window.scrollX+r.left, window.scrollX+window.innerWidth-menu.offsetWidth-12)+'px';
-  menu.querySelectorAll('[data-pick]').forEach(b=>b.onclick=()=>{ addDishToDay(recipe,Number(b.dataset.pick)); menu.remove(); });
+  const dayStep=()=>{ menu.innerHTML=`<div class="dp-head">Add “${recipe.name}” to which day?</div>`+
+      state.week.map((d,di)=>`<button data-pick-day="${di}">${d.day}</button>`).join('');
+    menu.querySelectorAll('[data-pick-day]').forEach(b=>b.onclick=()=>mealStep(Number(b.dataset.pickDay))); };
+  const mealStep=(di)=>{ menu.innerHTML=`<div class="dp-head">${state.week[di].day} — which meal?</div>`+
+      ['breakfast','lunch','dinner'].map(t=>`<button data-pick-meal="${t}">${t[0].toUpperCase()+t.slice(1)}</button>`).join('')+
+      `<button class="dp-back" data-back>← back</button>`;
+    menu.querySelectorAll('[data-pick-meal]').forEach(b=>b.onclick=()=>{ placeDishAt(recipe,di,{mealType:b.dataset.pickMeal}); menu.remove(); });
+    menu.querySelector('[data-back]').onclick=dayStep;
+    position(); };
+  const position=()=>{ const r=anchor.getBoundingClientRect();
+    menu.style.top=(window.scrollY+r.bottom+6)+'px';
+    menu.style.left=Math.min(window.scrollX+r.left, window.scrollX+window.innerWidth-menu.offsetWidth-12)+'px'; };
+  dayStep(); document.body.appendChild(menu); position();
   const close=(e)=>{ if(!menu.contains(e.target)){ menu.remove(); document.removeEventListener('click',close); } };
   setTimeout(()=>document.addEventListener('click',close),0);
 }
+// legacy call sites (empty-day nudge) still use addDishToDay → natural meal
+function addDishToDay(recipe,di){ return placeDishAt(recipe,di); }
 // The target banner + honest notices that used to sit above the week's day-blocks.
 // The day-blocks themselves are gone (§2 — the week now lives in the sidebar), so these
 // ride at the top of the main column instead.
@@ -1953,16 +2021,39 @@ function renderPlanner(){
     });
   });
 
-  // ---- drag & drop: browse cards → sidebar days ----
+  // ---- drag & drop (V4 §6): browse card → any slot (copy); plan dish → any slot (move) ----
+  const DT='text/plain';
+  // sources: browse cards (copy) and planned dish rows (move)
   app.querySelectorAll('.recipe-card[draggable]').forEach(card=>{
-    card.addEventListener('dragstart',e=>{ e.dataTransfer.setData('text/plain',card.dataset.rid); e.dataTransfer.effectAllowed='copy'; card.classList.add('dragging'); });
+    card.addEventListener('dragstart',e=>{ e.dataTransfer.setData(DT,'rid:'+card.dataset.rid); e.dataTransfer.effectAllowed='copy'; card.classList.add('dragging'); });
     card.addEventListener('dragend',()=>card.classList.remove('dragging'));
   });
+  app.querySelectorAll('.dish-row[data-drop-slot]').forEach(row=>{
+    row.setAttribute('draggable','true');
+    row.addEventListener('dragstart',e=>{ e.dataTransfer.setData(DT,'slot:'+row.dataset.dropSlot); e.dataTransfer.effectAllowed='move'; row.classList.add('dragging'); e.stopPropagation(); });
+    row.addEventListener('dragend',()=>row.classList.remove('dragging'));
+    // per-slot drop target: replaces this dish
+    row.addEventListener('dragover',e=>{ e.preventDefault(); e.stopPropagation(); row.classList.add('drop-replace'); });
+    row.addEventListener('dragleave',()=>row.classList.remove('drop-replace'));
+    row.addEventListener('drop',e=>{ e.preventDefault(); e.stopPropagation(); row.classList.remove('drop-replace');
+      const [di,mi]=row.dataset.dropSlot.split('-').map(Number);
+      applyDrop(e.dataTransfer.getData(DT),di,{slotMi:mi}); });
+  });
+  // per-meal-group append target: adds a new dish under that meal type
+  app.querySelectorAll('.group-add[data-add-group]').forEach(z=>{
+    z.addEventListener('dragover',e=>{ e.preventDefault(); e.stopPropagation(); z.classList.add('drop'); });
+    z.addEventListener('dragleave',()=>z.classList.remove('drop'));
+    z.addEventListener('drop',e=>{ e.preventDefault(); e.stopPropagation(); z.classList.remove('drop');
+      const [di,mt]=z.dataset.addGroup.split('|');
+      applyDrop(e.dataTransfer.getData(DT),Number(di),{mealType:mt}); });
+    z.addEventListener('click',()=>{ /* tap the ＋ → nudge to browse below */ });
+  });
+  // coarse fallback: dropping anywhere else on a day appends at the dish's natural meal
   app.querySelectorAll('.day-row[data-drop-day]').forEach(row=>{
-    row.addEventListener('dragover',e=>{ e.preventDefault(); e.dataTransfer.dropEffect='copy'; row.classList.add('drop'); });
+    row.addEventListener('dragover',e=>{ e.preventDefault(); row.classList.add('drop'); });
     row.addEventListener('dragleave',()=>row.classList.remove('drop'));
     row.addEventListener('drop',e=>{ e.preventDefault(); row.classList.remove('drop');
-      const r=findBrowseRecipe(e.dataTransfer.getData('text/plain')); if(r)addDishToDay(r,Number(row.dataset.dropDay)); });
+      applyDrop(e.dataTransfer.getData(DT),Number(row.dataset.dropDay)); });
   });
   // an empty day: nudge toward the browse column (which is already on-screen beside it)
   app.querySelectorAll('.slot.empty[data-add-day]').forEach(s=>s.onclick=()=>{

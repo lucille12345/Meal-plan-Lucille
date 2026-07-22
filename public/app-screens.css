@@ -199,6 +199,16 @@ button.ghost.on { background: var(--tomato-wash); border-color: var(--tomato); c
 .day-row { border: 1px solid var(--hairline); border-radius: 14px; padding: 12px; margin-bottom: 10px; background: var(--surface); box-shadow: var(--sh-1); transition: border-color var(--dur) var(--ease), box-shadow var(--dur) var(--ease), background var(--dur) var(--ease); }
 .day-row:hover { border-color: var(--green); }
 .day-row.drop { border-color: var(--green); border-style: dashed; background: var(--green-wash); box-shadow: var(--sh-2); }
+/* V4 §6 drop indicators: a dish row highlights when a drop will REPLACE it; the ＋ zone shows
+   where a drop will ADD a dish. Distinct looks so replace-vs-add is unambiguous before dropping. */
+.dish-row.dragging { opacity: .4; }
+.dish-row[draggable] { cursor: grab; }
+.dish-row.drop-replace { outline: 2px solid var(--gold); outline-offset: -2px; border-radius: 10px; background: var(--gold-wash); }
+.group-add { height: 18px; margin: 2px 5px 0; border: 1.5px dashed var(--hairline-2); border-radius: 8px; display: grid; place-items: center;
+  color: var(--faint); font-size: 13px; line-height: 1; opacity: .5; transition: opacity var(--dur) var(--ease), border-color var(--dur) var(--ease); }
+.meal-group:hover .group-add { opacity: 1; }
+.group-add.drop { opacity: 1; border-color: var(--green); border-style: solid; background: var(--green-wash); color: var(--green); }
+.dp-back { color: var(--muted) !important; font-weight: 500 !important; margin-top: 4px; border-top: 1px solid var(--hairline) !important; border-radius: 0 !important; }
 .day-row .dh { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; margin-bottom: 8px; }
 .day-row .dh b { font-size: var(--fs-sm); }
 .day-row .dh .kcal { font-size: var(--fs-xs); color: var(--muted); font-variant-numeric: tabular-nums; text-align: right; }
