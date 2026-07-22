@@ -1569,23 +1569,46 @@ function weekLabel(){
     ? `${mon.getDate()}–${sun.getDate()} ${m(sun)}`
     : `${mon.getDate()} ${m(mon)} – ${sun.getDate()} ${m(sun)}`;
 }
-// One dish inside a sidebar day: small thumb + name + course label. Click opens the detail overlay.
+// One dish inside a sidebar day (V4 §5): photo + name on one line, then ♥ and ✕ directly
+// under the name. Tapping the photo/name area opens the detail overlay; ♥ favourites; ✕ swaps.
 function railDishRow(meal,di,mi){
   const r=meal.recipe; if(!r) return '';
   const img=dishImageUrl(r);
   const thumb=img?`<img src="${img}" alt="" loading="lazy" onerror="this.replaceWith(Object.assign(document.createElement('div'),{className:'emoji-fill',textContent:'${r.isLeftover?'♻️':(r.emoji||'🍽️')}'}))">`
     :`<div class="emoji-fill">${r.isLeftover?'♻️':(r.emoji||'🍽️')}</div>`;
-  return `<button class="dish-row ${meal.rejected?'rejected':''}" data-open="${di}-${mi}" title="${r.name}">
-    <span class="dr-thumb">${thumb}</span>
-    <span class="dr-text"><span class="dr-name">${r.name}</span><span class="dr-course">${mealTypeLabel(meal)}</span></span>
-  </button>`;
+  const course=(meal.course&&meal.course!=='main'&&meal.course!=='single')?`<span class="dr-course">${COURSE_LABEL[meal.course]||meal.course}</span>`:'';
+  const fav=isFavorite(r.name);
+  // NB: dr-main is a DIV, not a button — the ♥/✕ buttons live inside it and nested <button>s
+  // are invalid HTML (the browser would reparent them out). Click/keyboard handled in JS.
+  return `<div class="dish-row ${meal.rejected?'rejected':''}" data-drop-slot="${di}-${mi}">
+    <div class="dr-main" data-open="${di}-${mi}" role="button" tabindex="0" title="See ${r.name}">
+      <span class="dr-thumb">${thumb}</span>
+      <span class="dr-text"><span class="dr-name">${r.name}</span>${course}
+        <span class="dr-actions">
+          <button class="dr-fav ${fav?'on':''}" data-fav="${di}-${mi}" title="Save as favourite" aria-label="Save ${r.name} as favourite">${fav?'♥':'♡'}</button>
+          <button class="dr-swap" data-swap="${di}-${mi}" title="Swap this dish" aria-label="Swap ${r.name}">✕</button>
+        </span>
+      </span>
+    </div>
+  </div>`;
+}
+// A day's dishes grouped by meal type: BREAKFAST / LUNCH / DINNER header once (bold, display
+// font), all that type's dishes beneath it. §5's requested structure.
+function railDayDishes(day,di){
+  const groups={};
+  day.meals.forEach((m,mi)=>{ if(m.recipe) (groups[m.type]??=[]).push({m,mi}); });
+  const order=['breakfast','lunch','dinner'];
+  return order.filter(t=>groups[t]).map(t=>{
+    const rows=groups[t].map(({m,mi})=>railDishRow(m,di,mi)).join('');
+    return `<div class="meal-group"><div class="meal-type">${t}</div>${rows}</div>`;
+  }).join('');
 }
 function railHtml(){
   let rows='';
   state.week.forEach((day,di)=>{
     const kc=dayKcal(day);
     const cost=dayCost(day);
-    const dishes=day.meals.map((m,mi)=>m.recipe?railDishRow(m,di,mi):'').join('');
+    const dishes=railDayDishes(day,di);
     const empty=day.meals.some(m=>m.recipe)?'':`<div class="slot empty" data-add-day="${di}" title="Nothing planned — browse dishes on the right">＋</div>`;
     rows+=`<div class="day-row" data-drop-day="${di}">
       <div class="dh"><b>${day.day}</b><span class="kcal">${kc?kc.toLocaleString('en-US')+' kcal':'—'}${cost>0?` · €${cost.toFixed(2)}`:''}</span></div>
@@ -1903,10 +1926,19 @@ function renderPlanner(){
   // ---- tabs ----
   app.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{ state.plannerTab=b.dataset.tab; renderPlanner(); });
 
-  // ---- sidebar: tap a dish → detail overlay ----
-  app.querySelectorAll('[data-open]').forEach(b=>b.onclick=()=>{
+  // ---- sidebar: tap a dish → detail overlay; ♥ favourites; ✕ swaps (V4 §5) ----
+  app.querySelectorAll('[data-open]').forEach(b=>b.onclick=(e)=>{
+    if(e.target.closest('[data-fav],[data-swap]')) return;   // the controls have their own handlers
     const [di,mi]=b.dataset.open.split('-').map(Number);
     openRecipeOverlay(di,mi);
+  });
+  app.querySelectorAll('[data-fav]').forEach(b=>b.onclick=(e)=>{ e.stopPropagation();
+    const [di,mi]=b.dataset.fav.split('-').map(Number);
+    const meal=state.week[di]&&state.week[di].meals[mi]; if(meal&&meal.recipe){ toggleFavorite(meal.recipe); renderPlanner(); }
+  });
+  app.querySelectorAll('[data-swap]').forEach(b=>b.onclick=(e)=>{ e.stopPropagation();
+    const [di,mi]=b.dataset.swap.split('-').map(Number);
+    swapMeal(di,mi); saveState(); renderPlanner();       // ✕ = immediate random swap (§7 keeps this fast path)
   });
 
   // ---- browse: ⊕ add / ♥ fav / tap card → detail overlay ----
