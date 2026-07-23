@@ -1545,12 +1545,16 @@ function renderProfile(){
       <h2>Want a little help remembering?</h2>
       <div class="q-why">Totally optional. Skip it now, add it later — no pressure, ever.</div>
       <div class="connect-cards">
-        <div class="connect"><div class="ic cal">📅</div><div class="c-body"><b>Google Calendar</b>
-          <p>Your dinners and shopping reminders, right where you already look.</p>
-          <span class="badge badge-basil">Coming soon</span></div></div>
+        <div class="connect"><div class="ic cal">📅</div><div class="c-body"><b>Add to your calendar</b>
+          <p>Drops your dinners into Google or Apple Calendar — no account to connect.</p>
+          ${state.week.length
+            ? `<button type="button" class="btn btn-sm btn-primary" data-add-cal>📅 Add my week</button>`
+            : `<span class="badge badge-basil">Ready once your week is planned</span>`}</div></div>
         <div class="connect"><div class="ic bell">🔔</div><div class="c-body"><b>Shopping reminders</b>
-          <p>A gentle nudge on shopping days — "tonight, buy for tomorrow."</p>
-          <span class="badge badge-honey">Coming soon</span></div></div>
+          <p>The same calendar pings you on shopping days — "tonight, buy for tomorrow." Included automatically.</p>
+          ${state.week.length
+            ? `<button type="button" class="btn btn-sm" data-add-cal>📅 Add reminders</button>`
+            : `<span class="badge badge-honey">Ready once your week is planned</span>`}</div></div>
       </div>
       <label class="q-check" style="margin-top:22px"><input type="checkbox" id="q-useAI" ${state.useAI?'checked':''}>
         <span><b>Let AI fill any gaps</b> <span class="hint">— your week always comes from the cookbook first. This only steps in on the rare day the cookbook can't find something new, and it also powers looking up a dish you add yourself. Uses a few of your 20 free lookups a day.</span></span></label>
@@ -1655,6 +1659,8 @@ function renderProfile(){
   const budget=document.getElementById('q-budget');
   budget.oninput=()=>document.getElementById('q-budget-val').textContent='€'+budget.value+' / day';
   document.getElementById('q-useAI').onchange=(e)=>{ state.useAI=e.target.checked; saveState(); };
+  // Connect step: the calendar cards download the .ics (dinners + shopping reminders) — works now.
+  app.querySelectorAll('[data-add-cal]').forEach(b=>b.onclick=()=>downloadICS());
 
   const clearBtn=document.getElementById('q-clear');
   if(clearBtn) clearBtn.onclick=()=>{ if(confirm("Clear your saved answers, your week and your favourites? This can't be undone.")) clearAllData(); };
