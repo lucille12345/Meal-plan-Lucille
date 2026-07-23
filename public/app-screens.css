@@ -244,11 +244,12 @@ button.ghost.on { background: var(--tomato-wash); border-color: var(--tomato); c
 .dr-course { font-size: 10px; text-transform: uppercase; letter-spacing: .06em; font-weight: 700; color: var(--faint); }
 /* ♥ and ✕ directly under the name, side by side */
 .dr-actions { display: flex; flex-direction: row; gap: 6px; margin-top: 1px; width: fit-content; }
-.dr-fav, .dr-swap { width: 30px; height: 30px; flex: none; display: grid; place-items: center; border: 1px solid var(--hairline); background: var(--surface);
+.dr-fav, .dr-swap, .dr-remove { width: 30px; height: 30px; flex: none; display: grid; place-items: center; border: 1px solid var(--hairline); background: var(--surface);
   border-radius: var(--r-pill); font-size: 13px; line-height: 1; cursor: pointer; color: var(--muted); font-family: var(--font-ui); padding: 0; }
 .dr-fav:hover { border-color: var(--gold); color: var(--gold-deep); }
 .dr-fav.on { color: var(--gold); border-color: var(--gold); }
-.dr-swap:hover { border-color: var(--reject); color: var(--reject); }
+.dr-swap:hover { border-color: var(--green); color: var(--green); }
+.dr-remove:hover { border-color: var(--reject); color: var(--reject); }
 
 .slot.empty { border: 1.5px dashed var(--hairline-2); border-radius: 10px; display: grid; place-items: center; color: var(--faint); font-size: 18px; background: var(--surface-2); cursor: pointer; padding: 12px; }
 .slot.empty:hover { border-color: var(--green); color: var(--green); }

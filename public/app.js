@@ -1791,7 +1791,8 @@ function railDishRow(meal,di,mi){
       <span class="dr-text"><span class="dr-name">${r.name}</span>${course}
         <span class="dr-actions">
           <button class="dr-fav ${fav?'on':''}" data-fav="${di}-${mi}" title="Save as favourite" aria-label="Save ${r.name} as favourite">${fav?'♥':'♡'}</button>
-          <button class="dr-swap" data-swap="${di}-${mi}" title="Swap this dish" aria-label="Swap ${r.name}">✕</button>
+          <button class="dr-swap" data-swap="${di}-${mi}" title="Swap for another dish" aria-label="Swap ${r.name}">🔄</button>
+          <button class="dr-remove" data-remove="${di}-${mi}" title="Remove this dish" aria-label="Remove ${r.name}">✕</button>
         </span>
       </span>
     </div>
@@ -2001,6 +2002,15 @@ function openDayPicker(recipe,anchor){
 }
 // legacy call sites (empty-day nudge) still use addDishToDay → natural meal
 function addDishToDay(recipe,di){ return placeDishAt(recipe,di); }
+// V4: fully remove a dish from a day (so adding via ＋ can be undone — you're not stuck with an
+// ever-growing meal). A leftover's source is un-doubled so the shopping list doesn't over-buy.
+function removeSlot(di,mi){
+  const day=state.week[di]; const meal=day&&day.meals[mi];
+  if(!meal||!meal.recipe) return;
+  if(meal.recipe.isLeftover) undoubleSourceFor(meal.recipe);
+  day.meals.splice(mi,1);
+  saveState(); renderPlanner();
+}
 // The target banner + honest notices that used to sit above the week's day-blocks.
 // The day-blocks themselves are gone (§2 — the week now lives in the sidebar), so these
 // ride at the top of the main column instead.
@@ -2210,7 +2220,7 @@ function renderPlanner(){
 
   // ---- sidebar: tap a dish → detail overlay; ♥ favourites; ✕ swaps (V4 §5) ----
   app.querySelectorAll('[data-open]').forEach(b=>b.onclick=(e)=>{
-    if(e.target.closest('[data-fav],[data-swap]')) return;   // the controls have their own handlers
+    if(e.target.closest('[data-fav],[data-swap],[data-remove]')) return;   // the controls have their own handlers
     const [di,mi]=b.dataset.open.split('-').map(Number);
     openRecipeOverlay(di,mi);
   });
@@ -2220,7 +2230,11 @@ function renderPlanner(){
   });
   app.querySelectorAll('[data-swap]').forEach(b=>b.onclick=(e)=>{ e.stopPropagation();
     const [di,mi]=b.dataset.swap.split('-').map(Number);
-    swapMeal(di,mi); saveState(); renderPlanner();       // ✕ = immediate random swap (§7 keeps this fast path)
+    swapMeal(di,mi); saveState(); renderPlanner();       // 🔄 = immediate random swap (§7 keeps this fast path)
+  });
+  app.querySelectorAll('[data-remove]').forEach(b=>b.onclick=(e)=>{ e.stopPropagation();
+    const [di,mi]=b.dataset.remove.split('-').map(Number);
+    removeSlot(di,mi);                                     // ✕ = fully delete this dish from the day
   });
 
   // ---- V4 §7 pick mode: highlight the held slot + the always-visible Cancel ----
