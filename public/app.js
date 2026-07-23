@@ -131,7 +131,7 @@ const STARTERS = [
     {name:'Zucchini',qty:2,unit:'',category:'Produce',buyDayBefore:false},{name:'Onion',qty:1,unit:'',category:'Produce',buyDayBefore:false}],steps:['Soften onion and zucchini.','Add water, simmer 15 min, blend.']},
   {id:'s9',type:'starter',name:'Gazpacho',desc:'Tomato, cucumber, pepper',time:12,difficulty:1,emoji:'🍅',img:'gazpacho,soup',tags:['vegetarian','vegan'],kcal:110,protein:3,ingredients:[
     {name:'Tomato',qty:3,unit:'',category:'Produce',buyDayBefore:false},{name:'Cucumber',qty:0.5,unit:'',category:'Produce',buyDayBefore:false},{name:'Bell pepper',qty:0.5,unit:'',category:'Produce',buyDayBefore:false}],steps:['Blend the vegetables with olive oil and a splash of vinegar.','Chill and serve cold.']},
-  {id:'s10',type:'starter',name:'Pea & mint soup',desc:'Peas, onion, mint',time:18,difficulty:2,emoji:'🥣',img:'soup,pea',tags:['vegetarian'],kcal:150,protein:8,ingredients:[
+  {id:'s10',type:'starter',name:'Pea & mint soup',desc:'Peas, onion, mint',time:18,difficulty:2,emoji:'🥣',img:'soup,pea',photo:'https://images.immediate.co.uk/production/volatile/sites/30/2020/08/recipe-image-legacy-id-491536_11-1c6fc4d.jpg',tags:['vegetarian'],kcal:150,protein:8,ingredients:[
     {name:'Peas',qty:150,unit:'g',category:'Frozen',buyDayBefore:false},{name:'Onion',qty:1,unit:'',category:'Produce',buyDayBefore:false},{name:'Fresh mint',qty:1,unit:'handful',category:'Produce',buyDayBefore:true}],steps:['Soften onion, add peas and water.','Simmer 8 min, blend with mint.']},
   {id:'s11',type:'starter',name:'Garlic bread',desc:'Baguette, garlic, butter',time:10,difficulty:1,emoji:'🧄',img:'garlic,bread',photo:'https://images.unsplash.com/photo-1619535860434-ba1d8fa12536?auto=format&fit=crop&w=600&q=70',tags:['vegetarian'],kcal:210,protein:5,ingredients:[
     {name:'Baguette',qty:3,unit:'slices',category:'Bakery',buyDayBefore:true},{name:'Garlic',qty:1,unit:'clove',category:'Produce',buyDayBefore:false},{name:'Butter',qty:15,unit:'g',category:'Dairy',buyDayBefore:false}],steps:['Mix soft butter with crushed garlic.','Spread on bread and toast until golden.']},
@@ -914,13 +914,22 @@ function buildICS(){
       `DTSTART;TZID=Europe/Paris:${icsStamp(date,startH,startMin)}`,`DTEND;TZID=Europe/Paris:${icsStamp(date,endH,endMin)}`,
       `SUMMARY:${icsEsc(summary)}`,`DESCRIPTION:${icsEsc(desc)}`,'END:VEVENT');
   };
-  // dinner events (19:00) — main dish name + full-course list + real recipe link
+  // A calendar event for EVERY meal of the day (breakfast 08:00, lunch 12:30, dinner 19:00) —
+  // not just dinner. Each event lists that meal's full course line-up + the main's recipe link.
+  const MEALS=[
+    {type:'breakfast', icon:'☕', label:'Breakfast', sH:8,  sM:0,  eH:8,  eM:30},
+    {type:'lunch',     icon:'🥗', label:'Lunch',     sH:12, sM:30, eH:13, eM:15},
+    {type:'dinner',    icon:'🍽', label:'Dinner',    sH:19, sM:0,  eH:19, eM:45},
+  ];
   state.week.forEach((day,di)=>{
-    const dinnerMain=day.meals.find(m=>m.type==='dinner'&&(m.course==='main'||!m.course)&&m.recipe&&!m.rejected);
-    if(!dinnerMain)return;
-    const courses=day.meals.filter(m=>m.type==='dinner'&&m.recipe&&!m.rejected).map(m=>m.recipe.name);
-    const desc=`Tonight's dinner: ${courses.join(', ')}.\nRecipe: ${recipeUrl(dinnerMain.recipe)}`;
-    ev(di,19,0,19,45,`🍽 ${dinnerMain.recipe.name}`,desc,`dinner-${di}`);
+    MEALS.forEach(M=>{
+      const slots=day.meals.filter(m=>m.type===M.type&&m.recipe&&!m.rejected);
+      if(!slots.length)return;
+      const main=slots.find(m=>m.course==='main'||m.course==='single'||!m.course)||slots[0];
+      const courses=slots.map(m=>m.recipe.name);
+      const desc=`${M.label}: ${courses.join(', ')}.\nRecipe: ${recipeUrl(main.recipe)}`;
+      ev(di,M.sH,M.sM,M.eH,M.eM,`${M.icon} ${main.recipe.name}`,desc,`${M.type}-${di}`);
+    });
   });
   // shopping reminders (17:00) on each buy-day
   const { fresh }=buildShoppingList();
@@ -1599,15 +1608,10 @@ function renderProfile(){
       <div class="q-why">Totally optional. Skip it now, add it later — no pressure, ever.</div>
       <div class="connect-cards">
         <div class="connect"><div class="ic cal">📅</div><div class="c-body"><b>Add to your calendar</b>
-          <p>Drops your dinners into Google or Apple Calendar — no account to connect.</p>
+          <p>Drops every meal — breakfast, lunch &amp; dinner — into Google or Apple Calendar, and pings you on shopping days ("tonight, buy for tomorrow"). No account to connect; your calendar app does the reminding.</p>
           ${state.week.length
             ? `<button type="button" class="btn btn-sm btn-primary" data-add-cal>📅 Add my week</button>`
             : `<span class="badge badge-basil">Ready once your week is planned</span>`}</div></div>
-        <div class="connect"><div class="ic bell">🔔</div><div class="c-body"><b>Shopping reminders</b>
-          <p>The same calendar pings you on shopping days — "tonight, buy for tomorrow." Included automatically.</p>
-          ${state.week.length
-            ? `<button type="button" class="btn btn-sm" data-add-cal>📅 Add reminders</button>`
-            : `<span class="badge badge-honey">Ready once your week is planned</span>`}</div></div>
       </div>
       <label class="q-check" style="margin-top:22px"><input type="checkbox" id="q-useAI" ${state.useAI?'checked':''}>
         <span><b>Let AI fill any gaps</b> <span class="hint">— your week always comes from the cookbook first. This only steps in on the rare day the cookbook can't find something new, and it also powers looking up a dish you add yourself. Uses a few of your 20 free lookups a day.</span></span></label>
