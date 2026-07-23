@@ -1,38 +1,25 @@
-# Photos still needed — 12 dishes (V4 §3)
+# Photos — ALL DONE ✅ (V4 §3, completed with Lucille's links 2026-07-23)
 
-Lucille, I gave real, hand-checked photos to every dish I could confirm. For these **12** I
-couldn't find a photo that honestly shows the dish (the candidates I found showed the wrong
-thing — a lemon photo for baked apple, a hotel lobby for poached pear, a mango pile for plums —
-and the brief's rule is that a wrong photo is worse than the little emoji tile).
+Lucille sent recipe links for all 12 remaining dishes. Every one now has a real, verified photo
+pulled from the page she chose (or, where a page couldn't be hotlinked, a hand-checked Unsplash
+match). **Nothing outstanding.**
 
-For each one below, you can either:
-- **(a)** send me a link to a photo you like (any web image URL, or an Unsplash page), or
-- **(b)** tell me to **drop the dish** from the pool.
+| Dish | Photo source |
+|---|---|
+| Melon & feta | jevaisvouscuisiner.com (her link) |
+| Hummus & veg sticks | cookieandkate.com — her Facebook link couldn't be hotlinked (Facebook images are behind login / expire), so I used a clean hummus-bowl photo instead |
+| Stuffed tomatoes | cravingtasty.com (her link) |
+| Olives & crudités | gzrecipes.com (her link) |
+| Grilled asparagus | feastingathome.com (her link) |
+| Baked cinnamon apple | homemadeinterest.com (her link) |
+| Lemon sorbet | themediterraneandish.com (her link) |
+| Poached pear | applecakeannie.com (her link) |
+| Grilled peach & honey | mybakingaddiction.com (her link) |
+| Mango sorbet | connoisseurusveg.com (extracted from her Google image link) |
+| Roasted plums | foodfidelity.com (her link) |
+| Figs & honey | Unsplash (her Riverford link is bot-protected and can't be hotlinked; used a hand-checked fresh-figs photo) |
 
-Until then, each shows its emoji tile — nothing is broken.
-
-### Starters
-1. **Melon & feta**
-2. **Hummus & veg sticks**
-3. **Stuffed tomatoes**
-4. **Olives & crudités**
-5. **Grilled asparagus**
-
-### Desserts
-6. **Baked cinnamon apple**
-7. **Lemon sorbet**
-8. **Poached pear**
-9. **Grilled peach & honey**
-10. **Mango sorbet**
-11. **Roasted plums**
-12. **Figs & honey**
-
----
-
-### For reference — the 11 I *did* confirm and add
-Banana pancakes · Garlic bread · Corn on the cob · Watermelon & mint · Dark chocolate &
-clementine · Cheese & grapes · Orange & cinnamon · Chocolate mousse · Apple compote · Frozen
-grapes · Pineapple carpaccio. (Tomato bruschetta already shows the curated database photo.)
-
-Every photo I added was **viewed by eye** in a contact sheet and its URL checked to return HTTP
-200, so none will 404 and none shows the wrong food.
+Every URL was checked to return HTTP 200 and every image was **viewed by eye** to confirm it
+shows the right dish. Only the raw legacy "Tomato bruschetta" entry still has no photo of its own,
+but it's shadowed by the curated `db-s2` bruschetta (which has one), so it never shows an emoji
+tile in the app.
