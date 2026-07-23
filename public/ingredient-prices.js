@@ -48,6 +48,8 @@ const UNIT_TO_BASE = {
   stalk:40,       // one celery stalk ≈ 40 g
   scoop:30,       // one protein scoop ≈ 30 g
   scoops:50,      // a dessert scoop (sorbet/ice cream) ≈ 50 g — 2 scoops ≈ 100 g
+  handful:15,     // a handful of leaves/herbs ≈ 15 g  (was pricing €0 before — a real bug)
+  bunch:30, sprig:2, knob:15, splash:15, dash:1, drizzle:8, can:400,
 };
 
 const INGREDIENT_PRICES = {
@@ -380,11 +382,54 @@ function piecePriceOf(ing){
   return null;
 }
 
+/* ----------------------------------------------------------------------------
+   packOf(name) → { pack, packEur, label } for a weight/volume ingredient that
+   is bought as a whole PACK you can't split — a bottle of oil, a jar of spice,
+   a bag of flour, a bunch of herbs. This is the "true till total" model (Lucille's
+   choice): you use 1 tsp of cinnamon but you buy the whole €1.50 jar. The shopping
+   list charges ceil(total ÷ pack) × packEur (same idea as onions, extended to packs).
+   Proteins and loose produce return null → still charged by weight, which is realistic
+   (you buy roughly the amount at the counter). Pack price is kept consistent with the
+   per-100 price so nothing contradicts the per-serving figure.
+---------------------------------------------------------------------------- */
+function packOf(name){
+  const e = INGREDIENT_PRICES[String(name||'').trim().toLowerCase()];
+  if (!e || (e.per!=='100g' && e.per!=='100ml')) return null;   // only weight/volume items
+  const n = String(name).toLowerCase();
+  let pack=null, label='pack';
+  if (e.per==='100ml'){
+    if (/coconut milk/.test(n)) { pack=400; label='can'; }
+    else if (/\bmilk\b|broth|stock/.test(n)) { pack=1000; label='carton'; }
+    else if (/cream/.test(n)) { pack=200; label='pot'; }
+    else if (/\boil\b/.test(n)) { pack=500; label='bottle'; }
+    else if (/wine|vinegar|extract|espresso/.test(n)) { pack=250; label='bottle'; }
+    else if (/soy sauce|sriracha|worcestershire|syrup|sauce/.test(n)) { pack=250; label='bottle'; }
+    else { pack=500; label='bottle'; }
+  } else { // 100g
+    if (/protein powder/.test(n)) { pack=500; label='tub'; }
+    else if (/fresh (basil|mint|parsley|coriander|thyme|dill|ginger)|flat-leaf parsley|arugula|\bspinach\b|\bkale\b/.test(n)) { pack=30; label='bunch'; }
+    else if (/salt|pepper|paprika|cumin|cinnamon|oregano|nutmeg|powder|flakes|seasoning|baking|bicarbonate|corn ?starch|cocoa|curry|chili|masala|turmeric|coriander|dried (thyme|basil|oregano)|italian season/.test(n) && !/chickpea|noodle/.test(n)) { pack=45; label='jar'; }
+    else if (/flour|\bsugar\b/.test(n)) { pack=1000; label='bag'; }
+    else if (/rice|pasta|spaghetti|penne|orzo|ditalini|noodle|oats|couscous|quinoa|lentils|breadcrumb|granola|muesli/.test(n)) { pack=500; label='pack'; }
+    else if (/(kidney|black|cannellini|butter|baked|broad|pinto|white) beans?|chickpea|crushed tomato|diced tomato|roasted tomato|tomato paste|tomato sauce|marinara|passata|beetroot|sweetcorn/.test(n)) { pack=400; label='can'; }
+    else if (/cheese|feta|mozzarella|parmesan|pecorino|gruy|cheddar|mascarpone|cotija|halloumi|paneer/.test(n)) { pack=200; label='pack'; }
+    else if (/butter/.test(n) && !/nut butter|peanut butter|almond butter/.test(n)) { pack=250; label='pack'; }
+    else if (/yogurt|hummus|pesto|tahini|mayonnaise|salsa|paste|mustard|jam|nut butter|peanut butter|almond butter|apple sauce|miso|olives/.test(n)) { pack=200; label='pot'; }
+    else if (/berries|strawberr|blueberr|grapes|cranberr/.test(n)) { pack=250; label='punnet'; }
+    else if (/chocolate|chips|walnuts|pine nuts|almond|coconut|chia|seeds/.test(n)) { pack=150; label='pack'; }
+    else if (/sorbet|ice cream/.test(n)) { pack=500; label='tub'; }
+    // proteins & loose produce (chicken, beef, tomato-by-weight, broccoli…) → null → by weight
+  }
+  if (!pack) return null;
+  return { pack, packEur: +(e.eur*pack/100).toFixed(2), label };
+}
+
 /* Browser global + Node export, so the app and the doc generator share one file. */
 if (typeof module !== 'undefined' && module.exports)
-  module.exports = { INGREDIENT_PRICES, UNIT_TO_BASE, estimateIngredientPrice, piecePriceOf };
+  module.exports = { INGREDIENT_PRICES, UNIT_TO_BASE, estimateIngredientPrice, piecePriceOf, packOf };
 if (typeof window !== 'undefined') {
   window.INGREDIENT_PRICES = INGREDIENT_PRICES;
   window.estimateIngredientPrice = estimateIngredientPrice;
   window.piecePriceOf = piecePriceOf;
+  window.packOf = packOf;
 }

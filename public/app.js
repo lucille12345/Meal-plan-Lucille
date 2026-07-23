@@ -398,6 +398,17 @@ const PANTRY_FALSE_MATCHES = {
   onion:  /spring onion|onion powder/,
   flour:  /flour tortilla/,
   garlic: /garlic powder/,
+  butter: /peanut butter|almond butter|nut butter/,
+};
+// V4: a generic pantry checkbox covers its whole GROUP — ticking "Spices" removes every spice jar,
+// "Olive oil" removes any oil, etc. Without this, the pack-priced staples (jars, bottles, bags)
+// never dropped off even when you said you already had them, so the weekly total stayed high.
+const PANTRY_GROUPS = {
+  spices: /paprika|cumin|cinnamon|oregano|nutmeg|turmeric|coriander|curry powder|chil(?:i|li) powder|garam masala|cayenne|dried (?:thyme|basil|oregano|rosemary)|italian season|taco season|red pepper flakes|garlic powder|onion powder|allspice|ground ginger|cloves|baking powder|baking soda|bicarbonate|cumin seeds|\bthyme\b|smoked paprika|sea salt/,
+  'olive oil': /\boil\b/, 'cooking oil': /\boil\b/,
+  flour: /flour/, sugar: /sugar/,
+  pasta: /pasta|spaghetti|penne|orzo|ditalini|noodle|macaroni/,
+  butter: /\bbutter\b/,
 };
 function pantryHas(name){
   const list=state.profile?.pantry||[]; if(!list.length)return false;
@@ -406,6 +417,8 @@ function pantryHas(name){
     const t=term.toLowerCase();
     const exclude=PANTRY_FALSE_MATCHES[t];
     if(exclude&&exclude.test(n))return false;
+    const grp=PANTRY_GROUPS[t];
+    if(grp&&grp.test(n))return true;
     return n.includes(t)||t.includes(n);
   });
 }
@@ -980,48 +993,85 @@ function openFeedback(){
   };
 }
 
-// V4 §4.3: whole-item rounding happens HERE, after every recipe's quantity has been summed —
-// never inside estimateIngredientPrice. Three recipes each using half an onion sum to 1.5
-// onions → you buy 2 (€3.00), not 3 rounded-per-row (€4.50) and not 1.5 (€2.25). Only
-// piece-priced table items round; weight/volume and AI-priced rows keep their exact price.
-function finalizeLine(line){
-  const pp = (typeof piecePriceOf==='function') ? piecePriceOf(line) : null;
-  // Round only when the table prices this as whole items AND no AI price was supplied.
-  if(pp && !line._hasAIPrice){
-    const bought=Math.max(1,Math.ceil(line.qty - 1e-9));
-    line.boughtQty=bought;
-    if(bought > line.qty + 1e-9) line.roundedFrom=line.qty;   // flag so the UI can say "(you need 1½)"
-    line.price=pp.eur*bought;
-  }
-  return line;
+// V4 "true till total": the shopping list charges for the whole PACK you actually buy, not the
+// grams a recipe uses — you use 1 tsp of cinnamon but buy the €1.50 jar, a splash of oil but buy
+// the bottle. Aggregation is by ingredient NAME across units (converting to g/ml), which ALSO
+// merges the old duplicate rows (olive oil that appeared as both tbsp and ml). A small surplus is
+// added so quantities aren't cut to the exact gram (Lucille: recipe×people + a little extra).
+// Proteins & loose produce have no pack → still charged by weight, which is realistic.
+const SHOP_SURPLUS = 1.08;
+function ingClass(name){
+  const e = (typeof INGREDIENT_PRICES!=='undefined') ? INGREDIENT_PRICES[String(name||'').trim().toLowerCase()] : null;
+  if(!e) return {kind:'unknown', e:null};
+  if(e.per==='piece'||e.per==='clove'||e.per==='slice'||e.per==='stalk') return {kind:'piece', e};
+  return {kind:'wv', e, base:(e.per==='100ml'?'ml':'g')};
 }
-function addTo(map,key,ing,pr){
-  if(map.has(key)){ const l=map.get(key); l.qty+=ing.qty; l._sumPrice+=pr; if(typeof ing.price==='number')l._hasAIPrice=true; }
-  else map.set(key,{...ing,_sumPrice:pr,_hasAIPrice:(typeof ing.price==='number'),price:pr});
+// pretty grams/ml (1200 g → "1.2 kg", 1000 ml → "1 L")
+function fmtBase(q,base){ q=Math.round(q);
+  if(base==='ml') return q>=1000?(q%1000?(q/1000).toFixed(1):(q/1000))+' L':q+' ml';
+  return q>=1000?(q%1000?(q/1000).toFixed(1):(q/1000))+' kg':q+' g'; }
+function aggAdd(map,ing){
+  const key=String(ing.name||'').toLowerCase();
+  let l=map.get(key);
+  if(!l){ l={key, name:ing.name, category:ing.category||'Other', unit:ing.unit||'', baseQty:0, pieceQty:0, rawQty:0, aiSum:0, hasAI:false}; map.set(key,l); }
+  const cls=ingClass(ing.name); const qty=Number(ing.qty)||0;
+  const aiP=(typeof ing.price==='number'&&isFinite(ing.price))?ing.price:null;
+  if(aiP!=null){ l.hasAI=true; l.aiSum+=aiP; }
+  if(cls.kind==='piece') l.pieceQty+=qty;
+  else if(cls.kind==='wv'){ const u=(ing.unit||'').trim().toLowerCase(); const f=(typeof UNIT_TO_BASE!=='undefined')?UNIT_TO_BASE[u]:null; l.baseQty += qty*(f!=null?f:1); }
+  else l.rawQty+=qty;
+  return l;
+}
+// Price one aggregated line and set its display text. Piece → ceil to whole items; packable
+// weight/volume → ceil to whole packs; loose weight/volume → by weight; AI-priced → trust the sum.
+function sealLine(l){
+  const cls=ingClass(l.name);
+  if(l.hasAI){
+    l.price=l.aiSum;
+    l.buyText = cls.kind==='piece' ? String(Math.round(l.pieceQty*10)/10)
+              : cls.kind==='wv'   ? fmtBase(l.baseQty*SHOP_SURPLUS, cls.base)
+              : (Math.round(l.rawQty*10)/10)+(l.unit?(' '+l.unit):'');
+    return l;
+  }
+  if(cls.kind==='piece'){
+    // ceil already rounds up to whole items (buy 2 for 1½) — do NOT also apply the surplus %,
+    // or an exact 1 becomes 1.08 → 2 and you over-buy a whole piece every time.
+    const need=l.pieceQty; const bought=Math.max(1,Math.ceil(need - 1e-9));
+    l.price=+(cls.e.eur*bought).toFixed(2); l.buyText=String(bought);
+    const nf=niceFrac(need);
+    if(bought>need+0.15 && nf!=='0') l.note=`you need ${nf}`;   // skip the note for barely-used items
+    return l;
+  }
+  if(cls.kind==='wv'){
+    const need=l.baseQty*SHOP_SURPLUS;
+    const pk=(typeof packOf==='function')?packOf(l.name):null;
+    if(pk){
+      const packs=Math.max(1,Math.ceil(need/pk.pack - 1e-9));
+      l.price=+(packs*pk.packEur).toFixed(2);
+      l.buyText=`${packs} ${pk.label}${packs>1?'s':''}`;
+    } else { l.price=+(cls.e.eur*need/100).toFixed(2); l.buyText=fmtBase(need,cls.base); }
+    return l;
+  }
+  l.price=0; l.buyText=(Math.round(l.rawQty*10)/10)+(l.unit?(' '+l.unit):'');   // unknown → no price
+  return l;
 }
 function buildShoppingList(){
-  const pantry=new Map(); const fresh={}; let anyPrice=false; let skipped=0;
+  const pantry=new Map(); const fresh={}; let skipped=0;
   state.week.forEach((day,di)=>{
     day.meals.forEach(meal=>{
       if(meal.rejected||!meal.recipe||meal.recipe.isLeftover)return;   // leftovers: nothing new to buy
       meal.recipe.ingredients.forEach(ing=>{
-        if(pantryHas(ing.name)){ skipped++; return; }                  // already in your pantry
-        const key=itemKey(ing);
-        const pr=priceOf(ing); if(pr>0)anyPrice=true;
-        if(ing.buyDayBefore){
-          const bd=buyDayFor(di); (fresh[bd]??=new Map());
-          addTo(fresh[bd],key,ing,pr);
-        } else addTo(pantry,key,ing,pr);
+        if(pantryHas(ing.name)){ skipped++; return; }                  // already in your cupboard
+        if(ing.buyDayBefore){ const bd=buyDayFor(di); (fresh[bd]??=new Map()); aggAdd(fresh[bd],ing); }
+        else aggAdd(pantry,ing);
       });
     });
   });
-  // Finalise each aggregated line (exact-sum by default, whole-item rounded for piece items),
-  // then total from the finalised lines so the headline matches what's on the list.
-  let total=0;
-  const seal=l=>{ l.price=l._sumPrice; finalizeLine(l); total+=l.price; return l; };
+  let total=0, anyPrice=false;
+  const seal=l=>{ sealLine(l); total+=l.price||0; if(l.price>0)anyPrice=true; return l; };
   const pantryLines=[...pantry.values()].map(seal);
   for(const bd in fresh) fresh[bd]=new Map([...fresh[bd]].map(([k,l])=>[k,seal(l)]));
-  return { pantry:pantryLines, fresh, total, anyPrice, skipped };
+  return { pantry:pantryLines, fresh, total:+total.toFixed(2), anyPrice, skipped };
 }
 
 /* ============================================================
@@ -1393,7 +1443,10 @@ const Q_STEPS = 8;   // Welcome · You · Rhythm · Goal · Tastes · Kitchen ·
 function renderProfile(){
   const d={weight:'',height:'',age:'',gender:'female',lifeStage:'working',goal:'maintain',
     sport:'none',frequency:0,cookingLevel:5,timePerMeal:30,people:1,name:'',
-    breakfastPref:'surprise',cuisines:[],dislikes:[],allergies:[],pantry:[],leftovers:false,
+    breakfastPref:'surprise',cuisines:[],dislikes:[],allergies:[],
+    // Assume the usual cupboard staples are already owned so the shopping total isn't inflated by
+    // a bottle of oil + every spice jar on day one (you can untick any you don't have).
+    pantry:['Salt','Pepper','Olive oil','Cooking oil','Butter','Flour','Sugar','Spices'],leftovers:false,
     avoidText:'',budget:'',budgetPerDay:12,city:'',mealSplit:{...DEFAULT_SPLIT}};
   const p={...d,...(state.profile||{})};
   const split={...DEFAULT_SPLIT,...(p.mealSplit||{})};
@@ -2479,7 +2532,7 @@ function shoppingBodyHtml(){
         <div class="big">€${total.toFixed(2)}</div>
         <div class="sub" style="margin:4px 0 0">≈ €${perDay.toFixed(2)} / day</div></div>
       ${pill}</div>
-      <p class="sub" style="margin:8px 0 0">Estimated — varies by shop.</p>`;
+      <p class="sub" style="margin:8px 0 0">Full price of every pack you'd buy — spices, oil and staples last well beyond this week. Varies by shop.</p>`;
   }
   return `
     <div class="card">
@@ -2517,20 +2570,16 @@ function bindShopping(){
 }
 // V4 §4.3: a piece item rounded up to whole items shows the whole count you actually buy,
 // with a quiet "(you need 1½)" so the maths doesn't look wrong.
-function niceFrac(q){ const r=Math.round(q*100)/100; const f=r-Math.floor(r);
+function niceFrac(q){ const r=Math.round(q*2)/2; const f=r-Math.floor(r);   // round to nearest ½ for a clean note
   if(Math.abs(f-0.5)<0.02) return (Math.floor(r)>0?Math.floor(r):'')+'½';
-  if(Math.abs(f-0.25)<0.02) return (Math.floor(r)>0?Math.floor(r):'')+'¼';
-  if(Math.abs(f-0.75)<0.02) return (Math.floor(r)>0?Math.floor(r):'')+'¾';
-  return String(r); }
+  return String(Math.round(r)); }
 function itemRow(i){
-  const key=itemKey(i);
+  const key=i.key||itemKey(i);
   const done=!!state.checked[key];
   const pr=(typeof i.price==='number'&&i.price>0)?`<span class="pr">€${i.price.toFixed(2)}</span>`:'<span class="pr"></span>';
-  const rounded = typeof i.boughtQty==='number';
-  const qtyTxt = rounded ? formatQty(i.boughtQty,i.unit) : formatQty(i.qty,i.unit);
-  const note = (rounded && i.roundedFrom!=null) ? `<span class="qty-note">you need ${niceFrac(i.roundedFrom)}</span>` : '';
+  const note = i.note ? `<span class="qty-note">${i.note}</span>` : '';
   return `<label class="item ${done?'checked':''}"><input type="checkbox" data-check="${key}" ${done?'checked':''}><span class="nm">${i.name}</span>
-    <span class="qty">${qtyTxt}${note}</span>${pr}</label>`;
+    <span class="qty">${i.buyText||''}${note}</span>${pr}</label>`;
 }
 function bindChecks(){
   app.querySelectorAll('[data-check]').forEach(cb=>{
@@ -2549,14 +2598,14 @@ function copyListText(){
   const cats={}; pantry.forEach(i=>{(cats[i.category]??=[]).push(i);});
   Object.keys(cats).forEach(cat=>{
     out+=`\n${cat}:\n`;
-    cats[cat].sort((a,b)=>a.name.localeCompare(b.name)).forEach(i=>{ out+=`  [ ] ${i.name} — ${formatQty(i.qty,i.unit)}\n`; });
+    cats[cat].sort((a,b)=>a.name.localeCompare(b.name)).forEach(i=>{ out+=`  [ ] ${i.name} — ${i.buyText||formatQty(i.qty,i.unit)}\n`; });
   });
   const freshDays=Object.keys(fresh).sort((a,b)=>buyOrder.indexOf(a)-buyOrder.indexOf(b));
   if(freshDays.length){
     out+='\n— Buy fresh, day by day —\n';
     freshDays.forEach(bd=>{
       out+=`\n${bd}:\n`;
-      [...fresh[bd].values()].sort((a,b)=>a.name.localeCompare(b.name)).forEach(i=>{ out+=`  [ ] ${i.name} — ${formatQty(i.qty,i.unit)}\n`; });
+      [...fresh[bd].values()].sort((a,b)=>a.name.localeCompare(b.name)).forEach(i=>{ out+=`  [ ] ${i.name} — ${i.buyText||formatQty(i.qty,i.unit)}\n`; });
     });
   }
   if(anyPrice)out+=`\nEstimated total: €${total.toFixed(2)}\n`;
