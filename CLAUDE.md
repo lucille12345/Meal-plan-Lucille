@@ -109,6 +109,37 @@ leftover parameter, not the brand — leave it.
 >   Every dish that appears in the app has a real, eye-checked, 200-verified photo.
 > - **Deliberately NOT done** (same as V3): photo mode for "Add a dish I love"; multi-week storage
 >   (week arrows still disabled); unit consolidation on the shopping list; Google Calendar OAuth.
+>
+> ## 🆕 V4.1 — HEARTIER DISHES + CALORIE-AWARE SELECTION (2026-07-23), COMMITTED, NOT PUSHED
+> From Lucille: dishes felt "trop léger"; wants goal to really drive calories (lose→lighter,
+> gain→lots of meat/calories), more hearty dishes, and a user-modifiable course count where one
+> hearty dish ≈ three lighter dishes (same total). All done, `sw` `CACHE` → **`foodie-shell-v9`**.
+> - **`pickMeal` is now calorie-aware** (was pure random — the root cause of "too light"): a new
+>   `weightedPick(list,target)` biases toward dishes near a per-dish kcal target with a **cubic**
+>   falloff (scale 200) + a mild ×1.1 curated nudge. No target (incomplete profile) → unchanged
+>   §0 curated-first path. **Key gotcha:** the old `preferCurated` ran BEFORE any calorie filter,
+>   so it stripped the new hearty *legacy* mains whenever a lighter curated dish existed — that's
+>   why a first hard-band attempt did nothing. Weighted pick over the FULL eligible pool fixes it.
+> - **Per-course calorie split** (`COURSE_WEIGHT` main 1.0 / starter .35 / dessert .4, normalised
+>   per meal via `courseTargets`): 1 course → the dish targets 100% of the meal (hearty); 3 courses
+>   → each targets its share (lighter). Implements Lucille's "un plat lourd = entrée+plat+dessert".
+> - **User-modifiable course count**: new `profile.coursePref` (`auto`|`1`|`2`|`3`), a segmented
+>   control on the questionnaire's Numbers step ("Dishes per lunch & dinner"). `coursesFor(profile)`
+>   replaces `coursesForGoal` in `generateWeek`; `auto` keeps the goal default.
+> - **14 hearty dishes added** to the legacy pool in `app.js` (all with explicit `contains[]` so the
+>   allergen filter is exact): 7 big breakfasts (600–760 kcal — the old pool capped at 470, the
+>   worst "too light" offender), 5 hearty dinners + 3 hearty lunches (820–1050 kcal, meat-forward).
+>   New meat/ingredient prices added to `ingredient-prices.js` (beef steak, pork loin, lamb,
+>   chorizo, sausages, burger bun, fries, baked beans, couscous) → **still 0 of 244 ingredients €0**.
+> - **Verified (AI off, 8-week samples):** gain ≈ **2528 kcal/day** vs lose ≈ **1905** (correct
+>   direction, ~600/day gap); gain breakfast 564 vs lose 485; a **1-dish** meal's main is heavier
+>   than the same goal's **3-dish** main; `coursePref:'1'`→`['main']`, `'3'`→starter+main+dessert;
+>   **0 allergy leaks, 0 duplicates**; shopping prices work (gain week ≈ €94); course selector
+>   renders + persists; 0 console errors.
+> - **Known limit (honest):** a heavy-gain day still lands ~2500 vs a ~3300 target — no single dish
+>   is 1000+ kcal and no-repeat caps how many hearty dishes fit a week. Selection now pulls the
+>   heaviest available; fully closing the gap would need **portion scaling** (deliberately NOT done
+>   — it touches per-person semantics + shopping quantities and is risky). Flag for a future phase.
 
 **Code:** V2 (Phases 1–10a) is **DEPLOYED AND LIVE** as of 2026-07-20. Lucille pushed `main` via
 GitHub Desktop and Render auto-deployed.

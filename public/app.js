@@ -70,6 +70,45 @@ const RECIPES = [
     {name:'Risotto rice',qty:90,unit:'g',category:'Pantry',buyDayBefore:false},{name:'Peas',qty:120,unit:'g',category:'Frozen',buyDayBefore:false},{name:'Parmesan',qty:30,unit:'g',category:'Dairy',buyDayBefore:false},{name:'Lemon',qty:0.5,unit:'',category:'Produce',buyDayBefore:false}],steps:['Toast the rice, then add stock a ladle at a time.','Stir in peas near the end.','Finish with parmesan and lemon zest.']},
   {id:'d11',type:'dinner',name:'Turkey meatballs & pasta',desc:'Turkey mince, tomato, pasta',time:30,difficulty:2,emoji:'🍝',img:'pasta',tags:[],kcal:700,protein:45,ingredients:[
     {name:'Turkey mince',qty:150,unit:'g',category:'Meat & Fish',buyDayBefore:true},{name:'Chopped tomatoes',qty:1,unit:'can',category:'Pantry',buyDayBefore:false},{name:'Pasta',qty:100,unit:'g',category:'Pantry',buyDayBefore:false}],steps:['Roll the mince into small meatballs and brown them.','Add tomatoes, simmer 15 min.','Serve over pasta.']},
+  // --- V4 hearty mains: high-calorie, protein-heavy, filling enough to stand alone as a whole meal
+  //     (for muscle-gain and for the "just one dish" course setting). All carry contains[] so the
+  //     allergen filter is exact, not guessed from the name. ---
+  {id:'d12',type:'dinner',name:'Steak, potatoes & green beans',desc:'Seared steak, buttery potatoes, green beans',time:30,difficulty:3,emoji:'🥩',img:'steak,beef',tags:[],contains:['dairy'],kcal:900,protein:52,ingredients:[
+    {name:'Beef steak',qty:220,unit:'g',category:'Meat & Fish',buyDayBefore:true},{name:'Potato',qty:3,unit:'',category:'Produce',buyDayBefore:false},{name:'Green beans',qty:120,unit:'g',category:'Produce',buyDayBefore:true},{name:'Butter',qty:15,unit:'g',category:'Dairy',buyDayBefore:false}],steps:['Boil the potatoes until tender, then toss in butter.','Sear the steak 3-4 min a side; rest it.','Steam the green beans; plate everything together.']},
+  {id:'d13',type:'dinner',name:'Beef & bean chilli with rice',desc:'Beef mince, kidney beans, tomato, rice',time:35,difficulty:2,emoji:'🌶️',img:'chili,beef',tags:[],contains:[],kcal:830,protein:47,ingredients:[
+    {name:'Beef mince',qty:180,unit:'g',category:'Meat & Fish',buyDayBefore:true},{name:'Kidney beans',qty:150,unit:'g',category:'Pantry',buyDayBefore:false},{name:'Chopped tomatoes',qty:1,unit:'can',category:'Pantry',buyDayBefore:false},{name:'Rice',qty:90,unit:'g',category:'Pantry',buyDayBefore:false}],steps:['Brown the mince with chilli spices.','Add tomatoes and beans; simmer 20 min.','Serve over rice.']},
+  {id:'d14',type:'dinner',name:'Chicken & chorizo rice',desc:'Chicken thighs, chorizo, peppers, rice',time:35,difficulty:3,emoji:'🍗',img:'chicken,rice',tags:[],contains:[],kcal:900,protein:50,ingredients:[
+    {name:'Chicken thighs',qty:180,unit:'g',category:'Meat & Fish',buyDayBefore:true},{name:'Chorizo',qty:60,unit:'g',category:'Meat & Fish',buyDayBefore:false},{name:'Bell pepper',qty:1,unit:'',category:'Produce',buyDayBefore:false},{name:'Rice',qty:90,unit:'g',category:'Pantry',buyDayBefore:false}],steps:['Brown the chicken and sliced chorizo.','Add peppers and rice with stock.','Simmer covered until the rice is cooked.']},
+  {id:'d15',type:'dinner',name:'Sausage & mash',desc:'Sausages, mashed potato, onion gravy',time:30,difficulty:2,emoji:'🌭',img:'sausage',tags:[],contains:['gluten','dairy'],kcal:950,protein:38,ingredients:[
+    {name:'Sausages',qty:3,unit:'',category:'Meat & Fish',buyDayBefore:true},{name:'Potato',qty:3,unit:'',category:'Produce',buyDayBefore:false},{name:'Onion',qty:1,unit:'',category:'Produce',buyDayBefore:false},{name:'Butter',qty:15,unit:'g',category:'Dairy',buyDayBefore:false}],steps:['Grill the sausages until golden.','Boil and mash the potatoes with butter.','Soften sliced onion into a quick gravy; serve over the mash.']},
+  {id:'d16',type:'dinner',name:'Salmon, potatoes & greens',desc:'Salmon fillet, new potatoes, spinach',time:25,difficulty:2,emoji:'🐟',img:'salmon,fish',tags:['fish'],contains:['fish','dairy'],kcal:820,protein:46,ingredients:[
+    {name:'Salmon fillet',qty:180,unit:'g',category:'Meat & Fish',buyDayBefore:true},{name:'Potato',qty:3,unit:'',category:'Produce',buyDayBefore:false},{name:'Spinach',qty:80,unit:'g',category:'Produce',buyDayBefore:true},{name:'Butter',qty:10,unit:'g',category:'Dairy',buyDayBefore:false}],steps:['Roast the salmon 12-15 min.','Boil the potatoes.','Wilt the spinach in butter; plate together.']},
+  {id:'l11',type:'lunch',name:'Double beef burger & fries',desc:'Beef patties, bun, cheese, fries',time:25,difficulty:2,emoji:'🍔',img:'beef',tags:[],contains:['gluten','dairy'],kcal:1050,protein:48,ingredients:[
+    {name:'Beef mince',qty:200,unit:'g',category:'Meat & Fish',buyDayBefore:true},{name:'Burger bun',qty:1,unit:'',category:'Bakery',buyDayBefore:false},{name:'Cheese',qty:30,unit:'g',category:'Dairy',buyDayBefore:false},{name:'Fries',qty:200,unit:'g',category:'Frozen',buyDayBefore:false}],steps:['Shape two patties and sear them hard.','Bake or fry the fries until crisp.','Build the burger with melted cheese in the bun.']},
+  {id:'l12',type:'lunch',name:'Steak burrito bowl',desc:'Beef strips, rice, black beans, avocado',time:25,difficulty:2,emoji:'🌯',img:'burrito,beef',tags:[],contains:[],kcal:900,protein:50,ingredients:[
+    {name:'Beef strips',qty:160,unit:'g',category:'Meat & Fish',buyDayBefore:true},{name:'Rice',qty:90,unit:'g',category:'Pantry',buyDayBefore:false},{name:'Black beans',qty:120,unit:'g',category:'Pantry',buyDayBefore:false},{name:'Avocado',qty:1,unit:'',category:'Produce',buyDayBefore:true}],steps:['Sear the beef strips with spices.','Warm the rice and black beans.','Bowl it up and top with sliced avocado.']},
+  {id:'l13',type:'lunch',name:'Pork loin, rice & veg',desc:'Pork loin, rice, mixed vegetables',time:30,difficulty:2,emoji:'🍖',img:'rice',tags:[],contains:[],kcal:880,protein:52,ingredients:[
+    {name:'Pork loin',qty:180,unit:'g',category:'Meat & Fish',buyDayBefore:true},{name:'Rice',qty:90,unit:'g',category:'Pantry',buyDayBefore:false},{name:'Mixed veg',qty:120,unit:'g',category:'Frozen',buyDayBefore:false}],steps:['Sear the pork loin, then finish in the oven.','Cook the rice.','Steam the mixed veg; slice the pork and serve.']},
+  // hearty breakfasts (the old pool capped at ~470 kcal — far too light for a muscle-gain morning)
+  {id:'b13',type:'breakfast',name:'Big cooked breakfast',desc:'Eggs, bacon, sausage, beans, toast',time:20,difficulty:2,emoji:'🍳',img:'egg',tags:[],contains:['gluten'],kcal:760,protein:38,ingredients:[
+    {name:'Eggs',qty:3,unit:'',category:'Dairy',buyDayBefore:false},{name:'Bacon',qty:60,unit:'g',category:'Meat & Fish',buyDayBefore:true},{name:'Sausages',qty:2,unit:'',category:'Meat & Fish',buyDayBefore:true},{name:'Baked beans',qty:150,unit:'g',category:'Pantry',buyDayBefore:false},{name:'Bread',qty:2,unit:'slices',category:'Bakery',buyDayBefore:true}],steps:['Fry the bacon and sausages.','Fry or scramble the eggs; warm the beans.','Serve with toast.']},
+  {id:'b14',type:'breakfast',name:'Steak & eggs',desc:'Minute steak, eggs, avocado',time:15,difficulty:2,emoji:'🥩',img:'steak,egg',tags:[],contains:[],kcal:700,protein:48,ingredients:[
+    {name:'Beef steak',qty:150,unit:'g',category:'Meat & Fish',buyDayBefore:true},{name:'Eggs',qty:2,unit:'',category:'Dairy',buyDayBefore:false},{name:'Avocado',qty:1,unit:'',category:'Produce',buyDayBefore:true}],steps:['Sear the steak to your liking; rest it.','Fry the eggs.','Serve with sliced avocado.']},
+  {id:'b15',type:'breakfast',name:'Protein oats, peanut butter & banana',desc:'Oats, milk, protein, peanut butter, banana',time:8,difficulty:1,emoji:'🥣',img:'oatmeal',tags:['vegetarian'],contains:['dairy','nuts'],kcal:680,protein:40,ingredients:[
+    {name:'Oats',qty:80,unit:'g',category:'Pantry',buyDayBefore:false},{name:'Milk',qty:300,unit:'ml',category:'Dairy',buyDayBefore:false},{name:'Protein powder',qty:1,unit:'scoop',category:'Pantry',buyDayBefore:false},{name:'Peanut butter',qty:30,unit:'g',category:'Pantry',buyDayBefore:false},{name:'Banana',qty:1,unit:'',category:'Produce',buyDayBefore:false}],steps:['Cook the oats with milk.','Stir in the protein powder.','Top with peanut butter and sliced banana.']},
+  {id:'b16',type:'breakfast',name:'Breakfast burrito',desc:'Eggs, beans, cheese, tortilla',time:15,difficulty:2,emoji:'🌯',img:'burrito',tags:['vegetarian'],contains:['gluten','dairy'],kcal:650,protein:32,ingredients:[
+    {name:'Eggs',qty:3,unit:'',category:'Dairy',buyDayBefore:false},{name:'Black beans',qty:120,unit:'g',category:'Pantry',buyDayBefore:false},{name:'Cheese',qty:30,unit:'g',category:'Dairy',buyDayBefore:false},{name:'Tortilla wrap',qty:1,unit:'',category:'Bakery',buyDayBefore:false}],steps:['Scramble the eggs.','Warm the beans and cheese.','Wrap it all in the tortilla.']},
+  // a couple more hearty mains so a gain / single-dish week has enough variety for the no-repeat rule
+  {id:'d17',type:'dinner',name:'Lamb & couscous',desc:'Lamb, couscous, roasted vegetables',time:35,difficulty:3,emoji:'🍖',img:'rice',tags:[],contains:['gluten'],kcal:880,protein:48,ingredients:[
+    {name:'Lamb',qty:180,unit:'g',category:'Meat & Fish',buyDayBefore:true},{name:'Couscous',qty:90,unit:'g',category:'Pantry',buyDayBefore:false},{name:'Bell pepper',qty:1,unit:'',category:'Produce',buyDayBefore:true},{name:'Zucchini',qty:1,unit:'',category:'Produce',buyDayBefore:true}],steps:['Sear the lamb, then roast with the vegetables.','Steam the couscous.','Slice the lamb and serve over the couscous.']},
+  {id:'l14',type:'lunch',name:'Chicken, bacon & avocado bowl',desc:'Chicken, bacon, rice, avocado',time:25,difficulty:2,emoji:'🥑',img:'chicken,rice',tags:[],contains:[],kcal:900,protein:55,ingredients:[
+    {name:'Chicken breast',qty:180,unit:'g',category:'Meat & Fish',buyDayBefore:true},{name:'Bacon',qty:40,unit:'g',category:'Meat & Fish',buyDayBefore:true},{name:'Rice',qty:90,unit:'g',category:'Pantry',buyDayBefore:false},{name:'Avocado',qty:1,unit:'',category:'Produce',buyDayBefore:true}],steps:['Grill the chicken and bacon.','Cook the rice.','Bowl it up with sliced avocado.']},
+  {id:'b17',type:'breakfast',name:'Ham & cheese omelette with toast',desc:'Eggs, ham, cheese, toast',time:12,difficulty:2,emoji:'🍳',img:'omelette',tags:[],contains:['gluten','dairy'],kcal:640,protein:42,ingredients:[
+    {name:'Eggs',qty:3,unit:'',category:'Dairy',buyDayBefore:false},{name:'Ham',qty:60,unit:'g',category:'Meat & Fish',buyDayBefore:true},{name:'Cheese',qty:30,unit:'g',category:'Dairy',buyDayBefore:false},{name:'Bread',qty:2,unit:'slices',category:'Bakery',buyDayBefore:true}],steps:['Whisk the eggs; fill the omelette with ham and cheese.','Fold and cook through.','Serve with buttered toast.']},
+  {id:'b18',type:'breakfast',name:'Bagel with cream cheese & salmon',desc:'Bagel, cream cheese, smoked salmon',time:6,difficulty:1,emoji:'🥯',img:'bagel',tags:['fish'],contains:['gluten','dairy','fish'],kcal:600,protein:34,ingredients:[
+    {name:'Bagel',qty:1,unit:'',category:'Bakery',buyDayBefore:true},{name:'Cream cheese',qty:40,unit:'g',category:'Dairy',buyDayBefore:false},{name:'Salmon fillet',qty:80,unit:'g',category:'Meat & Fish',buyDayBefore:true}],steps:['Toast the bagel.','Spread with cream cheese.','Top with smoked salmon.']},
+  {id:'b19',type:'breakfast',name:'Peanut butter & banana toast',desc:'Thick toast, peanut butter, banana',time:5,difficulty:1,emoji:'🍌',img:'toast',tags:['vegetarian'],contains:['gluten','nuts'],kcal:620,protein:20,ingredients:[
+    {name:'Bread',qty:3,unit:'slices',category:'Bakery',buyDayBefore:true},{name:'Peanut butter',qty:40,unit:'g',category:'Pantry',buyDayBefore:false},{name:'Banana',qty:1,unit:'',category:'Produce',buyDayBefore:false}],steps:['Toast the bread.','Spread thickly with peanut butter.','Top with sliced banana.']},
 ];
 
 /* Starters (light) & desserts — courses for lunch/dinner (§3). Kept lighter than mains. */
@@ -174,7 +213,28 @@ function coursesForGoal(goal){
   if(goal==='lose') return ['main','dessert'];             // Feel light → main + light/fruit dessert
   return ['starter','main'];                               // Stay balanced → main + one side
 }
+// V4: the user can override how many courses a lunch/dinner has. 'auto' keeps the goal-based
+// default; '1'/'2'/'3' force main / main+dessert / starter+main+dessert. Fewer courses means each
+// dish is targeted at a bigger share of the meal's calories (see courseTargets) — so one dish is
+// hearty, three dishes are lighter, and the meal is equally filling either way (Lucille's request).
+function coursesFor(profile){
+  const pref=profile&&profile.coursePref;
+  if(pref==='1') return ['main'];
+  if(pref==='2') return ['main','dessert'];
+  if(pref==='3') return ['starter','main','dessert'];
+  return coursesForGoal(profile&&profile.goal);            // 'auto' / unset → goal default
+}
 const COURSE_LABEL = { starter:'Starter', main:'Main', dessert:'Dessert', single:'' };
+// How a meal's calorie budget is shared across its courses. Normalised per meal, so a single
+// main gets 100% (hearty), while starter+main+dessert splits it (each lighter).
+const COURSE_WEIGHT = { main:1.0, starter:0.35, dessert:0.4, single:1.0 };
+function courseTargets(courses,mealKcal){
+  if(!mealKcal||!courses||!courses.length) return {};
+  const sum=courses.reduce((s,c)=>s+(COURSE_WEIGHT[c]||1),0);
+  const out={};
+  courses.forEach(c=>{ out[c]=Math.round(mealKcal*(COURSE_WEIGHT[c]||1)/sum); });
+  return out;
+}
 
 /* ============================================================
    2. STATE
@@ -319,6 +379,7 @@ function migrateProfile(p){
   }
   if(!p.mealSplit) p.mealSplit={...DEFAULT_SPLIT};
   if(!p.breakfastPref) p.breakfastPref='surprise';
+  if(!p.coursePref) p.coursePref='auto';
   if(!Array.isArray(p.cuisines)) p.cuisines=[];
   return p;
 }
@@ -495,7 +556,11 @@ const preferCurated = list => {
   return c.length ? c : list;
 };
 // usedNames (lowercased dish names) enforces the hard "no dish twice a week" rule (§3) across ALL types.
-function pickMeal(type,profile,usedIds,usedNames){
+// V4: when targetKcal is given, bias selection toward dishes whose calories are close to it —
+// so a muscle-gain plan pulls heavier dishes and a lose-weight plan pulls lighter ones, and a
+// single-course meal pulls a hearty dish. Still random within the closest band, so weeks vary and
+// the no-repeat / curated-first / allergen rules are untouched.
+function pickMeal(type,profile,usedIds,usedNames,targetKcal){
   const pool=eligibleRecipes(type,profile);
   const nameFree=r=>!usedNames||!usedNames.has(r.name.toLowerCase());
   // prefer recipes that are both unused-this-type AND name-unique across the whole week
@@ -504,11 +569,33 @@ function pickMeal(type,profile,usedIds,usedNames){
   if(!choices.length)choices=pool.filter(r=>!usedIds.has(r.id));
   if(!choices.length)choices=pool;
   if(!choices.length)return null;
-  // favorites get first pick when available; otherwise curated database dishes are preferred
-  // over the legacy pool (§0 precedence rule: the database always comes before Gemini/legacy).
+  // favorites get first pick when available.
   const favFresh=choices.filter(r=>String(r.id).startsWith('fav'));
-  const from=(favFresh.length&&Math.random()<0.5)?favFresh:preferCurated(choices);
+  if(favFresh.length&&Math.random()<0.5) return favFresh[Math.floor(Math.random()*favFresh.length)];
+  // With a calorie target (profile complete): weighted pick blending calorie-closeness with a
+  // gentle curated nudge — so a hearty dish wins for a high target without excluding it the way a
+  // hard curated-first filter did, while variety and no-repeat are preserved. Without a target,
+  // keep the original §0 curated-first behaviour unchanged.
+  if(targetKcal>0) return weightedPick(choices,targetKcal);
+  const from=preferCurated(choices);
   return from[Math.floor(Math.random()*from.length)];
+}
+// Pick one dish, weighting each by how close its calories are to the target (closer = likelier)
+// and giving curated/user dishes a mild bonus (§0 precedence, softened to a nudge).
+function weightedPick(list,target){
+  const scale=200;   // kcal: how quickly weight falls off as a dish gets further from target
+  const w=list.map(r=>{
+    // cubic falloff: dishes near the target dominate, far dishes fade fast (so a high target
+    // really pulls the hearty dishes and a low target really pulls the light ones).
+    let x=(typeof r.kcal==='number')?1/(1+Math.pow(Math.abs(r.kcal-target)/scale,3)):0.15;
+    if(isCurated(r)||isUserDish(r)) x*=1.1;   // mild curated nudge, small enough not to override the goal
+    return x;
+  });
+  let total=w.reduce((s,x)=>s+x,0);
+  if(!(total>0)) return list[Math.floor(Math.random()*list.length)];
+  let r=Math.random()*total;
+  for(let i=0;i<list.length;i++){ r-=w[i]; if(r<=0) return list[i]; }
+  return list[list.length-1];
 }
 function scaleRecipe(r,n){
   if(!r||n===1)return r?{...r,ingredients:(r.ingredients||[]).map(i=>({...i}))}:r;
@@ -520,18 +607,22 @@ function generateWeek(profile){
   const week=[];
   const used={breakfast:new Set(),lunch:new Set(),dinner:new Set(),starter:new Set(),dessert:new Set()};
   const usedNames=new Set();
-  const courses=coursesForGoal(profile.goal);
-  const addSlot=(meals,mealType,course)=>{
+  const courses=coursesFor(profile);                // V4: user-overridable course count
+  const mealK=computeMealTargets(profile);          // per-meal kcal budgets (null if profile incomplete)
+  const addSlot=(meals,mealType,course,targetKcal)=>{
     // starters/desserts pick from their own pool; 'main' picks from the meal-type pool
     const role=course==='main'?mealType:course;
-    const r=pickMeal(role,profile,used[role],usedNames);
+    const r=pickMeal(role,profile,used[role],usedNames,targetKcal);
     if(r){ used[role].add(r.id); usedNames.add(r.name.toLowerCase()); }
     meals.push({type:mealType,course,recipe:scaleRecipe(r,n),rejected:false});
   };
   for(const day of DAYS){
     const meals=[];
-    addSlot(meals,'breakfast','main');              // breakfast stays single
-    for(const mealType of ['lunch','dinner']) for(const course of courses) addSlot(meals,mealType,course);
+    addSlot(meals,'breakfast','main',mealK?mealK.breakfast:0);   // breakfast stays single
+    for(const mealType of ['lunch','dinner']){
+      const targets=courseTargets(courses,mealK?mealK[mealType]:0);   // split this meal's kcal across its courses
+      for(const course of courses) addSlot(meals,mealType,course,targets[course]);
+    }
     week.push({day,meals});
   }
   return enforceNoRepeat(week,profile);
@@ -1395,6 +1486,14 @@ function renderProfile(){
         <input class="slider" id="q-split-lunch" type="range" min="20" max="55" value="${split.lunch}"></div>
       <div class="slider-block"><div class="sl-head"><b>Dinner</b><span class="sl-val" id="q-split-dinner-val"></span></div>
         <input class="slider" id="q-split-dinner" type="range" min="20" max="55" value="${split.dinner}"></div>
+      <div class="field" style="margin-top:6px">
+        <label>Dishes per lunch &amp; dinner</label>
+        <div class="q-why" style="margin-top:2px">Fewer dishes = each one heartier; more = each lighter. Same total either way.</div>
+        <div class="seg" id="q-course">
+          ${[['auto','Auto'],['1','1 dish'],['2','2 dishes'],['3','3 dishes']].map(([v,l])=>
+            `<button type="button" class="seg-btn ${(p.coursePref||'auto')===v?'on':''}" data-course="${v}">${l}</button>`).join('')}
+        </div>
+      </div>
       <div class="slider-block"><div class="sl-head"><b>Budget</b><span class="sl-val" id="q-budget-val">€${p.budgetPerDay} / day</span></div>
         <input class="slider" id="q-budget" type="range" min="5" max="40" value="${p.budgetPerDay}"></div>
       <div class="field" style="margin-top:16px"><label for="q-city">City <span class="hint">(optional — for prices; we assume Paris)</span></label>
@@ -1465,6 +1564,7 @@ function renderProfile(){
       timePerMeal:Number(val('q-time')),
       leftovers:document.getElementById('q-leftovers').checked,
       mealSplit:{ breakfast:Number(val('q-split-breakfast')), lunch:Number(val('q-split-lunch')), dinner:Number(val('q-split-dinner')) },
+      coursePref:document.querySelector('#q-course .seg-btn.on')?.dataset.course||'auto',
       budgetPerDay:bpd,
       budget:String(Math.round(bpd*7)),   // legacy weekly value keeps the shopping screen working until Phase 8
       city:val('q-city'),
@@ -1500,6 +1600,10 @@ function renderProfile(){
   // single-select chip group (breakfast); the rest are multi-select toggles
   app.querySelectorAll('#q-breakfast .chip').forEach(c=>c.onclick=()=>{
     app.querySelectorAll('#q-breakfast .chip').forEach(x=>x.classList.remove('selected')); c.classList.add('selected');
+  });
+  // V4: dishes-per-meal segmented control (single-select), then re-compute the numbers
+  app.querySelectorAll('#q-course .seg-btn').forEach(b=>b.onclick=()=>{
+    app.querySelectorAll('#q-course .seg-btn').forEach(x=>x.classList.remove('on')); b.classList.add('on'); persist();
   });
   ['#q-cuisines','#q-dislikes','#q-allergies','#q-pantry'].forEach(grp=>
     app.querySelectorAll(grp+' .chip').forEach(c=>c.onclick=()=>c.classList.toggle('selected')));

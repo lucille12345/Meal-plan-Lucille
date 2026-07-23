@@ -316,6 +316,17 @@ const INGREDIENT_PRICES = {
   /* frozen desserts — per 100 g (2 scoops ≈ 100 g via UNIT_TO_BASE) */
   'lemon sorbet':            {per:'100g',  eur:0.60},
   'mango sorbet':            {per:'100g',  eur:0.60},
+
+  /* ---------- V4 hearty-mains additions (meat for the higher-calorie / muscle-gain dishes) ---------- */
+  'beef steak':              {per:'100g',  eur:2.20},
+  'pork loin':               {per:'100g',  eur:1.30},
+  'lamb':                    {per:'100g',  eur:2.60},
+  'chorizo':                 {per:'100g',  eur:2.20},
+  'sausages':                {per:'piece', eur:0.70},
+  'burger bun':              {per:'piece', eur:0.40},
+  'fries':                   {per:'100g',  eur:0.30},
+  'baked beans':             {per:'100g',  eur:0.30},
+  'couscous':                {per:'100g',  eur:0.45},
 };
 
 /* ----------------------------------------------------------------------------

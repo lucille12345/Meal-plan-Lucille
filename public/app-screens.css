@@ -139,6 +139,11 @@ button.ghost.on { background: var(--tomato-wash); border-color: var(--tomato); c
 /* inline checkbox rows */
 .q-check { display: flex; align-items: flex-start; gap: 10px; font-weight: 400; margin: 0; cursor: pointer; }
 .q-check input { width: 18px; height: 18px; margin-top: 3px; accent-color: var(--basil); flex: none; }
+/* V4: dishes-per-meal segmented control */
+.seg { display: flex; gap: 6px; background: var(--surface-2); border-radius: var(--r-pill); padding: 4px; margin-top: 8px; }
+.seg-btn { flex: 1; border: none; background: transparent; padding: 9px 8px; border-radius: var(--r-pill); font-family: var(--font-ui);
+  font-weight: 600; font-size: var(--fs-sm); color: var(--muted); cursor: pointer; transition: background var(--dur) var(--ease), color var(--dur) var(--ease); }
+.seg-btn.on { background: var(--surface); color: var(--green-deep); box-shadow: var(--sh-1); }
 .q-util { margin-top: 24px; }
 
 /* numbers step: target banner + per-meal sliders */

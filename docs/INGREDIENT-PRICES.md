@@ -4,7 +4,7 @@
 > The source of truth is [`public/ingredient-prices.js`](../public/ingredient-prices.js).
 > Change a price there, then run `node tools/build-prices-md.js` to rebuild this page.
 
-**235 ingredients priced.** Covers 172 of the 172 distinct ingredients currently used by `recipes-db.js`.
+**244 ingredients priced.** Covers 172 of the 172 distinct ingredients currently used by `recipes-db.js`.
 
 ⚠️ **These are informed estimates, not live scraped prices** — a French supermarket
 (Carrefour / Leclerc / Intermarché), mid-range own-brand, 2026. They exist so the shopping
@@ -89,7 +89,7 @@ Always label them in the app as *"Estimated — varies by shop."* Gemini's own p
 | Spring Onions | per piece | €0.20 |
 | Yellow Onion | per piece | €0.30 |
 
-### Pantry (178)
+### Pantry (187)
 
 | Ingredient | Price basis | EUR |
 |---|---|---|
@@ -100,10 +100,12 @@ Always label them in the app as *"Estimated — varies by shop."* Gemini's own p
 | Asparagus | per 100 g | €1.60 |
 | Avocado Oil | per 100 ml | €1.50 |
 | Bagel | per piece | €0.50 |
+| Baked Beans | per 100 g | €0.30 |
 | Baking Powder | per 100 g | €0.80 |
 | Baking Soda | per 100 g | €0.30 |
 | Balsamic Vinegar | per 100 ml | €0.60 |
 | Basil Pesto | per 100 g | €1.40 |
+| Beef Steak | per 100 g | €2.20 |
 | Beef Strips | per 100 g | €1.40 |
 | Bicarbonate Of Soda | per 100 g | €0.30 |
 | Black Beans | per 100 g | €0.25 |
@@ -111,6 +113,7 @@ Always label them in the app as *"Estimated — varies by shop."* Gemini's own p
 | Bread | per slice | €0.10 |
 | Broccoli | per 100 g | €0.45 |
 | Brown Sugar | per 100 g | €0.18 |
+| Burger Bun | per piece | €0.40 |
 | Butternut Squash | per 100 g | €0.28 |
 | Canned Tuna | per piece | €0.95 |
 | Cannellini Beans | per 100 g | €0.25 |
@@ -123,6 +126,7 @@ Always label them in the app as *"Estimated — varies by shop."* Gemini's own p
 | Chickpeas | per 100 g | €0.22 |
 | Chili Powder | per 100 g | €3.00 |
 | Chopped Tomatoes | per piece | €0.70 |
+| Chorizo | per 100 g | €2.20 |
 | Cinnamon | per 100 g | €3.50 |
 | Clementine | per piece | €0.25 |
 | Cocoa Powder | per 100 g | €1.60 |
@@ -137,6 +141,7 @@ Always label them in the app as *"Estimated — varies by shop."* Gemini's own p
 | Corn Starch | per 100 g | €0.30 |
 | Cotija Cheese | per 100 g | €1.80 |
 | Cottage Cheese | per 100 g | €0.65 |
+| Couscous | per 100 g | €0.45 |
 | Crackers | per piece | €0.06 |
 | Cream | per 100 ml | €0.35 |
 | Crushed Tomatoes | per 100 g | €0.18 |
@@ -161,6 +166,7 @@ Always label them in the app as *"Estimated — varies by shop."* Gemini's own p
 | Flour | per 100 g | €0.10 |
 | Fresh Dill | per piece | €1.00 |
 | Fresh Thyme | per 100 g | €2.50 |
+| Fries | per 100 g | €0.30 |
 | Garam Masala | per 100 g | €3.50 |
 | Garlic Powder | per 100 g | €2.50 |
 | Ginger | per 100 g | €0.80 |
@@ -181,6 +187,7 @@ Always label them in the app as *"Estimated — varies by shop."* Gemini's own p
 | Jasmine Rice | per 100 g | €0.25 |
 | Kalamata Olives | per 100 g | €1.20 |
 | Kidney Beans | per 100 g | €0.25 |
+| Lamb | per 100 g | €2.60 |
 | Lemon Sorbet | per 100 g | €0.60 |
 | Lettuce | per 100 g | €0.60 |
 | Mango Sorbet | per 100 g | €0.60 |
@@ -220,6 +227,7 @@ Always label them in the app as *"Estimated — varies by shop."* Gemini's own p
 | Plain Breadcrumbs | per 100 g | €0.35 |
 | Plain Flour | per 100 g | €0.09 |
 | Plums | per piece | €0.35 |
+| Pork Loin | per 100 g | €1.30 |
 | Potato | per piece | €0.25 |
 | Powdered Sugar | per 100 g | €0.20 |
 | Protein Powder | per 100 g | €3.00 |
@@ -239,6 +247,7 @@ Always label them in the app as *"Estimated — varies by shop."* Gemini's own p
 | Rye Bread | per slice | €0.15 |
 | Salad Greens | per 100 g | €1.20 |
 | Salsa | per 100 g | €0.80 |
+| Sausages | per piece | €0.70 |
 | Shallots | per piece | €0.30 |
 | Sherry Vinegar | per 100 ml | €0.80 |
 | Smoked Paprika | per 100 g | €3.00 |
