@@ -210,7 +210,7 @@ const DESSERTS = [
 // Which courses a lunch/dinner gets, driven by goal & appetite (§3.1). 'main' is always present.
 function coursesForGoal(goal){
   if(goal==='gain') return ['starter','main','dessert'];   // Get stronger → all three
-  if(goal==='lose') return ['main','dessert'];             // Feel light → main + light/fruit dessert
+  if(goal==='lose') return ['main'];                       // Lose weight → one lighter main, no dessert
   return ['starter','main'];                               // Stay balanced → main + one side
 }
 // V4: the user can override how many courses a lunch/dinner has. 'auto' keeps the goal-based
@@ -268,9 +268,9 @@ const BREAKFAST_OPTIONS = [
 ];
 // The three friendly goal cards map 1:1 to the stable internal keys (never shown in UI).
 const GOAL_CARDS = [
-  {key:'lose',    emoji:'🍃', title:'Feel light',   sub:'lighter, fresher plates'},
+  {key:'lose',    emoji:'🍃', title:'Lose weight',   sub:'lighter meals, no dessert'},
   {key:'maintain',emoji:'⚖️', title:'Stay balanced', sub:'steady & satisfying'},
-  {key:'gain',    emoji:'💪', title:'Get stronger',  sub:'fuller, protein-rich'},
+  {key:'gain',    emoji:'💪', title:'Get stronger',  sub:'bigger, protein-rich portions'},
 ];
 const DEFAULT_SPLIT = { breakfast:25, lunch:40, dinner:35 };   // per-meal kcal % (§6.7)
 
@@ -369,7 +369,7 @@ function computeMealTargets(p){
   return { breakfast:per('breakfast'), lunch:per('lunch'), dinner:per('dinner') };
 }
 // UI never shows clinical words — this maps the internal goal key to friendly copy.
-function goalWord(goal){ return {lose:'feeling light',maintain:'balanced',gain:'getting stronger'}[goal]||'balanced'; }
+function goalWord(goal){ return {lose:'losing weight',maintain:'balanced',gain:'getting stronger'}[goal]||'balanced'; }
 
 /* ---- keep older saved profiles working as fields are added (§4 budget migration) ---- */
 function migrateProfile(p){
@@ -602,6 +602,45 @@ function scaleRecipe(r,n){
   return {...r, ingredients:(r.ingredients||[]).map(i=>({ ...i, qty:i.qty*n,
     ...(typeof i.price==='number' ? {price:i.price*n} : {}) }))};
 }
+// V4.1: grow (or shrink) a dish's PORTION by factor f — ingredients, calories, protein and price
+// all move together. Unlike scaleRecipe (which is per-people and leaves kcal alone), this changes
+// how big each serving is, so a muscle-gain meal actually reaches its calorie target and a
+// lose-weight meal stays genuinely light. Quantities are rounded so the recipe still reads cleanly.
+function portionScale(r,f){
+  if(!r||!(f>0)||Math.abs(f-1)<0.001) return r;
+  const roundQty=(q,unit)=>{
+    const u=(unit||'').toLowerCase();
+    if(u==='g'||u==='ml') return Math.max(5,Math.round(q/5)*5);      // nearest 5 g/ml
+    return Math.round(q*2)/2;                                        // pieces: nearest ½
+  };
+  return {...r,
+    kcal: typeof r.kcal==='number'?Math.round(r.kcal*f/10)*10:r.kcal,
+    protein: typeof r.protein==='number'?Math.round(r.protein*f):r.protein,
+    portionF:(r.portionF||1)*f,
+    ingredients:(r.ingredients||[]).map(i=>({ ...i, qty:roundQty(i.qty*f,i.unit),
+      ...(typeof i.price==='number'?{price:i.price*f}:{}) }))};
+}
+// Final pass: scale each meal's MAIN so the meal's calories land near its target. The target
+// already reflects weight, sex and goal (Mifflin–St Jeor in computeTargets), so this is how
+// "prise de masse = plus grosses portions" happens — proportional to all three. Capped so a
+// portion never becomes absurd. Leftovers and manually-placed dishes are left alone.
+function scaleWeekPortions(week,profile){
+  const mealK=computeMealTargets(profile); if(!mealK) return week;   // incomplete profile → base sizes
+  week.forEach(day=>{
+    ['breakfast','lunch','dinner'].forEach(mt=>{
+      const slots=day.meals.filter(m=>m.recipe&&m.type===mt&&!m.recipe.isLeftover&&!m.manual);
+      if(!slots.length) return;
+      const total=slots.reduce((s,m)=>s+(m.recipe.kcal||0),0);
+      const mainSlot=slots.find(m=>m.course==='main'||m.course==='single')||slots[0];
+      const mk=mainSlot.recipe.kcal||0; const target=mealK[mt];
+      if(!mk||!target) return;
+      let f=1+(target-total)/mk;
+      f=Math.max(0.65,Math.min(1.8,f));                              // never shrink below ⅔ or grow past 1.8×
+      if(Math.abs(f-1)>0.05) mainSlot.recipe=portionScale(mainSlot.recipe,f);
+    });
+  });
+  return week;
+}
 function generateWeek(profile){
   const n=Math.max(1,Number(profile.people)||1);
   const week=[];
@@ -625,7 +664,8 @@ function generateWeek(profile){
     }
     week.push({day,meals});
   }
-  return enforceNoRepeat(week,profile);
+  enforceNoRepeat(week,profile);
+  return scaleWeekPortions(week,profile);   // V4.1: grow/shrink main portions to hit the goal's calorie target
 }
 /* ---- post-validate: replace any duplicate dish name with an unused eligible one (§3 "no doubles") ---- */
 function enforceNoRepeat(week,profile){
