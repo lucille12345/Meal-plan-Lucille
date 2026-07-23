@@ -829,6 +829,8 @@ function openFeedback(){
     if(ov.querySelector('#fbHoney').value){ close(); return; }   // bot honeypot filled → silently drop
     if(msg.length<2){ err.textContent='Please write a short message first.'; err.style.display='block'; return; }
     const btn=ov.querySelector('#fbSend'); btn.disabled=true; btn.textContent='Sending…';
+    // Try the Edge Function if it's deployed; otherwise fall back to the user's own email app so
+    // feedback ALWAYS works with zero backend setup (mailto opens their mail client pre-filled).
     try{
       if(!FEEDBACK_ENDPOINT) throw new Error('no endpoint configured');
       const key=(window.SUPABASE_CONFIG&&window.SUPABASE_CONFIG.anonKey)||'';
@@ -837,8 +839,13 @@ function openFeedback(){
         body:JSON.stringify({message:msg,email:email||'',hp:''})});
       if(!res.ok)throw new Error('status '+res.status);
       close(); showToast('✓ Sent — thank you! 💛');
-    }catch(e){ btn.disabled=false; btn.textContent='Send to Lucille →';
-      err.textContent='Could not send just now — please try again.'; err.style.display='block'; }
+    }catch(e){
+      // Fallback: open a pre-addressed email to Lucille. No server needed.
+      const body=encodeURIComponent(msg+(email?`\n\n— reply to: ${email}`:''));
+      const subject=encodeURIComponent('#Foodie feedback');
+      window.location.href=`mailto:lucillemonamie@icloud.com?subject=${subject}&body=${body}`;
+      close(); showToast('📧 Opening your email to send it to Lucille');
+    }
   };
 }
 
