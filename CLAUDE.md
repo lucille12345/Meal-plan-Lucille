@@ -98,9 +98,17 @@ leftover parameter, not the brand — leave it.
 >   49-slot week has **0 duplicates**, Gluten+Soy → **0 leaks**, week €78/≈€11/day; 375px & 1280px
 >   clean; **0 console errors, 0 `/generate-*` calls**. The 7–12 emoji-tile dishes are the
 >   `PHOTOS-NEEDED.md` list, not a regression.
-> - **Deliberately NOT done** (same as V3): AI-ON re-test of V4 (no quota spent — client contracts
->   verified by stubbing/direct calls); photo mode for "Add a dish I love"; multi-week storage (week
->   arrows still disabled); unit consolidation on the shopping list; Google Calendar OAuth.
+> - **✅ AI-ON RE-TEST DONE (2026-07-23) — real Gemini, GREEN.** Key loaded (`gemini-flash-lite-latest`).
+>   A direct `/generate-meal` returned a valid, safe dish in 2.3 s. Full app flow with **AI on** +
+>   a Nuts+Dairy+Gluten+dislikes profile: **5 `/generate-meal` top-ups, 0 `/generate-week`** (proves
+>   the §0 database-first precedence), 49 slots, **0 allergy leaks** — `acceptAIDish` vets real
+>   Gemini output correctly. AI-week prices: only **7 of 198 ingredient rows** price €0 (the §4 win —
+>   AI dishes now get real prices; the 7 are AI-invented ingredient names not in the table). Mango
+>   sorbet etc. show their new photos. 0 console errors. ~6 of the 20/day quota used.
+> - **✅ ALL 12 PHOTOS DONE (2026-07-23)** from Lucille's links — `docs/PHOTOS-NEEDED.md` now closed.
+>   Every dish that appears in the app has a real, eye-checked, 200-verified photo.
+> - **Deliberately NOT done** (same as V3): photo mode for "Add a dish I love"; multi-week storage
+>   (week arrows still disabled); unit consolidation on the shopping list; Google Calendar OAuth.
 
 **Code:** V2 (Phases 1–10a) is **DEPLOYED AND LIVE** as of 2026-07-20. Lucille pushed `main` via
 GitHub Desktop and Render auto-deployed.
