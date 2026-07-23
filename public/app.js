@@ -1536,8 +1536,7 @@ function renderProfile(){
       </div>
       <div class="slider-block"><div class="sl-head"><b>Budget</b><span class="sl-val" id="q-budget-val">€${p.budgetPerDay} / day</span></div>
         <input class="slider" id="q-budget" type="range" min="5" max="40" value="${p.budgetPerDay}"></div>
-      <div class="field" style="margin-top:16px"><label for="q-city">City <span class="hint">(optional — for prices; we assume Paris)</span></label>
-        <input class="input" id="q-city" value="${p.city}" placeholder="Paris, France"></div>
+      <div class="q-why" style="margin-top:6px">💶 Prices are based on Paris supermarkets.</div>
     </div>
 
     <!-- 8 · Connect -->
@@ -1607,7 +1606,7 @@ function renderProfile(){
       coursePref:document.querySelector('#q-course .seg-btn.on')?.dataset.course||'auto',
       budgetPerDay:bpd,
       budget:String(Math.round(bpd*7)),   // legacy weekly value keeps the shopping screen working until Phase 8
-      city:val('q-city'),
+      city:'Paris',                        // city picker removed — prices are always Paris-based
     };
   }
   function persist(){ state.profile=readWizard(); saveState(); }   // §6: save at each step
