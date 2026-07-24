@@ -139,6 +139,10 @@ button.ghost.on { background: var(--tomato-wash); border-color: var(--tomato); c
 /* inline checkbox rows */
 .q-check { display: flex; align-items: flex-start; gap: 10px; font-weight: 400; margin: 0; cursor: pointer; }
 .q-check input { width: 18px; height: 18px; margin-top: 3px; accent-color: var(--basil); flex: none; }
+/* V4.4: categorised sports checklist */
+.sport-groups { display: flex; flex-direction: column; gap: 14px; margin-top: 8px; }
+.sport-cat { font-size: var(--fs-xs); font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); margin-bottom: 6px; }
+.sport-group .chip-row { display: flex; flex-wrap: wrap; gap: 8px; }
 /* V4: dishes-per-meal segmented control */
 .seg { display: flex; gap: 6px; background: var(--surface-2); border-radius: var(--r-pill); padding: 4px; margin-top: 8px; }
 .seg-btn { flex: 1; border: none; background: transparent; padding: 9px 8px; border-radius: var(--r-pill); font-family: var(--font-ui);

@@ -156,10 +156,27 @@ const RECIPES = [
     {name:'Pasta',qty:120,unit:'g',category:'Pantry',buyDayBefore:false},{name:'Cheese',qty:80,unit:'g',category:'Dairy',buyDayBefore:false},{name:'Milk',qty:200,unit:'ml',category:'Dairy',buyDayBefore:false},{name:'Butter',qty:20,unit:'g',category:'Dairy',buyDayBefore:false}],steps:['Cook the macaroni.','Make a cheese sauce with butter, milk and cheese.','Combine, top with cheese and bake until bubbling.']},
   {id:'l17',type:'lunch',name:'Beef tacos',desc:'Spiced beef, cheese & salsa in soft tacos',time:25,difficulty:2,emoji:'🌮',img:'taco',tags:[],contains:['gluten','dairy'],kcal:700,protein:38,ingredients:[
     {name:'Beef mince',qty:160,unit:'g',category:'Meat & Fish',buyDayBefore:true},{name:'Small tortillas',qty:3,unit:'',category:'Bakery',buyDayBefore:false},{name:'Cheese',qty:40,unit:'g',category:'Dairy',buyDayBefore:false},{name:'Salsa',qty:60,unit:'g',category:'Pantry',buyDayBefore:false}],steps:['Brown the spiced beef.','Warm the tortillas.','Fill with beef, cheese and salsa.']},
-  {id:'s21',type:'starter',name:'French onion soup',desc:'Deep caramelised onion soup with cheese toast',time:50,difficulty:3,emoji:'🧅',img:'soup',tags:['vegetarian'],contains:['gluten','dairy'],kcal:260,protein:10,ingredients:[
-    {name:'Onion',qty:3,unit:'',category:'Produce',buyDayBefore:false},{name:'Baguette',qty:60,unit:'g',category:'Bakery',buyDayBefore:true},{name:'Cheese',qty:40,unit:'g',category:'Dairy',buyDayBefore:false},{name:'Butter',qty:15,unit:'g',category:'Dairy',buyDayBefore:false}],steps:['Slowly caramelise the onions in butter.','Add stock and simmer.','Top with a cheese-topped baguette slice and grill.']},
-  {id:'s22',type:'starter',name:'Prawn cocktail',desc:'Chilled prawns in a tangy marie-rose sauce',time:12,difficulty:1,emoji:'🦐',img:'shrimp',tags:['fish'],contains:['shellfish'],kcal:220,protein:18,ingredients:[
-    {name:'Shrimp',qty:100,unit:'g',category:'Meat & Fish',buyDayBefore:true},{name:'Romaine lettuce',qty:60,unit:'g',category:'Produce',buyDayBefore:true},{name:'Mayonnaise',qty:30,unit:'g',category:'Pantry',buyDayBefore:false},{name:'Lemon',qty:0.5,unit:'',category:'Produce',buyDayBefore:false}],steps:['Mix mayonnaise with ketchup and lemon for the sauce.','Toss the prawns through.','Serve on shredded lettuce.']},
+  // --- V4.4: quick & cheap student staples (low difficulty, ≤20 min, cheap ingredients) ---
+  {id:'b21',type:'breakfast',name:'Cheesy scrambled eggs on toast',desc:'Eggs, cheese, buttered toast',time:8,difficulty:1,emoji:'🍳',img:'egg',tags:['vegetarian'],contains:['gluten','dairy'],kcal:480,protein:26,ingredients:[
+    {name:'Eggs',qty:3,unit:'',category:'Dairy',buyDayBefore:false},{name:'Cheese',qty:30,unit:'g',category:'Dairy',buyDayBefore:false},{name:'Bread',qty:2,unit:'slices',category:'Bakery',buyDayBefore:true},{name:'Butter',qty:10,unit:'g',category:'Dairy',buyDayBefore:false}],steps:['Whisk and season the eggs.','Scramble softly, stirring in the cheese.','Pile onto buttered toast.']},
+  {id:'b22',type:'breakfast',name:'Spinach & feta scramble',desc:'Eggs scrambled with spinach & feta',time:8,difficulty:1,emoji:'🍳',img:'egg',tags:['vegetarian'],contains:['dairy'],kcal:420,protein:24,ingredients:[
+    {name:'Eggs',qty:3,unit:'',category:'Dairy',buyDayBefore:false},{name:'Spinach',qty:60,unit:'g',category:'Produce',buyDayBefore:true},{name:'Feta',qty:40,unit:'g',category:'Dairy',buyDayBefore:false}],steps:['Wilt the spinach in a pan.','Add the beaten eggs and scramble.','Crumble in the feta at the end.']},
+  {id:'l18',type:'lunch',name:'Garlic & olive oil pasta',desc:'Aglio e olio — pasta, garlic, olive oil, chilli',time:12,difficulty:1,emoji:'🍝',img:'spaghetti',tags:['vegetarian','vegan'],contains:['gluten'],kcal:560,protein:14,ingredients:[
+    {name:'Pasta',qty:120,unit:'g',category:'Pantry',buyDayBefore:false},{name:'Garlic',qty:3,unit:'clove',category:'Produce',buyDayBefore:false},{name:'Olive oil',qty:2,unit:'tbsp',category:'Pantry',buyDayBefore:false},{name:'Red pepper flakes',qty:1,unit:'tsp',category:'Pantry',buyDayBefore:false}],steps:['Cook the pasta.','Gently sizzle sliced garlic and chilli in the oil.','Toss with the pasta and a splash of pasta water.']},
+  {id:'l19',type:'lunch',name:'Tuna & sweetcorn pasta',desc:'Store-cupboard pasta with tuna & sweetcorn',time:12,difficulty:1,emoji:'🐟',img:'pasta',tags:['fish'],contains:['gluten','fish'],kcal:600,protein:34,ingredients:[
+    {name:'Pasta',qty:120,unit:'g',category:'Pantry',buyDayBefore:false},{name:'Canned tuna',qty:1,unit:'can',category:'Pantry',buyDayBefore:false},{name:'Sweetcorn',qty:80,unit:'g',category:'Pantry',buyDayBefore:false},{name:'Mayonnaise',qty:20,unit:'g',category:'Pantry',buyDayBefore:false}],steps:['Cook the pasta.','Drain the tuna and sweetcorn.','Stir everything together with a spoon of mayo.']},
+  {id:'l20',type:'lunch',name:'Grilled cheese sandwich',desc:'Golden, oozy cheese toastie',time:8,difficulty:1,emoji:'🧀',img:'toast',tags:['vegetarian'],contains:['gluten','dairy'],kcal:520,protein:20,ingredients:[
+    {name:'Bread',qty:2,unit:'slices',category:'Bakery',buyDayBefore:true},{name:'Cheese',qty:60,unit:'g',category:'Dairy',buyDayBefore:false},{name:'Butter',qty:15,unit:'g',category:'Dairy',buyDayBefore:false}],steps:['Butter the outside of the bread.','Fill with cheese.','Fry both sides until golden and melty.']},
+  {id:'l21',type:'lunch',name:'Jacket potato, cheese & beans',desc:'Baked potato loaded with beans & cheese',time:15,difficulty:1,emoji:'🥔',img:'',tags:['vegetarian'],contains:['dairy'],kcal:560,protein:22,ingredients:[
+    {name:'Potato',qty:1,unit:'',category:'Produce',buyDayBefore:false},{name:'Baked beans',qty:200,unit:'g',category:'Pantry',buyDayBefore:false},{name:'Cheese',qty:40,unit:'g',category:'Dairy',buyDayBefore:false}],steps:['Microwave the potato 8 min, then crisp in the oven if you like.','Warm the beans.','Split the potato, load with beans and grated cheese.']},
+  {id:'l22',type:'lunch',name:'Egg fried rice',desc:'Quick fried rice with egg & soy',time:12,difficulty:1,emoji:'🍚',img:'rice',tags:['vegetarian'],contains:['soy'],kcal:520,protein:16,ingredients:[
+    {name:'Rice',qty:100,unit:'g',category:'Pantry',buyDayBefore:false},{name:'Eggs',qty:2,unit:'',category:'Dairy',buyDayBefore:false},{name:'Peas',qty:60,unit:'g',category:'Frozen',buyDayBefore:false},{name:'Soy sauce',qty:1,unit:'tbsp',category:'Pantry',buyDayBefore:false}],steps:['Cook the rice (or use leftover).','Scramble the eggs in a hot pan, add rice and peas.','Splash with soy sauce and fry until hot.']},
+  {id:'d35',type:'dinner',name:'Steak & fries',desc:'Pan-seared steak with crispy fries',time:20,difficulty:2,emoji:'🥩',img:'steak,beef',tags:[],contains:[],kcal:780,protein:44,ingredients:[
+    {name:'Beef steak',qty:180,unit:'g',category:'Meat & Fish',buyDayBefore:true},{name:'Fries',qty:200,unit:'g',category:'Frozen',buyDayBefore:false}],steps:['Bake or fry the fries until crisp.','Sear the steak 3–4 min a side; rest it.','Serve together with salt and pepper.']},
+  {id:'d36',type:'dinner',name:'Fish, pasta, olive oil & lemon',desc:'White fish with pasta, good oil & lemon',time:18,difficulty:2,emoji:'🐟',img:'fish',tags:['fish'],contains:['gluten','fish'],kcal:620,protein:40,ingredients:[
+    {name:'Cod fillet',qty:160,unit:'g',category:'Meat & Fish',buyDayBefore:true},{name:'Pasta',qty:100,unit:'g',category:'Pantry',buyDayBefore:false},{name:'Olive oil',qty:2,unit:'tbsp',category:'Pantry',buyDayBefore:false},{name:'Lemon',qty:1,unit:'',category:'Produce',buyDayBefore:false}],steps:['Cook the pasta.','Pan-fry the fish a few minutes each side.','Toss the pasta with olive oil, lemon and flaked fish.']},
+  {id:'d37',type:'dinner',name:'Sausages & beans',desc:'Grilled sausages with baked beans',time:15,difficulty:1,emoji:'🌭',img:'sausage',tags:[],contains:['gluten'],kcal:640,protein:30,ingredients:[
+    {name:'Sausages',qty:3,unit:'',category:'Meat & Fish',buyDayBefore:true},{name:'Baked beans',qty:200,unit:'g',category:'Pantry',buyDayBefore:false},{name:'Bread',qty:2,unit:'slices',category:'Bakery',buyDayBefore:true}],steps:['Grill the sausages until golden.','Warm the beans.','Serve with buttered bread.']},
 ];
 
 /* Starters (light) & desserts — courses for lunch/dinner (§3). Kept lighter than mains. */
@@ -210,6 +227,10 @@ const STARTERS = [
     {name:'Butternut squash',qty:250,unit:'g',category:'Produce',buyDayBefore:false},{name:'Onion',qty:1,unit:'',category:'Produce',buyDayBefore:false}],steps:['Soften onion, add squash and water.','Simmer 18 min, then blend.']},
   {id:'s22',type:'starter',name:'Avocado on rye',desc:'Avocado, rye, chilli',time:6,difficulty:1,emoji:'🥑',img:'avocado',tags:['vegetarian','vegan'],kcal:210,protein:5,ingredients:[
     {name:'Avocado',qty:0.5,unit:'',category:'Produce',buyDayBefore:true},{name:'Rye bread',qty:1,unit:'slices',category:'Bakery',buyDayBefore:true}],steps:['Mash avocado onto the rye.','Season with chilli flakes and salt.']},
+  {id:'s23',type:'starter',name:'French onion soup',desc:'Deep caramelised onion soup with cheese toast',time:50,difficulty:3,emoji:'🧅',img:'soup',tags:['vegetarian'],contains:['gluten','dairy'],kcal:260,protein:10,ingredients:[
+    {name:'Onion',qty:3,unit:'',category:'Produce',buyDayBefore:false},{name:'Baguette',qty:60,unit:'g',category:'Bakery',buyDayBefore:true},{name:'Cheese',qty:40,unit:'g',category:'Dairy',buyDayBefore:false},{name:'Butter',qty:15,unit:'g',category:'Dairy',buyDayBefore:false}],steps:['Slowly caramelise the onions in butter.','Add stock and simmer.','Top with a cheese-topped baguette slice and grill.']},
+  {id:'s24',type:'starter',name:'Prawn cocktail',desc:'Chilled prawns in a tangy marie-rose sauce',time:12,difficulty:1,emoji:'🦐',img:'shrimp',tags:['fish'],contains:['shellfish'],kcal:220,protein:18,ingredients:[
+    {name:'Shrimp',qty:100,unit:'g',category:'Meat & Fish',buyDayBefore:true},{name:'Romaine lettuce',qty:60,unit:'g',category:'Produce',buyDayBefore:true},{name:'Mayonnaise',qty:30,unit:'g',category:'Pantry',buyDayBefore:false},{name:'Lemon',qty:0.5,unit:'',category:'Produce',buyDayBefore:false}],steps:['Mix mayonnaise with ketchup and lemon for the sauce.','Toss the prawns through.','Serve on shredded lettuce.']},
 ];
 const DESSERTS = [
   {id:'x1',type:'dessert',name:'Fresh fruit salad',desc:'Seasonal fruit, mint',time:6,difficulty:1,emoji:'🍓',img:'fruit,salad',tags:['vegetarian','vegan'],kcal:120,protein:2,ingredients:[
@@ -354,6 +375,17 @@ const CUISINE_OPTIONS = [
 const BREAKFAST_OPTIONS = [
   {v:'sweet',label:'🥐 Sweet'},{v:'savory',label:'🍳 Savory'},{v:'surprise',label:'✨ Surprise me'},
 ];
+// Common sports to tick, grouped by category (V4.4). Tick any that apply — combined with
+// "times per week" they hint at how active you are (calorie needs come from frequency).
+const SPORT_CATEGORIES = [
+  {cat:'Team sports', items:['Football','Basketball','Volleyball','Rugby','Handball','Hockey','Baseball']},
+  {cat:'Cardio & endurance', items:['Running','Cycling','Swimming','Rowing','Hiking','Walking','Triathlon']},
+  {cat:'Strength', items:['Gym / weights','CrossFit','Calisthenics','Powerlifting']},
+  {cat:'Racket sports', items:['Tennis','Badminton','Squash','Padel','Table tennis']},
+  {cat:'Combat', items:['Boxing','Martial arts','Judo','Wrestling','Fencing']},
+  {cat:'Studio & flexibility', items:['Yoga','Pilates','Dance','Gymnastics']},
+  {cat:'Outdoor & other', items:['Climbing','Skiing','Surfing','Horse riding','Golf','Skating']},
+];
 // The three friendly goal cards map 1:1 to the stable internal keys (never shown in UI).
 const GOAL_CARDS = [
   {key:'lose',    emoji:'🍃', title:'Lose weight',   sub:'lighter meals, no dessert'},
@@ -469,6 +501,7 @@ function migrateProfile(p){
   if(!p.breakfastPref) p.breakfastPref='surprise';
   if(!p.coursePref) p.coursePref='auto';
   if(!Array.isArray(p.cuisines)) p.cuisines=[];
+  if(!Array.isArray(p.sports)) p.sports=[];
   return p;
 }
 
@@ -1539,7 +1572,7 @@ async function planWeek(){
 const Q_STEPS = 8;   // Welcome · You · Rhythm · Goal · Tastes · Kitchen · Numbers · Connect
 function renderProfile(){
   const d={weight:'',height:'',age:'',gender:'female',lifeStage:'working',goal:'maintain',
-    sport:'none',frequency:0,cookingLevel:5,timePerMeal:30,people:1,name:'',
+    sport:'none',sports:[],frequency:0,cookingLevel:5,timePerMeal:30,people:1,name:'',
     breakfastPref:'surprise',cuisines:[],dislikes:[],allergies:[],
     // Assume the usual cupboard staples are already owned so the shopping total isn't inflated by
     // a bottle of oil + every spice jar on day one (you can untick any you don't have).
@@ -1577,8 +1610,8 @@ function renderProfile(){
       <h2>A little about you</h2>
       <div class="q-why">We use this to size portions — never to judge. Friendly numbers only.</div>
       <div class="q-fields" style="margin-bottom:18px">
-        <div class="field"><label>Age</label>
-          <div class="stepper" data-step-min="14" data-step-max="99"><button type="button" data-dir="-1" aria-label="less">−</button><span class="val" id="q-age">${Number(p.age)||32}</span><button type="button" data-dir="1" aria-label="more">＋</button></div></div>
+        <div class="field"><label for="q-age">Age <span class="hint">(14+)</span></label>
+          <input class="input" id="q-age" type="number" min="14" max="99" value="${Number(p.age)||''}" placeholder="32"></div>
         <div class="field"><label>Household size</label>
           <div class="stepper" data-step-min="1" data-step-max="8"><button type="button" data-dir="-1" aria-label="less">−</button><span class="val" id="q-people">${Number(p.people)||1}</span><button type="button" data-dir="1" aria-label="more">＋</button></div></div>
       </div>
@@ -1607,18 +1640,13 @@ function renderProfile(){
           <option value="parent" ${sel('parent',p.lifeStage)}>Parent / family</option>
           <option value="flexible" ${sel('flexible',p.lifeStage)}>Plenty of time to cook</option>
         </select></div>
-      <div class="q-fields" style="margin-top:16px">
-        <div class="field"><label for="q-sport">Main activity</label>
-          <select class="select" id="q-sport">
-            <option value="none" ${sel('none',p.sport)}>None</option>
-            <option value="running" ${sel('running',p.sport)}>Running / cardio</option>
-            <option value="gym" ${sel('gym',p.sport)}>Gym / weights</option>
-            <option value="team" ${sel('team',p.sport)}>Team sport</option>
-            <option value="yoga" ${sel('yoga',p.sport)}>Yoga / pilates</option>
-          </select></div>
-        <div class="field"><label for="q-frequency">Times per week</label>
-          <input class="input" id="q-frequency" type="number" min="0" max="14" value="${p.frequency}" placeholder="3"></div>
-      </div>
+      <div class="field" style="margin-top:16px"><label>Sports you do <span class="hint">(tick any — or none)</span></label>
+        <div id="q-sports" class="sport-groups">
+          ${SPORT_CATEGORIES.map(g=>`<div class="sport-group"><div class="sport-cat">${g.cat}</div>
+            <div class="chip-row">${g.items.map(s=>`<button type="button" class="chip ${(Array.isArray(p.sports)&&p.sports.includes(s))?'selected':''}" data-v="${s}">${s}</button>`).join('')}</div></div>`).join('')}
+        </div></div>
+      <div class="field" style="margin-top:16px"><label for="q-frequency">How many times a week do you train?</label>
+        <input class="input" id="q-frequency" type="number" min="0" max="14" value="${p.frequency}" placeholder="3"></div>
     </div>
 
     <!-- 4 · Goal -->
@@ -1739,10 +1767,11 @@ function renderProfile(){
     return {
       name:(val('q-name')||'').trim(),
       weight:val('q-weight'), height:val('q-height'),
-      age:String(stepInt('q-age')||''),
+      age:(()=>{ const a=Number(val('q-age')); return a>0?String(Math.min(99,Math.max(14,Math.round(a)))):''; })(),
       gender:val('q-gender'),
       people:Math.min(8,Math.max(1,stepInt('q-people')||1)),
-      lifeStage:val('q-lifeStage'), sport:val('q-sport'),
+      lifeStage:val('q-lifeStage'), sports:chosen('#q-sports'),
+      sport:chosen('#q-sports')[0]||'none',
       frequency:Number(val('q-frequency'))||0,
       goal:app.querySelector('#q-goals .goal.on')?.dataset.goal||'maintain',
       breakfastPref:app.querySelector('#q-breakfast .chip.selected')?.dataset.v||'surprise',
@@ -1794,7 +1823,7 @@ function renderProfile(){
   app.querySelectorAll('#q-course .seg-btn').forEach(b=>b.onclick=()=>{
     app.querySelectorAll('#q-course .seg-btn').forEach(x=>x.classList.remove('on')); b.classList.add('on'); persist();
   });
-  ['#q-cuisines','#q-dislikes','#q-allergies','#q-pantry'].forEach(grp=>
+  ['#q-cuisines','#q-dislikes','#q-allergies','#q-pantry','#q-sports'].forEach(grp=>
     app.querySelectorAll(grp+' .chip').forEach(c=>c.onclick=()=>c.classList.toggle('selected')));
   const cook=document.getElementById('q-cook');
   cook.oninput=()=>document.getElementById('q-cook-val').textContent=cook.value+'/10';
@@ -2656,7 +2685,7 @@ function shoppingBodyHtml(){
     totalBar=`<div class="total-bar">
       <div><div class="sub" style="margin:0">Estimated total · ${city}${peopleCount()>1?` · ${peopleCount()} people`:''}</div>
         <div class="big">€${total.toFixed(2)}</div>
-        <div class="sub" style="margin:4px 0 0">≈ €${perDay.toFixed(2)} / day</div></div>
+        <div class="sub" style="margin:4px 0 0">≈ €${perDay.toFixed(2)} / day${peopleCount()>1?` · €${perDayPerPerson.toFixed(2)} per person / day`:''}</div></div>
       ${pill}</div>
       <p class="sub" style="margin:8px 0 0">Full price of every pack you'd buy — spices, oil and staples last well beyond this week. Varies by shop.</p>`;
   }
@@ -3024,6 +3053,15 @@ function openAddDishOverlay(){
         msg.textContent=out.fail;
         if(out.detail) console.info('Research dish — why it failed:',out.detail);
         if(out.quota) go.disabled=true;
+        // Couldn't look it up → offer to paste the recipe by hand (unless we're already in that mode).
+        if(mode==='name'){
+          const actions=overlay.querySelector('.recipe-actions');
+          if(actions && !actions.querySelector('#ad-paste')){
+            const b=document.createElement('button'); b.className='ghost'; b.id='ad-paste'; b.textContent='✍️ Paste the recipe myself';
+            b.onclick=()=>{ mode='text'; overlay.innerHTML=body(); bind(); const m=overlay.querySelector('#ad-msg'); if(m)m.textContent='Paste the recipe (or a link) and we’ll add it to your cookbook.'; };
+            actions.appendChild(b);
+          }
+        }
         return;
       }
       close();
