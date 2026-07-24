@@ -607,7 +607,7 @@ const RECIPES_DB = [
     {name:'Olive oil',qty:0.5,unit:'tbsp',category:'Pantry',buyDayBefore:false},
     {name:'Garlic',qty:0.5,unit:'clove',category:'Produce',buyDayBefore:false},
     {name:'Fresh parsley',qty:0.5,unit:'tbsp',category:'Produce',buyDayBefore:true},
-    {name:'Pita bread',qty:30,unit:'g',category:'Bakery',buyDayBefore:true}],
+    {name:'Pita bread',qty:1,unit:'',category:'Bakery',buyDayBefore:true}],
   steps:[
     'Roast the whole eggplants wrapped in foil at 200°C for 50–60 minutes until soft and collapsed.',
     'Once cool, peel and drain the flesh in a strainer for 20 minutes to remove excess water.',

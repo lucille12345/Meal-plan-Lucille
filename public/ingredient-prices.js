@@ -187,7 +187,7 @@ const INGREDIENT_PRICES = {
   'cotija cheese':           {per:'100g',  eur:1.80},
   'peas':                    {per:'100g',  eur:0.35},
   'rice paper wrappers':     {per:'piece', eur:0.15},
-  'pita bread':              {per:'100g',  eur:0.40},
+  'pita bread':              {per:'piece', eur:0.45},
   'miso paste':              {per:'100g',  eur:1.60},
   'taco seasoning':          {per:'100g',  eur:2.50},
   'worcestershire sauce':    {per:'100ml', eur:0.90},
@@ -207,6 +207,7 @@ const INGREDIENT_PRICES = {
   'vegetable broth':         {per:'100ml', eur:0.06},
   'chicken broth':           {per:'100ml', eur:0.07},
   'white wine':              {per:'100ml', eur:0.50},
+  'red wine':                {per:'100ml', eur:0.50},
   'rice wine':               {per:'100ml', eur:0.70},
   'balsamic vinegar':        {per:'100ml', eur:0.60},
   'red wine vinegar':        {per:'100ml', eur:0.30},
@@ -329,6 +330,8 @@ const INGREDIENT_PRICES = {
   'fries':                   {per:'100g',  eur:0.30},
   'baked beans':             {per:'100g',  eur:0.30},
   'couscous':                {per:'100g',  eur:0.45},
+  'duck breast':             {per:'100g',  eur:2.80},
+  'mussels':                 {per:'100g',  eur:1.10},
 };
 
 /* ----------------------------------------------------------------------------
@@ -402,6 +405,7 @@ function packOf(name){
     else if (/\bmilk\b|broth|stock/.test(n)) { pack=1000; label='carton'; }
     else if (/cream/.test(n)) { pack=200; label='pot'; }
     else if (/\boil\b/.test(n)) { pack=500; label='bottle'; }
+    else if (/red wine|white wine/.test(n)) { pack=750; label='bottle'; }
     else if (/wine|vinegar|extract|espresso/.test(n)) { pack=250; label='bottle'; }
     else if (/soy sauce|sriracha|worcestershire|syrup|sauce/.test(n)) { pack=250; label='bottle'; }
     else { pack=500; label='bottle'; }

@@ -4,7 +4,7 @@
 > The source of truth is [`public/ingredient-prices.js`](../public/ingredient-prices.js).
 > Change a price there, then run `node tools/build-prices-md.js` to rebuild this page.
 
-**244 ingredients priced.** Covers 172 of the 172 distinct ingredients currently used by `recipes-db.js`.
+**247 ingredients priced.** Covers 172 of the 172 distinct ingredients currently used by `recipes-db.js`.
 
 ⚠️ **These are informed estimates, not live scraped prices** — a French supermarket
 (Carrefour / Leclerc / Intermarché), mid-range own-brand, 2026. They exist so the shopping
@@ -89,7 +89,7 @@ Always label them in the app as *"Estimated — varies by shop."* Gemini's own p
 | Spring Onions | per piece | €0.20 |
 | Yellow Onion | per piece | €0.30 |
 
-### Pantry (187)
+### Pantry (190)
 
 | Ingredient | Price basis | EUR |
 |---|---|---|
@@ -156,6 +156,7 @@ Always label them in the app as *"Estimated — varies by shop."* Gemini's own p
 | Dried Cranberries | per 100 g | €1.10 |
 | Dried Oregano | per 100 g | €4.00 |
 | Dried Thyme | per 100 g | €4.00 |
+| Duck Breast | per 100 g | €2.80 |
 | Egg Noodles | per 100 g | €0.45 |
 | Eggplant | per piece | €1.10 |
 | Espresso | per 100 ml | €0.30 |
@@ -202,6 +203,7 @@ Always label them in the app as *"Estimated — varies by shop."* Gemini's own p
 | Mozzarella | per 100 g | €1.10 |
 | Muesli | per 100 g | €0.55 |
 | Mushrooms | per 100 g | €0.65 |
+| Mussels | per 100 g | €1.10 |
 | Neutral Oil | per 100 ml | €0.25 |
 | Nutmeg | per 100 g | €5.00 |
 | Oats | per 100 g | €0.20 |
@@ -222,7 +224,7 @@ Always label them in the app as *"Estimated — varies by shop."* Gemini's own p
 | Penne Pasta | per 100 g | €0.18 |
 | Pine Nuts | per 100 g | €4.50 |
 | Pineapple | per 100 g | €0.30 |
-| Pita Bread | per 100 g | €0.40 |
+| Pita Bread | per piece | €0.45 |
 | Pizza Base | per piece | €1.20 |
 | Plain Breadcrumbs | per 100 g | €0.35 |
 | Plain Flour | per 100 g | €0.09 |
@@ -236,6 +238,7 @@ Always label them in the app as *"Estimated — varies by shop."* Gemini's own p
 | Radishes | per 100 g | €0.60 |
 | Red Lentils | per 100 g | €0.35 |
 | Red Pepper Flakes | per 100 g | €3.50 |
+| Red Wine | per 100 ml | €0.50 |
 | Red Wine Vinegar | per 100 ml | €0.30 |
 | Rice | per 100 g | €0.20 |
 | Rice Noodles | per 100 g | €0.35 |

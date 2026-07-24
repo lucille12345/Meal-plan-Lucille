@@ -109,6 +109,34 @@ const RECIPES = [
     {name:'Bagel',qty:1,unit:'',category:'Bakery',buyDayBefore:true},{name:'Cream cheese',qty:40,unit:'g',category:'Dairy',buyDayBefore:false},{name:'Salmon fillet',qty:80,unit:'g',category:'Meat & Fish',buyDayBefore:true}],steps:['Toast the bagel.','Spread with cream cheese.','Top with smoked salmon.']},
   {id:'b19',type:'breakfast',name:'Peanut butter & banana toast',desc:'Thick toast, peanut butter, banana',time:5,difficulty:1,emoji:'🍌',img:'toast',tags:['vegetarian'],contains:['gluten','nuts'],kcal:620,protein:20,ingredients:[
     {name:'Bread',qty:3,unit:'slices',category:'Bakery',buyDayBefore:true},{name:'Peanut butter',qty:40,unit:'g',category:'Pantry',buyDayBefore:false},{name:'Banana',qty:1,unit:'',category:'Produce',buyDayBefore:false}],steps:['Toast the bread.','Spread thickly with peanut butter.','Top with sliced banana.']},
+  // --- V4.3: famous & difficult dishes (difficulty 4 = involved, longer times so they only show
+  //     for cooks who allow the time), plus heavy "athlete" plates with excessive portions. ---
+  {id:'d18',type:'dinner',name:'Beef bourguignon',desc:'Slow-braised beef in red wine, mushrooms, bacon',time:150,difficulty:4,emoji:'🍲',img:'beef',tags:[],contains:[],kcal:820,protein:52,ingredients:[
+    {name:'Beef steak',qty:220,unit:'g',category:'Meat & Fish',buyDayBefore:true},{name:'Red wine',qty:150,unit:'ml',category:'Pantry',buyDayBefore:false},{name:'Mushrooms',qty:120,unit:'g',category:'Produce',buyDayBefore:true},{name:'Bacon',qty:50,unit:'g',category:'Meat & Fish',buyDayBefore:true},{name:'Onion',qty:1,unit:'',category:'Produce',buyDayBefore:false}],steps:['Brown the beef in batches, then the bacon and onion.','Deglaze with red wine; add stock and herbs.','Braise low 2 hours; add mushrooms near the end.']},
+  {id:'d19',type:'dinner',name:'Coq au vin',desc:'Chicken braised in red wine with bacon & mushrooms',time:90,difficulty:4,emoji:'🍷',img:'chicken',tags:[],contains:[],kcal:780,protein:50,ingredients:[
+    {name:'Chicken thighs',qty:220,unit:'g',category:'Meat & Fish',buyDayBefore:true},{name:'Red wine',qty:150,unit:'ml',category:'Pantry',buyDayBefore:false},{name:'Mushrooms',qty:100,unit:'g',category:'Produce',buyDayBefore:true},{name:'Bacon',qty:50,unit:'g',category:'Meat & Fish',buyDayBefore:true}],steps:['Brown the chicken and bacon.','Add wine and stock; simmer 45 min.','Reduce the sauce and stir in the mushrooms.']},
+  {id:'d20',type:'dinner',name:'Duck breast à l\'orange',desc:'Seared duck, crisp skin, orange sauce',time:40,difficulty:4,emoji:'🦆',img:'',tags:[],contains:['dairy'],kcal:800,protein:46,ingredients:[
+    {name:'Duck breast',qty:200,unit:'g',category:'Meat & Fish',buyDayBefore:true},{name:'Orange',qty:2,unit:'',category:'Produce',buyDayBefore:false},{name:'Butter',qty:15,unit:'g',category:'Dairy',buyDayBefore:false}],steps:['Score the skin; sear skin-side down until crisp.','Roast to medium; rest.','Make an orange sauce with the juice and butter.']},
+  {id:'d21',type:'dinner',name:'Seafood paella',desc:'Saffron rice with shrimp, mussels & chicken',time:45,difficulty:4,emoji:'🥘',img:'shrimp,rice',tags:['fish'],contains:['shellfish'],kcal:800,protein:48,ingredients:[
+    {name:'Rice',qty:100,unit:'g',category:'Pantry',buyDayBefore:false},{name:'Shrimp',qty:100,unit:'g',category:'Meat & Fish',buyDayBefore:true},{name:'Mussels',qty:150,unit:'g',category:'Meat & Fish',buyDayBefore:true},{name:'Chicken thighs',qty:80,unit:'g',category:'Meat & Fish',buyDayBefore:true},{name:'Bell pepper',qty:1,unit:'',category:'Produce',buyDayBefore:false}],steps:['Brown the chicken, then soften the pepper.','Add rice and saffron stock; simmer without stirring.','Nestle in the seafood; cook until the mussels open.']},
+  {id:'d22',type:'dinner',name:'Beef lasagna',desc:'Layered pasta, beef ragù & cheese',time:70,difficulty:3,emoji:'🍝',img:'pasta',tags:[],contains:['gluten','dairy'],kcal:800,protein:44,ingredients:[
+    {name:'Beef mince',qty:180,unit:'g',category:'Meat & Fish',buyDayBefore:true},{name:'Pasta',qty:100,unit:'g',category:'Pantry',buyDayBefore:false},{name:'Chopped tomatoes',qty:1,unit:'can',category:'Pantry',buyDayBefore:false},{name:'Cheese',qty:60,unit:'g',category:'Dairy',buyDayBefore:false},{name:'Milk',qty:150,unit:'ml',category:'Dairy',buyDayBefore:false}],steps:['Simmer a beef ragù with the tomatoes.','Make a quick white sauce with milk and cheese.','Layer pasta, ragù and sauce; bake 30 min.']},
+  {id:'d23',type:'dinner',name:'Spaghetti carbonara',desc:'Egg, bacon & parmesan — the real Roman way',time:20,difficulty:3,emoji:'🍝',img:'spaghetti',tags:[],contains:['gluten','dairy'],kcal:820,protein:34,ingredients:[
+    {name:'Pasta',qty:120,unit:'g',category:'Pantry',buyDayBefore:false},{name:'Bacon',qty:60,unit:'g',category:'Meat & Fish',buyDayBefore:true},{name:'Eggs',qty:2,unit:'',category:'Dairy',buyDayBefore:false},{name:'Parmesan',qty:40,unit:'g',category:'Dairy',buyDayBefore:false}],steps:['Cook the pasta; crisp the bacon.','Whisk eggs with parmesan.','Toss off the heat with a splash of pasta water until creamy.']},
+  {id:'d24',type:'dinner',name:'Butter chicken',desc:'Creamy spiced tomato chicken with rice',time:35,difficulty:3,emoji:'🍛',img:'chicken,curry',tags:[],contains:['dairy'],kcal:830,protein:46,ingredients:[
+    {name:'Chicken breast',qty:180,unit:'g',category:'Meat & Fish',buyDayBefore:true},{name:'Chopped tomatoes',qty:1,unit:'can',category:'Pantry',buyDayBefore:false},{name:'Double cream',qty:60,unit:'ml',category:'Dairy',buyDayBefore:false},{name:'Butter',qty:15,unit:'g',category:'Dairy',buyDayBefore:false},{name:'Rice',qty:80,unit:'g',category:'Pantry',buyDayBefore:false}],steps:['Sear the spiced chicken.','Add tomatoes; simmer, then blend smooth.','Finish with butter and cream; serve with rice.']},
+  {id:'d25',type:'dinner',name:'Pad thai',desc:'Rice noodles, shrimp, egg & peanuts',time:25,difficulty:3,emoji:'🍜',img:'',tags:['fish'],contains:['nuts','shellfish','soy'],kcal:740,protein:34,ingredients:[
+    {name:'Rice noodles',qty:100,unit:'g',category:'Pantry',buyDayBefore:false},{name:'Shrimp',qty:100,unit:'g',category:'Meat & Fish',buyDayBefore:true},{name:'Eggs',qty:1,unit:'',category:'Dairy',buyDayBefore:false},{name:'Peanut butter',qty:20,unit:'g',category:'Pantry',buyDayBefore:false},{name:'Soy sauce',qty:1,unit:'tbsp',category:'Pantry',buyDayBefore:false}],steps:['Soak the noodles.','Stir-fry shrimp and scramble in the egg.','Toss with noodles, tamarind-soy sauce and crushed peanuts.']},
+  {id:'x23',type:'dessert',name:'Chocolate soufflé',desc:'Warm, risen dark-chocolate soufflé',time:40,difficulty:4,emoji:'🍫',img:'chocolate',tags:['vegetarian'],contains:['dairy'],kcal:380,protein:9,ingredients:[
+    {name:'Dark chocolate',qty:60,unit:'g',category:'Pantry',buyDayBefore:false},{name:'Eggs',qty:3,unit:'',category:'Dairy',buyDayBefore:false},{name:'Butter',qty:20,unit:'g',category:'Dairy',buyDayBefore:false},{name:'Caster sugar',qty:30,unit:'g',category:'Pantry',buyDayBefore:false}],steps:['Melt chocolate with butter; beat in the yolks.','Whip the whites with sugar to soft peaks; fold together.','Bake in buttered ramekins 12 min — serve at once.']},
+  {id:'b20',type:'breakfast',name:'Mass-gain breakfast',desc:'Oats, whole milk, protein, peanut butter, banana & eggs',time:12,difficulty:1,emoji:'💪',img:'oatmeal',tags:['vegetarian'],contains:['dairy','nuts'],kcal:1250,protein:70,ingredients:[
+    {name:'Oats',qty:100,unit:'g',category:'Pantry',buyDayBefore:false},{name:'Milk',qty:400,unit:'ml',category:'Dairy',buyDayBefore:false},{name:'Protein powder',qty:1,unit:'scoop',category:'Pantry',buyDayBefore:false},{name:'Peanut butter',qty:40,unit:'g',category:'Pantry',buyDayBefore:false},{name:'Banana',qty:2,unit:'',category:'Produce',buyDayBefore:false},{name:'Eggs',qty:2,unit:'',category:'Dairy',buyDayBefore:false}],steps:['Cook the oats in the milk.','Stir in protein powder and peanut butter.','Top with banana; serve with scrambled eggs on the side.']},
+  {id:'l15',type:'lunch',name:'Athlete power bowl',desc:'Double chicken, rice, eggs, avocado & beans',time:25,difficulty:2,emoji:'🥇',img:'chicken,rice',tags:[],contains:[],kcal:1300,protein:85,ingredients:[
+    {name:'Chicken breast',qty:250,unit:'g',category:'Meat & Fish',buyDayBefore:true},{name:'Rice',qty:120,unit:'g',category:'Pantry',buyDayBefore:false},{name:'Eggs',qty:2,unit:'',category:'Dairy',buyDayBefore:false},{name:'Avocado',qty:1,unit:'',category:'Produce',buyDayBefore:true},{name:'Black beans',qty:120,unit:'g',category:'Pantry',buyDayBefore:false}],steps:['Grill the chicken.','Cook the rice and boil the eggs.','Pile it all in a bowl with sliced avocado and beans.']},
+  {id:'d26',type:'dinner',name:'Double steak & sweet potato',desc:'Two steaks, roasted sweet potato & greens',time:35,difficulty:3,emoji:'🥩',img:'steak,beef',tags:[],contains:['dairy'],kcal:1450,protein:95,ingredients:[
+    {name:'Beef steak',qty:350,unit:'g',category:'Meat & Fish',buyDayBefore:true},{name:'Sweet potato',qty:2,unit:'',category:'Produce',buyDayBefore:false},{name:'Spinach',qty:100,unit:'g',category:'Produce',buyDayBefore:true},{name:'Butter',qty:15,unit:'g',category:'Dairy',buyDayBefore:false}],steps:['Roast the sweet potato wedges.','Sear the steaks to your liking; rest.','Wilt the spinach in butter; plate up.']},
+  {id:'d27',type:'dinner',name:'Bodybuilder\'s chicken pasta',desc:'Big-portion creamy chicken pasta',time:25,difficulty:2,emoji:'🍝',img:'pasta,chicken',tags:[],contains:['gluten','dairy'],kcal:1350,protein:90,ingredients:[
+    {name:'Chicken breast',qty:250,unit:'g',category:'Meat & Fish',buyDayBefore:true},{name:'Pasta',qty:150,unit:'g',category:'Pantry',buyDayBefore:false},{name:'Double cream',qty:80,unit:'ml',category:'Dairy',buyDayBefore:false},{name:'Cheese',qty:40,unit:'g',category:'Dairy',buyDayBefore:false}],steps:['Cook the pasta.','Sear the chicken; add cream and cheese to a sauce.','Toss through the pasta.']},
 ];
 
 /* Starters (light) & desserts — courses for lunch/dinner (§3). Kept lighter than mains. */
@@ -1456,7 +1484,7 @@ function renderProfile(){
     // Assume the usual cupboard staples are already owned so the shopping total isn't inflated by
     // a bottle of oil + every spice jar on day one (you can untick any you don't have).
     pantry:['Salt','Pepper','Olive oil','Cooking oil','Butter','Flour','Sugar','Spices'],leftovers:false,
-    avoidText:'',budget:'',budgetPerDay:12,city:'',mealSplit:{...DEFAULT_SPLIT}};
+    avoidText:'',budget:'',budgetPerDay:30,city:'',mealSplit:{...DEFAULT_SPLIT}};
   const p={...d,...(state.profile||{})};
   const split={...DEFAULT_SPLIT,...(p.mealSplit||{})};
   const sel=(v,cur)=>v===cur?'selected':'';
@@ -1597,7 +1625,8 @@ function renderProfile(){
         </div>
       </div>
       <div class="slider-block"><div class="sl-head"><b>Budget</b><span class="sl-val" id="q-budget-val">€${p.budgetPerDay} / day</span></div>
-        <input class="slider" id="q-budget" type="range" min="5" max="40" value="${p.budgetPerDay}"></div>
+        <input class="slider" id="q-budget" type="range" min="8" max="60" value="${p.budgetPerDay}">
+        <div class="q-why" style="margin-top:2px">Recommended ~€30/day per person. A fresh week starts within budget; adding pricier dishes can push it over.</div></div>
       <div class="q-why" style="margin-top:6px">💶 Prices are based on Paris supermarkets.</div>
     </div>
 
@@ -2525,12 +2554,13 @@ function shoppingBodyHtml(){
   // Budget is now per-day (§4): compare the week's average day against it.
   const budgetPerDay=Number(state.profile?.budgetPerDay)|| (state.profile?.budget?Math.round(Number(state.profile.budget)/7):0);
   const perDay=total/7;
+  const perDayPerPerson=perDay/Math.max(1,peopleCount());   // budget is per person so it works for any household size
   const city=(state.profile?.city&&state.profile.city.trim())?state.profile.city.trim():'Paris';
   // §5: the total moves to the BOTTOM of the list, as a summary card.
   let totalBar='';
   if(haveTotal){
     let pill='';
-    if(budgetPerDay>0){ const under=perDay<=budgetPerDay; pill=`<span class="pill ${under?'under':'over'}">${under?'within':'over'} your €${budgetPerDay}/day</span>`; }
+    if(budgetPerDay>0){ const under=perDayPerPerson<=budgetPerDay; pill=`<span class="pill ${under?'under':'over'}">${under?'within':'over'} your €${budgetPerDay}/day${peopleCount()>1?' pp':''}</span>`; }
     totalBar=`<div class="total-bar">
       <div><div class="sub" style="margin:0">Estimated total · ${city}${peopleCount()>1?` · ${peopleCount()} people`:''}</div>
         <div class="big">€${total.toFixed(2)}</div>
