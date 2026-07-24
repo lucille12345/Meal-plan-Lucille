@@ -332,6 +332,17 @@ const INGREDIENT_PRICES = {
   'couscous':                {per:'100g',  eur:0.45},
   'duck breast':             {per:'100g',  eur:2.80},
   'mussels':                 {per:'100g',  eur:1.10},
+  /* ---------- V4.4: dessert & extra-dish ingredients ---------- */
+  'shortcrust pastry':       {per:'100g',  eur:0.55},
+  'puff pastry':             {per:'100g',  eur:0.55},
+  'gelatine':                {per:'piece', eur:0.30},
+  'apricots':                {per:'piece', eur:0.35},
+  'raspberries':             {per:'100g',  eur:1.90},
+  'ice cream':               {per:'100g',  eur:0.55},
+  'rum':                     {per:'100ml', eur:2.00},
+  'pistachios':              {per:'100g',  eur:3.50},
+  'passion fruit':           {per:'piece', eur:0.90},
+  'gnocchi':                 {per:'100g',  eur:0.40},
 };
 
 /* ----------------------------------------------------------------------------
@@ -419,8 +430,9 @@ function packOf(name){
     else if (/cheese|feta|mozzarella|parmesan|pecorino|gruy|cheddar|mascarpone|cotija|halloumi|paneer/.test(n)) { pack=200; label='pack'; }
     else if (/butter/.test(n) && !/nut butter|peanut butter|almond butter/.test(n)) { pack=250; label='pack'; }
     else if (/yogurt|hummus|pesto|tahini|mayonnaise|salsa|paste|mustard|jam|nut butter|peanut butter|almond butter|apple sauce|miso|olives/.test(n)) { pack=200; label='pot'; }
-    else if (/berries|strawberr|blueberr|grapes|cranberr/.test(n)) { pack=250; label='punnet'; }
-    else if (/chocolate|chips|walnuts|pine nuts|almond|coconut|chia|seeds/.test(n)) { pack=150; label='pack'; }
+    else if (/berries|strawberr|blueberr|raspberr|grapes|cranberr/.test(n)) { pack=250; label='punnet'; }
+    else if (/pastry/.test(n)) { pack=320; label='block'; }
+    else if (/chocolate|chips|walnuts|pine nuts|almond|pistachio|coconut|chia|seeds/.test(n)) { pack=150; label='pack'; }
     else if (/sorbet|ice cream/.test(n)) { pack=500; label='tub'; }
     // proteins & loose produce (chicken, beef, tomato-by-weight, broccoli…) → null → by weight
   }

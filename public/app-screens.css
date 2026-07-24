@@ -411,6 +411,12 @@ button.ghost.on { background: var(--tomato-wash); border-color: var(--tomato); c
   font-size: var(--fs-sm); z-index: 60; box-shadow: var(--sh-3); animation: rise .25s var(--ease) both;
 }
 /* feedback modal (§5) */
+/* reusable yes/no confirm modal */
+.confirm-overlay { position: fixed; inset: 0; z-index: 90; background: rgba(29,29,31,.45); backdrop-filter: blur(3px); display: grid; place-items: center; padding: 20px; animation: rise .18s var(--ease) both; }
+.confirm-card { background: var(--surface); border-radius: var(--r-card); box-shadow: var(--sh-3); padding: 24px 22px; max-width: 400px; width: 100%; }
+.confirm-card h3 { font-family: var(--font-display); font-size: var(--fs-h3); margin: 0 0 8px; }
+.confirm-card p { color: var(--muted); font-size: var(--fs-sm); margin: 0 0 18px; line-height: 1.5; }
+.confirm-actions { display: flex; gap: 10px; justify-content: flex-end; }
 .fb-overlay { position: fixed; inset: 0; z-index: 80; background: rgba(29,29,31,.4); backdrop-filter: blur(3px); display: grid; place-items: center; padding: 20px; animation: rise .2s var(--ease) both; }
 .fb-card { position: relative; background: var(--surface); border-radius: var(--r-card); box-shadow: var(--sh-3); padding: 26px 24px; max-width: 440px; width: 100%; }
 .fb-card h3 { font-family: var(--font-display); font-size: var(--fs-h3); margin: 0 0 4px; }
