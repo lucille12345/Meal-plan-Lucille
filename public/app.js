@@ -1693,7 +1693,6 @@ function renderProfile(){
 
     <!-- 5 · Tastes -->
     <div class="q-step" data-step="4">
-      <div class="q-emojihead">😋</div>
       <h2>How do you like to eat?</h2>
       <div class="q-why">The tastier your week, the more you'll actually cook it.</div>
       <div class="field" style="margin-bottom:20px"><label>Breakfast mood</label>
