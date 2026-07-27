@@ -581,7 +581,7 @@ function applyLeftovers(week){
       ...(typeof i.price==='number'?{price:i.price*2}:{})}));
     d.batchNote=true;
     const leftover={ type:'lunch', course:'main', rejected:false, recipe:{
-      ...d, id:'lo'+(nextId++), type:'lunch', name:'Leftover '+d.name,
+      ...d, id:'lo'+(nextId++), sourceId:dishOrigin(d), type:'lunch', name:'Leftover '+d.name,
       desc:'From '+prevDay.day+' night — just reheat', isLeftover:true, batchNote:false,
       ingredients:(d.ingredients||[]).map(i=>({...i})),   // kept for display only; not bought again
       steps:['Reheat the leftovers from '+prevDay.day+' until piping hot.'] }};
