@@ -905,7 +905,7 @@ from the ingredient list, so treat it as a good approximation rather than a meas
 | Olive oil | 0.5 tbsp | Pantry |
 | Garlic | 0.5 clove | Produce |
 | Fresh parsley 🥬 | 0.5 tbsp | Produce |
-| Pita bread 🥬 | 30 g | Bakery |
+| Pita bread 🥬 | 1 | Bakery |
 
 🥬 = buy fresh, close to the day you cook it.
 

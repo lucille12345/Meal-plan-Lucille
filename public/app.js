@@ -64,7 +64,7 @@ const RECIPES = [
     {name:'Sweet potato',qty:1,unit:'',category:'Produce',buyDayBefore:false},{name:'Chickpeas',qty:1,unit:'can',category:'Pantry',buyDayBefore:false},{name:'Greek yogurt',qty:60,unit:'g',category:'Dairy',buyDayBefore:false}],steps:['Roast diced sweet potato and chickpeas 20 min.','Serve with a spoonful of yogurt.']},
   {id:'d8',type:'dinner',name:'Roast chicken & veg',desc:'Chicken thighs, carrot, potato',time:40,difficulty:2,emoji:'🍗',img:'chicken',tags:[],kcal:680,protein:46,ingredients:[
     {name:'Chicken thighs',qty:200,unit:'g',category:'Meat & Fish',buyDayBefore:true},{name:'Carrot',qty:2,unit:'',category:'Produce',buyDayBefore:false},{name:'Potato',qty:2,unit:'',category:'Produce',buyDayBefore:false}],steps:['Toss chicken and veg with oil and herbs.','Roast 35 min at 200°C, turning once.']},
-  {id:'d9',type:'dinner',name:'Cod & lemon potatoes',desc:'Cod, potato, lemon, greens',time:32,difficulty:2,emoji:'🐟',img:'fish',tags:['fish'],kcal:600,protein:42,ingredients:[
+  {id:'d9',type:'dinner',name:'Cod & lemon potatoes',desc:'Cod, potato, lemon, greens',time:32,difficulty:2,emoji:'🐟',img:'fish',photo:'https://assets.surlatable.com/m/6028abeae60f94b0/72_dpi_webp-REC-370492_citrus_cod_0218-jpg',tags:['fish'],kcal:600,protein:42,ingredients:[
     {name:'Cod fillet',qty:160,unit:'g',category:'Meat & Fish',buyDayBefore:true},{name:'Potato',qty:2,unit:'',category:'Produce',buyDayBefore:false},{name:'Lemon',qty:1,unit:'',category:'Produce',buyDayBefore:false},{name:'Green beans',qty:120,unit:'g',category:'Produce',buyDayBefore:false}],steps:['Roast sliced potato 20 min.','Add cod and lemon, roast 12 min more.','Steam the beans and serve.']},
   {id:'d10',type:'dinner',name:'Pea & lemon risotto',desc:'Rice, peas, parmesan, lemon',time:35,difficulty:3,emoji:'🍚',img:'rice',photo:'https://www.happyskinkitchen.com/wp-content/uploads/2020/03/IMG_2688.jpg',tags:['vegetarian'],kcal:640,protein:22,ingredients:[
     {name:'Risotto rice',qty:90,unit:'g',category:'Pantry',buyDayBefore:false},{name:'Peas',qty:120,unit:'g',category:'Frozen',buyDayBefore:false},{name:'Parmesan',qty:30,unit:'g',category:'Dairy',buyDayBefore:false},{name:'Lemon',qty:0.5,unit:'',category:'Produce',buyDayBefore:false}],steps:['Toast the rice, then add stock a ladle at a time.','Stir in peas near the end.','Finish with parmesan and lemon zest.']},
@@ -87,7 +87,7 @@ const RECIPES = [
     {name:'Beef mince',qty:200,unit:'g',category:'Meat & Fish',buyDayBefore:true},{name:'Burger bun',qty:1,unit:'',category:'Bakery',buyDayBefore:false},{name:'Cheese',qty:30,unit:'g',category:'Dairy',buyDayBefore:false},{name:'Fries',qty:200,unit:'g',category:'Frozen',buyDayBefore:false}],steps:['Shape two patties and sear them hard.','Bake or fry the fries until crisp.','Build the burger with melted cheese in the bun.']},
   {id:'l12',type:'lunch',name:'Steak burrito bowl',desc:'Beef strips, rice, black beans, avocado',time:25,difficulty:2,emoji:'🌯',img:'burrito,beef',tags:[],contains:[],kcal:900,protein:50,ingredients:[
     {name:'Beef strips',qty:160,unit:'g',category:'Meat & Fish',buyDayBefore:true},{name:'Rice',qty:90,unit:'g',category:'Pantry',buyDayBefore:false},{name:'Black beans',qty:120,unit:'g',category:'Pantry',buyDayBefore:false},{name:'Avocado',qty:1,unit:'',category:'Produce',buyDayBefore:true}],steps:['Sear the beef strips with spices.','Warm the rice and black beans.','Bowl it up and top with sliced avocado.']},
-  {id:'l13',type:'lunch',name:'Pork loin, rice & veg',desc:'Pork loin, rice, mixed vegetables',time:30,difficulty:2,emoji:'🍖',img:'rice',tags:[],contains:[],kcal:880,protein:52,ingredients:[
+  {id:'l13',type:'lunch',name:'Pork loin, rice & veg',desc:'Pork loin, rice, mixed vegetables',time:30,difficulty:2,emoji:'🍖',img:'rice',photo:'https://diethood.com/wp-content/uploads/2026/06/pork-fried-rice-recipe-diethood-11.jpg',tags:[],contains:[],kcal:880,protein:52,ingredients:[
     {name:'Pork loin',qty:180,unit:'g',category:'Meat & Fish',buyDayBefore:true},{name:'Rice',qty:90,unit:'g',category:'Pantry',buyDayBefore:false},{name:'Mixed veg',qty:120,unit:'g',category:'Frozen',buyDayBefore:false}],steps:['Sear the pork loin, then finish in the oven.','Cook the rice.','Steam the mixed veg; slice the pork and serve.']},
   // hearty breakfasts (the old pool capped at ~470 kcal — far too light for a muscle-gain morning)
   {id:'b13',type:'breakfast',name:'Big cooked breakfast',desc:'Eggs, bacon, sausage, beans, toast',time:20,difficulty:2,emoji:'🍳',img:'egg',tags:[],contains:['gluten'],kcal:760,protein:38,ingredients:[
@@ -99,7 +99,7 @@ const RECIPES = [
   {id:'b16',type:'breakfast',name:'Breakfast burrito',desc:'Eggs, beans, cheese, tortilla',time:15,difficulty:2,emoji:'🌯',img:'burrito',tags:['vegetarian'],contains:['gluten','dairy'],kcal:650,protein:32,ingredients:[
     {name:'Eggs',qty:3,unit:'',category:'Dairy',buyDayBefore:false},{name:'Black beans',qty:120,unit:'g',category:'Pantry',buyDayBefore:false},{name:'Cheese',qty:30,unit:'g',category:'Dairy',buyDayBefore:false},{name:'Tortilla wrap',qty:1,unit:'',category:'Bakery',buyDayBefore:false}],steps:['Scramble the eggs.','Warm the beans and cheese.','Wrap it all in the tortilla.']},
   // a couple more hearty mains so a gain / single-dish week has enough variety for the no-repeat rule
-  {id:'d17',type:'dinner',name:'Lamb & couscous',desc:'Lamb, couscous, roasted vegetables',time:35,difficulty:3,emoji:'🍖',img:'rice',tags:[],contains:['gluten'],kcal:880,protein:48,ingredients:[
+  {id:'d17',type:'dinner',name:'Lamb & couscous',desc:'Lamb, couscous, roasted vegetables',time:35,difficulty:3,emoji:'🍖',img:'rice',photo:'https://www.fufuskitchen.com/wp-content/uploads/2023/11/2BD70830-2EE2-49D2-A116-008813B3ACEA.png',tags:[],contains:['gluten'],kcal:880,protein:48,ingredients:[
     {name:'Lamb',qty:180,unit:'g',category:'Meat & Fish',buyDayBefore:true},{name:'Couscous',qty:90,unit:'g',category:'Pantry',buyDayBefore:false},{name:'Bell pepper',qty:1,unit:'',category:'Produce',buyDayBefore:true},{name:'Zucchini',qty:1,unit:'',category:'Produce',buyDayBefore:true}],steps:['Sear the lamb, then roast with the vegetables.','Steam the couscous.','Slice the lamb and serve over the couscous.']},
   {id:'l14',type:'lunch',name:'Chicken, bacon & avocado bowl',desc:'Chicken, bacon, rice, avocado',time:25,difficulty:2,emoji:'🥑',img:'chicken,rice',tags:[],contains:[],kcal:900,protein:55,ingredients:[
     {name:'Chicken breast',qty:180,unit:'g',category:'Meat & Fish',buyDayBefore:true},{name:'Bacon',qty:40,unit:'g',category:'Meat & Fish',buyDayBefore:true},{name:'Rice',qty:90,unit:'g',category:'Pantry',buyDayBefore:false},{name:'Avocado',qty:1,unit:'',category:'Produce',buyDayBefore:true}],steps:['Grill the chicken and bacon.','Cook the rice.','Bowl it up with sliced avocado.']},
@@ -115,9 +115,9 @@ const RECIPES = [
     {name:'Beef steak',qty:220,unit:'g',category:'Meat & Fish',buyDayBefore:true},{name:'Red wine',qty:150,unit:'ml',category:'Pantry',buyDayBefore:false},{name:'Mushrooms',qty:120,unit:'g',category:'Produce',buyDayBefore:true},{name:'Bacon',qty:50,unit:'g',category:'Meat & Fish',buyDayBefore:true},{name:'Onion',qty:1,unit:'',category:'Produce',buyDayBefore:false}],steps:['Brown the beef in batches, then the bacon and onion.','Deglaze with red wine; add stock and herbs.','Braise low 2 hours; add mushrooms near the end.']},
   {id:'d19',type:'dinner',name:'Coq au vin',desc:'Chicken braised in red wine with bacon & mushrooms',time:90,difficulty:4,emoji:'🍷',img:'chicken',tags:[],contains:[],kcal:780,protein:50,ingredients:[
     {name:'Chicken thighs',qty:220,unit:'g',category:'Meat & Fish',buyDayBefore:true},{name:'Red wine',qty:150,unit:'ml',category:'Pantry',buyDayBefore:false},{name:'Mushrooms',qty:100,unit:'g',category:'Produce',buyDayBefore:true},{name:'Bacon',qty:50,unit:'g',category:'Meat & Fish',buyDayBefore:true}],steps:['Brown the chicken and bacon.','Add wine and stock; simmer 45 min.','Reduce the sauce and stir in the mushrooms.']},
-  {id:'d20',type:'dinner',name:'Duck breast à l\'orange',desc:'Seared duck, crisp skin, orange sauce',time:40,difficulty:4,emoji:'🦆',img:'',tags:[],contains:['dairy'],kcal:800,protein:46,ingredients:[
+  {id:'d20',type:'dinner',name:'Duck breast à l\'orange',desc:'Seared duck, crisp skin, orange sauce',time:40,difficulty:4,emoji:'🦆',img:'',photo:'https://assets.epicurious.com/photos/655400d6efbd06b5a99b5f55/16:9/w_1280,c_limit/duck-a-lorange_RECIPE_110823_4982_V1_final.jpg',tags:[],contains:['dairy'],kcal:800,protein:46,ingredients:[
     {name:'Duck breast',qty:200,unit:'g',category:'Meat & Fish',buyDayBefore:true},{name:'Orange',qty:2,unit:'',category:'Produce',buyDayBefore:false},{name:'Butter',qty:15,unit:'g',category:'Dairy',buyDayBefore:false}],steps:['Score the skin; sear skin-side down until crisp.','Roast to medium; rest.','Make an orange sauce with the juice and butter.']},
-  {id:'d21',type:'dinner',name:'Seafood paella',desc:'Saffron rice with shrimp, mussels & chicken',time:45,difficulty:4,emoji:'🥘',img:'shrimp,rice',tags:['fish'],contains:['shellfish'],kcal:800,protein:48,ingredients:[
+  {id:'d21',type:'dinner',name:'Seafood paella',desc:'Saffron rice with shrimp, mussels & chicken',time:45,difficulty:4,emoji:'🥘',img:'shrimp,rice',photo:'https://www.platingsandpairings.com/wp-content/uploads/2024/02/SEAFOOD-PAELLA-H.png',tags:['fish'],contains:['shellfish'],kcal:800,protein:48,ingredients:[
     {name:'Rice',qty:100,unit:'g',category:'Pantry',buyDayBefore:false},{name:'Shrimp',qty:100,unit:'g',category:'Meat & Fish',buyDayBefore:true},{name:'Mussels',qty:150,unit:'g',category:'Meat & Fish',buyDayBefore:true},{name:'Chicken thighs',qty:80,unit:'g',category:'Meat & Fish',buyDayBefore:true},{name:'Bell pepper',qty:1,unit:'',category:'Produce',buyDayBefore:false}],steps:['Brown the chicken, then soften the pepper.','Add rice and saffron stock; simmer without stirring.','Nestle in the seafood; cook until the mussels open.']},
   {id:'d22',type:'dinner',name:'Beef lasagna',desc:'Layered pasta, beef ragù & cheese',time:70,difficulty:3,emoji:'🍝',img:'pasta',tags:[],contains:['gluten','dairy'],kcal:800,protein:44,ingredients:[
     {name:'Beef mince',qty:180,unit:'g',category:'Meat & Fish',buyDayBefore:true},{name:'Pasta',qty:100,unit:'g',category:'Pantry',buyDayBefore:false},{name:'Chopped tomatoes',qty:1,unit:'can',category:'Pantry',buyDayBefore:false},{name:'Cheese',qty:60,unit:'g',category:'Dairy',buyDayBefore:false},{name:'Milk',qty:150,unit:'ml',category:'Dairy',buyDayBefore:false}],steps:['Simmer a beef ragù with the tomatoes.','Make a quick white sauce with milk and cheese.','Layer pasta, ragù and sauce; bake 30 min.']},
@@ -131,7 +131,7 @@ const RECIPES = [
     {name:'Dark chocolate',qty:60,unit:'g',category:'Pantry',buyDayBefore:false},{name:'Eggs',qty:3,unit:'',category:'Dairy',buyDayBefore:false},{name:'Butter',qty:20,unit:'g',category:'Dairy',buyDayBefore:false},{name:'Caster sugar',qty:30,unit:'g',category:'Pantry',buyDayBefore:false}],steps:['Melt chocolate with butter; beat in the yolks.','Whip the whites with sugar to soft peaks; fold together.','Bake in buttered ramekins 12 min — serve at once.']},
   {id:'b20',type:'breakfast',name:'Mass-gain breakfast',desc:'Oats, whole milk, protein, peanut butter, banana & eggs',time:12,difficulty:1,emoji:'💪',img:'oatmeal',tags:['vegetarian'],contains:['dairy','nuts'],kcal:1250,protein:70,ingredients:[
     {name:'Oats',qty:100,unit:'g',category:'Pantry',buyDayBefore:false},{name:'Milk',qty:400,unit:'ml',category:'Dairy',buyDayBefore:false},{name:'Protein powder',qty:1,unit:'scoop',category:'Pantry',buyDayBefore:false},{name:'Peanut butter',qty:40,unit:'g',category:'Pantry',buyDayBefore:false},{name:'Banana',qty:2,unit:'',category:'Produce',buyDayBefore:false},{name:'Eggs',qty:2,unit:'',category:'Dairy',buyDayBefore:false}],steps:['Cook the oats in the milk.','Stir in protein powder and peanut butter.','Top with banana; serve with scrambled eggs on the side.']},
-  {id:'l15',type:'lunch',name:'Athlete power bowl',desc:'Double chicken, rice, eggs, avocado & beans',time:25,difficulty:2,emoji:'🥇',img:'chicken,rice',tags:[],contains:[],kcal:1300,protein:85,ingredients:[
+  {id:'l15',type:'lunch',name:'Athlete power bowl',desc:'Double chicken, rice, eggs, avocado & beans',time:25,difficulty:2,emoji:'🥇',img:'chicken,rice',photo:'https://static1.squarespace.com/static/658cc9a9ca5d034496c77eb6/65a1e0cf7d9b9c49340e9194/65a1cb8729118d6ca0cc8d13/1705109054651/athlete+oat+bowl.jpeg?format=1500w',tags:[],contains:[],kcal:1300,protein:85,ingredients:[
     {name:'Chicken breast',qty:250,unit:'g',category:'Meat & Fish',buyDayBefore:true},{name:'Rice',qty:120,unit:'g',category:'Pantry',buyDayBefore:false},{name:'Eggs',qty:2,unit:'',category:'Dairy',buyDayBefore:false},{name:'Avocado',qty:1,unit:'',category:'Produce',buyDayBefore:true},{name:'Black beans',qty:120,unit:'g',category:'Pantry',buyDayBefore:false}],steps:['Grill the chicken.','Cook the rice and boil the eggs.','Pile it all in a bowl with sliced avocado and beans.']},
   {id:'d26',type:'dinner',name:'Double steak & sweet potato',desc:'Two steaks, roasted sweet potato & greens',time:35,difficulty:3,emoji:'🥩',img:'steak,beef',photo:'https://juliasalbum.com/wp-content/uploads/2024/09/flank-steak-with-green-spinach-sauce-recipe-1.jpg',tags:[],contains:['dairy'],kcal:1450,protein:95,ingredients:[
     {name:'Beef steak',qty:350,unit:'g',category:'Meat & Fish',buyDayBefore:true},{name:'Sweet potato',qty:2,unit:'',category:'Produce',buyDayBefore:false},{name:'Spinach',qty:100,unit:'g',category:'Produce',buyDayBefore:true},{name:'Butter',qty:15,unit:'g',category:'Dairy',buyDayBefore:false}],steps:['Roast the sweet potato wedges.','Sear the steaks to your liking; rest.','Wilt the spinach in butter; plate up.']},
@@ -148,7 +148,7 @@ const RECIPES = [
     {name:'Chicken breast',qty:180,unit:'g',category:'Meat & Fish',buyDayBefore:true},{name:'Panko breadcrumbs',qty:50,unit:'g',category:'Pantry',buyDayBefore:false},{name:'Rice',qty:90,unit:'g',category:'Pantry',buyDayBefore:false},{name:'Curry powder',qty:1,unit:'tbsp',category:'Pantry',buyDayBefore:false}],steps:['Coat the chicken in panko and fry until crisp.','Make a quick katsu sauce with curry powder.','Slice over rice and pour on the sauce.']},
   {id:'d32',type:'dinner',name:'Gnocchi with tomato & basil',desc:'Pillowy gnocchi in a bright tomato sauce',time:20,difficulty:2,emoji:'🍝',img:'pasta',photo:'https://www.texanerin.com/content/uploads/2013/04/gnocchi-lighter-tomato-cream-sauce.jpg',tags:['vegetarian'],contains:['gluten','dairy'],kcal:640,protein:20,ingredients:[
     {name:'Gnocchi',qty:250,unit:'g',category:'Pantry',buyDayBefore:false},{name:'Chopped tomatoes',qty:1,unit:'can',category:'Pantry',buyDayBefore:false},{name:'Fresh basil',qty:1,unit:'handful',category:'Produce',buyDayBefore:true},{name:'Parmesan',qty:30,unit:'g',category:'Dairy',buyDayBefore:false}],steps:['Simmer a quick tomato sauce.','Boil the gnocchi until they float.','Toss with sauce, basil and parmesan.']},
-  {id:'d33',type:'dinner',name:'Fish & chips',desc:'Crisp battered cod with chips & peas',time:40,difficulty:3,emoji:'🍟',img:'fish',tags:['fish'],contains:['gluten','fish'],kcal:900,protein:40,ingredients:[
+  {id:'d33',type:'dinner',name:'Fish & chips',desc:'Crisp battered cod with chips & peas',time:40,difficulty:3,emoji:'🍟',img:'fish',photo:'https://www.tables-auberges.com/storage/uploads/2025/03/AdobeStock_201740303-min-scaled.jpeg',tags:['fish'],contains:['gluten','fish'],kcal:900,protein:40,ingredients:[
     {name:'Cod fillet',qty:180,unit:'g',category:'Meat & Fish',buyDayBefore:true},{name:'Potato',qty:3,unit:'',category:'Produce',buyDayBefore:false},{name:'Plain flour',qty:60,unit:'g',category:'Pantry',buyDayBefore:false},{name:'Peas',qty:80,unit:'g',category:'Frozen',buyDayBefore:false}],steps:['Cut the potatoes into chips and bake or fry.','Dip the cod in a light batter and fry until golden.','Serve with mushy peas.']},
   {id:'d34',type:'dinner',name:'Teriyaki chicken & rice',desc:'Glossy teriyaki chicken with rice & broccoli',time:25,difficulty:2,emoji:'🍗',img:'chicken,rice',tags:[],contains:['soy'],kcal:720,protein:48,ingredients:[
     {name:'Chicken thighs',qty:180,unit:'g',category:'Meat & Fish',buyDayBefore:true},{name:'Soy sauce',qty:2,unit:'tbsp',category:'Pantry',buyDayBefore:false},{name:'Rice',qty:90,unit:'g',category:'Pantry',buyDayBefore:false},{name:'Broccoli',qty:120,unit:'g',category:'Produce',buyDayBefore:true}],steps:['Sear the chicken.','Glaze with a soy-honey teriyaki sauce.','Serve with rice and steamed broccoli.']},
@@ -213,7 +213,7 @@ const STARTERS = [
   //     dietary filtering (14 slots/week at most) — keeps the no-repeat rule honest.
   {id:'s15',type:'starter',name:'Cucumber & dill salad',desc:'Cucumber, dill, vinegar',time:6,difficulty:1,emoji:'🥒',img:'salad',tags:['vegetarian','vegan'],kcal:90,protein:2,ingredients:[
     {name:'Cucumber',qty:1,unit:'',category:'Produce',buyDayBefore:false},{name:'Fresh dill',qty:1,unit:'handful',category:'Produce',buyDayBefore:true}],steps:['Slice cucumber thinly.','Toss with dill, vinegar and a pinch of sugar.']},
-  {id:'s16',type:'starter',name:'Roasted pepper soup',desc:'Peppers, onion, paprika',time:22,difficulty:2,emoji:'🌶',img:'soup',tags:['vegetarian','vegan'],kcal:140,protein:3,ingredients:[
+  {id:'s16',type:'starter',name:'Roasted pepper soup',desc:'Peppers, onion, paprika',time:22,difficulty:2,emoji:'🌶',img:'soup',photo:'https://www.bestofhungary.co.uk/cdn/shop/articles/roasted-red-pepper-soup-best-of-hungary_60306aef-1696-46cd-8b29-9d49981c8a6a.jpg',tags:['vegetarian','vegan'],kcal:140,protein:3,ingredients:[
     {name:'Bell pepper',qty:2,unit:'',category:'Produce',buyDayBefore:false},{name:'Onion',qty:1,unit:'',category:'Produce',buyDayBefore:false}],steps:['Roast peppers and onion 15 min.','Blend with water and paprika.']},
   {id:'s17',type:'starter',name:'Olives & crudités',desc:'Olives, celery, radish',time:5,difficulty:1,emoji:'🫒',img:'olive',photo:'https://www.gzrecipes.com/content/uploads/sites/4/2026/02/Olives-vertes-ecrasees-20190908-7-699974dc9d1f88-15757085.jpg',tags:['vegetarian','vegan'],kcal:130,protein:2,ingredients:[
     {name:'Olives',qty:60,unit:'g',category:'Pantry',buyDayBefore:false},{name:'Celery',qty:2,unit:'sticks',category:'Produce',buyDayBefore:false},{name:'Radish',qty:4,unit:'',category:'Produce',buyDayBefore:true}],steps:['Arrange olives and cut vegetables on a plate.']},
@@ -225,7 +225,7 @@ const STARTERS = [
     {name:'Watermelon',qty:250,unit:'g',category:'Produce',buyDayBefore:true},{name:'Fresh mint',qty:1,unit:'handful',category:'Produce',buyDayBefore:true}],steps:['Cube the watermelon.','Scatter mint and squeeze over lime.']},
   {id:'s21',type:'starter',name:'Butternut soup',desc:'Squash, onion, stock',time:25,difficulty:2,emoji:'🎃',img:'soup',tags:['vegetarian','vegan'],kcal:160,protein:4,ingredients:[
     {name:'Butternut squash',qty:250,unit:'g',category:'Produce',buyDayBefore:false},{name:'Onion',qty:1,unit:'',category:'Produce',buyDayBefore:false}],steps:['Soften onion, add squash and water.','Simmer 18 min, then blend.']},
-  {id:'s22',type:'starter',name:'Avocado on rye',desc:'Avocado, rye, chilli',time:6,difficulty:1,emoji:'🥑',img:'avocado',tags:['vegetarian','vegan'],kcal:210,protein:5,ingredients:[
+  {id:'s22',type:'starter',name:'Avocado on rye',desc:'Avocado, rye, chilli',time:6,difficulty:1,emoji:'🥑',img:'avocado',photo:'https://static1.squarespace.com/static/5fc3c6fcec917750a3e9b173/5fc3ccdc9b64ee46e6e24693/5fc3cd529b64ee46e6e254f4/1629195596889/?format=1500w',tags:['vegetarian','vegan'],kcal:210,protein:5,ingredients:[
     {name:'Avocado',qty:0.5,unit:'',category:'Produce',buyDayBefore:true},{name:'Rye bread',qty:1,unit:'slices',category:'Bakery',buyDayBefore:true}],steps:['Mash avocado onto the rye.','Season with chilli flakes and salt.']},
   {id:'s23',type:'starter',name:'French onion soup',desc:'Deep caramelised onion soup with cheese toast',time:50,difficulty:3,emoji:'🧅',img:'soup',tags:['vegetarian'],contains:['gluten','dairy'],kcal:260,protein:10,ingredients:[
     {name:'Onion',qty:3,unit:'',category:'Produce',buyDayBefore:false},{name:'Baguette',qty:60,unit:'g',category:'Bakery',buyDayBefore:true},{name:'Cheese',qty:40,unit:'g',category:'Dairy',buyDayBefore:false},{name:'Butter',qty:15,unit:'g',category:'Dairy',buyDayBefore:false}],steps:['Slowly caramelise the onions in butter.','Add stock and simmer.','Top with a cheese-topped baguette slice and grill.']},
@@ -262,7 +262,7 @@ const DESSERTS = [
   {id:'x14',type:'dessert',name:'Chocolate mousse',desc:'Chocolate, egg',time:15,difficulty:3,emoji:'🍫',img:'chocolate,mousse',photo:'https://images.unsplash.com/photo-1541783245831-57d6fb0926d3?auto=format&fit=crop&w=600&q=70',tags:['vegetarian'],kcal:230,protein:6,ingredients:[
     {name:'Dark chocolate',qty:40,unit:'g',category:'Pantry',buyDayBefore:false},{name:'Eggs',qty:1,unit:'',category:'Dairy',buyDayBefore:false}],steps:['Melt chocolate, fold into whisked egg white.','Chill 1 hour before serving.']},
   // --- extra desserts: same reason as the starters above (up to 14 slots a week).
-  {id:'x15',type:'dessert',name:'Apple compote',desc:'Apple, cinnamon',time:15,difficulty:1,emoji:'🍎',img:'apple',photo:'https://images.unsplash.com/photo-1568702846914-96b305d2aaeb?auto=format&fit=crop&w=600&q=70',tags:['vegetarian','vegan'],kcal:120,protein:1,ingredients:[
+  {id:'x15',type:'dessert',name:'Apple compote',desc:'Apple, cinnamon',time:15,difficulty:1,emoji:'🍎',img:'apple',photo:'https://i0.wp.com/s.lightorangebean.com/media/20240914164209/Spiced-Apple-Compote_done.png',tags:['vegetarian','vegan'],kcal:120,protein:1,ingredients:[
     {name:'Apple',qty:2,unit:'',category:'Produce',buyDayBefore:false}],steps:['Simmer chopped apple with a splash of water 12 min.','Stir in cinnamon; serve warm or cold.']},
   {id:'x16',type:'dessert',name:'Strawberries & balsamic',desc:'Strawberries, balsamic',time:5,difficulty:1,emoji:'🍓',img:'berries',tags:['vegetarian','vegan'],kcal:110,protein:1,ingredients:[
     {name:'Strawberries',qty:150,unit:'g',category:'Produce',buyDayBefore:true}],steps:['Halve the strawberries.','Drizzle with a little balsamic and let sit 5 min.']},
@@ -289,31 +289,31 @@ const DESSERTS = [
     {name:'Shortcrust pastry',qty:250,unit:'g',category:'Bakery',buyDayBefore:false},{name:'Lemon',qty:3,unit:'',category:'Produce',buyDayBefore:false},{name:'Eggs',qty:4,unit:'',category:'Dairy',buyDayBefore:false},{name:'Caster sugar',qty:150,unit:'g',category:'Pantry',buyDayBefore:false}],steps:['Blind-bake the pastry case.','Make a lemon curd with juice, yolks and sugar; fill.','Whip the whites with sugar, pile on top and bake until golden.']},
   {id:'x28',type:'dessert',name:'Panna cotta',desc:'Silky set vanilla cream',time:25,difficulty:3,emoji:'🍨',img:'',photo:'https://preppykitchen.com/wp-content/uploads/2023/11/Panna-Cotta-Social.jpg',tags:['vegetarian'],contains:['dairy'],kcal:320,protein:5,ingredients:[
     {name:'Double cream',qty:200,unit:'ml',category:'Dairy',buyDayBefore:false},{name:'Caster sugar',qty:40,unit:'g',category:'Pantry',buyDayBefore:false},{name:'Vanilla extract',qty:1,unit:'tsp',category:'Pantry',buyDayBefore:false},{name:'Gelatine',qty:1,unit:'',category:'Pantry',buyDayBefore:false}],steps:['Warm the cream with sugar and vanilla.','Stir in bloomed gelatine.','Pour into moulds and chill until set.']},
-  {id:'x29',type:'dessert',name:'Poached apricots',desc:'Apricots gently poached in vanilla syrup',time:20,difficulty:2,emoji:'🍑',img:'',tags:['vegetarian','vegan'],contains:[],kcal:150,protein:2,ingredients:[
+  {id:'x29',type:'dessert',name:'Poached apricots',desc:'Apricots gently poached in vanilla syrup',time:20,difficulty:2,emoji:'🍑',img:'',photo:'https://gourmandeinthekitchen.com/wp-content/uploads/2023/09/Poached-Apricots-in-Wine.jpg',tags:['vegetarian','vegan'],contains:[],kcal:150,protein:2,ingredients:[
     {name:'Apricots',qty:4,unit:'',category:'Produce',buyDayBefore:true},{name:'Caster sugar',qty:40,unit:'g',category:'Pantry',buyDayBefore:false},{name:'Vanilla extract',qty:1,unit:'tsp',category:'Pantry',buyDayBefore:false}],steps:['Make a light syrup with sugar, water and vanilla.','Halve the apricots and poach gently 8 min.','Serve warm or chilled.']},
   {id:'x30',type:'dessert',name:'Peach & raspberry pavlova',desc:'Crisp meringue, cream, peach & raspberries',time:90,difficulty:4,emoji:'🍧',img:'',photo:'https://www.recipetineats.com/tachyon/2025/12/Pavlova-bombs_6.jpg',tags:['vegetarian'],contains:['dairy'],kcal:310,protein:4,ingredients:[
     {name:'Eggs',qty:4,unit:'',category:'Dairy',buyDayBefore:false},{name:'Caster sugar',qty:150,unit:'g',category:'Pantry',buyDayBefore:false},{name:'Double cream',qty:150,unit:'ml',category:'Dairy',buyDayBefore:false},{name:'Peach',qty:1,unit:'',category:'Produce',buyDayBefore:true},{name:'Raspberries',qty:120,unit:'g',category:'Produce',buyDayBefore:true}],steps:['Whip the whites with sugar and bake low & slow to a crisp meringue.','Whip the cream.','Top with cream, sliced peach and raspberries.']},
-  {id:'x31',type:'dessert',name:'Affogato',desc:'Vanilla ice cream drowned in hot espresso',time:3,difficulty:1,emoji:'☕',img:'',tags:['vegetarian'],contains:['dairy'],kcal:250,protein:4,ingredients:[
+  {id:'x31',type:'dessert',name:'Affogato',desc:'Vanilla ice cream drowned in hot espresso',time:3,difficulty:1,emoji:'☕',img:'',photo:'https://content.joseedistasio.ca/app/uploads/2019/09/06153623/Affogato-Cafe-JDS_NOV_2023-web.jpg',tags:['vegetarian'],contains:['dairy'],kcal:250,protein:4,ingredients:[
     {name:'Ice cream',qty:100,unit:'g',category:'Frozen',buyDayBefore:false},{name:'Espresso',qty:60,unit:'ml',category:'Pantry',buyDayBefore:false}],steps:['Scoop ice cream into a glass.','Pull a shot of hot espresso.','Pour over and serve at once.']},
-  {id:'x32',type:'dessert',name:'Rum baba',desc:'Light sponge soaked in rum syrup',time:60,difficulty:4,emoji:'🥃',img:'',tags:['vegetarian'],contains:['gluten','dairy'],kcal:360,protein:6,ingredients:[
+  {id:'x32',type:'dessert',name:'Rum baba',desc:'Light sponge soaked in rum syrup',time:60,difficulty:4,emoji:'🥃',img:'',photo:'https://www.gatherandfeast.com/sites/gatherandfeast/files/styles/slider/public/images/posts/02-rum-baba-with-daffinois-orange-vanilla-recipe-front.jpg',tags:['vegetarian'],contains:['gluten','dairy'],kcal:360,protein:6,ingredients:[
     {name:'Plain flour',qty:150,unit:'g',category:'Pantry',buyDayBefore:false},{name:'Eggs',qty:2,unit:'',category:'Dairy',buyDayBefore:false},{name:'Caster sugar',qty:80,unit:'g',category:'Pantry',buyDayBefore:false},{name:'Rum',qty:50,unit:'ml',category:'Pantry',buyDayBefore:false},{name:'Butter',qty:40,unit:'g',category:'Dairy',buyDayBefore:false}],steps:['Make an enriched yeast batter and bake little babas.','Boil a sugar syrup and stir in the rum.','Soak the warm babas in the rum syrup.']},
-  {id:'x33',type:'dessert',name:'Meringues with cream',desc:'Crisp meringue nests with whipped cream',time:80,difficulty:3,emoji:'🍥',img:'',tags:['vegetarian'],contains:['dairy'],kcal:280,protein:4,ingredients:[
+  {id:'x33',type:'dessert',name:'Meringues with cream',desc:'Crisp meringue nests with whipped cream',time:80,difficulty:3,emoji:'🍥',img:'',photo:'https://images.immediate.co.uk/production/volatile/sites/30/2020/08/recipe-image-legacy-id-1027467_11-b1d6d64.jpg',tags:['vegetarian'],contains:['dairy'],kcal:280,protein:4,ingredients:[
     {name:'Eggs',qty:3,unit:'',category:'Dairy',buyDayBefore:false},{name:'Caster sugar',qty:150,unit:'g',category:'Pantry',buyDayBefore:false},{name:'Double cream',qty:100,unit:'ml',category:'Dairy',buyDayBefore:false}],steps:['Whip whites with sugar to stiff, glossy peaks.','Pipe nests and bake low until crisp.','Fill with whipped cream.']},
-  {id:'x34',type:'dessert',name:'Salted caramel pots',desc:'Silky salted-caramel custard pots',time:35,difficulty:3,emoji:'🍯',img:'',tags:['vegetarian'],contains:['dairy'],kcal:370,protein:5,ingredients:[
+  {id:'x34',type:'dessert',name:'Salted caramel pots',desc:'Silky salted-caramel custard pots',time:35,difficulty:3,emoji:'🍯',img:'',photo:'https://www.sugarsaltmagic.com/wp-content/uploads/2020/05/Salted-Caramel-Pots-De-Creme-FB10.jpg',tags:['vegetarian'],contains:['dairy'],kcal:370,protein:5,ingredients:[
     {name:'Double cream',qty:150,unit:'ml',category:'Dairy',buyDayBefore:false},{name:'Caster sugar',qty:100,unit:'g',category:'Pantry',buyDayBefore:false},{name:'Butter',qty:30,unit:'g',category:'Dairy',buyDayBefore:false},{name:'Eggs',qty:2,unit:'',category:'Dairy',buyDayBefore:false}],steps:['Cook the sugar to a deep caramel; whisk in butter and cream.','Temper into the yolks.','Bake in a water bath until just set; chill.']},
-  {id:'x35',type:'dessert',name:'Ice cream',desc:'Just scoop and serve — no cooking',time:2,difficulty:1,emoji:'🍦',img:'',tags:['vegetarian'],contains:['dairy'],kcal:220,protein:4,ingredients:[
+  {id:'x35',type:'dessert',name:'Ice cream',desc:'Just scoop and serve — no cooking',time:2,difficulty:1,emoji:'🍦',img:'',photo:'https://funcakes.com/content/uploads/2023/06/Ice-cream-recipe-1000x750.jpg',tags:['vegetarian'],contains:['dairy'],kcal:220,protein:4,ingredients:[
     {name:'Ice cream',qty:120,unit:'g',category:'Frozen',buyDayBefore:false}],steps:['Scoop into bowls and enjoy.']},
   {id:'x36',type:'dessert',name:'Strawberry tart',desc:'Crisp pastry, custard, fresh strawberries',time:50,difficulty:3,emoji:'🍓',img:'',photo:'https://preppykitchen.com/wp-content/uploads/2023/09/Strawberry-Tart-Social.jpg',tags:['vegetarian'],contains:['gluten','dairy'],kcal:340,protein:6,ingredients:[
     {name:'Shortcrust pastry',qty:200,unit:'g',category:'Bakery',buyDayBefore:false},{name:'Strawberries',qty:200,unit:'g',category:'Produce',buyDayBefore:true},{name:'Double cream',qty:120,unit:'ml',category:'Dairy',buyDayBefore:false},{name:'Caster sugar',qty:40,unit:'g',category:'Pantry',buyDayBefore:false}],steps:['Blind-bake the pastry case.','Fill with a set vanilla custard.','Arrange the strawberries on top and glaze.']},
   {id:'x37',type:'dessert',name:'Apple pie',desc:'Cinnamon-spiced apples in a golden crust',time:60,difficulty:3,emoji:'🥧',img:'',photo:'https://www.recipetineats.com/tachyon/2022/11/Apple-Pie_8.jpg',tags:['vegetarian'],contains:['gluten','dairy'],kcal:390,protein:5,ingredients:[
     {name:'Shortcrust pastry',qty:250,unit:'g',category:'Bakery',buyDayBefore:false},{name:'Apple',qty:4,unit:'',category:'Produce',buyDayBefore:false},{name:'Caster sugar',qty:70,unit:'g',category:'Pantry',buyDayBefore:false},{name:'Cinnamon',qty:1,unit:'tsp',category:'Pantry',buyDayBefore:false}],steps:['Line a tin with pastry.','Fill with sliced apples, sugar and cinnamon.','Top with pastry and bake 45 min at 190°C.']},
-  {id:'x38',type:'dessert',name:'Crêpes with sugar & lemon',desc:'Thin pancakes, sugar and a squeeze of lemon',time:25,difficulty:2,emoji:'🥞',img:'pancake',tags:['vegetarian'],contains:['gluten','dairy'],kcal:320,protein:9,ingredients:[
+  {id:'x38',type:'dessert',name:'Crêpes with sugar & lemon',desc:'Thin pancakes, sugar and a squeeze of lemon',time:25,difficulty:2,emoji:'🥞',img:'pancake',photo:'https://juliasalbum.com/wp-content/uploads/2014/07/14405355627_ff8d4c4a1c_c.jpg',tags:['vegetarian'],contains:['gluten','dairy'],kcal:320,protein:9,ingredients:[
     {name:'Plain flour',qty:100,unit:'g',category:'Pantry',buyDayBefore:false},{name:'Eggs',qty:2,unit:'',category:'Dairy',buyDayBefore:false},{name:'Milk',qty:250,unit:'ml',category:'Dairy',buyDayBefore:false},{name:'Lemon',qty:1,unit:'',category:'Produce',buyDayBefore:false},{name:'Caster sugar',qty:30,unit:'g',category:'Pantry',buyDayBefore:false}],steps:['Whisk a smooth batter and rest it.','Fry thin crêpes in a hot pan.','Sprinkle with sugar and a squeeze of lemon.']},
-  {id:'x39',type:'dessert',name:'Pistachio cake',desc:'Moist ground-pistachio sponge',time:55,difficulty:3,emoji:'🌰',img:'',tags:['vegetarian'],contains:['gluten','dairy','nuts'],kcal:400,protein:9,ingredients:[
+  {id:'x39',type:'dessert',name:'Pistachio cake',desc:'Moist ground-pistachio sponge',time:55,difficulty:3,emoji:'🌰',img:'',photo:'http://www.whitakerschocolates.com/cdn/shop/articles/20250429154232-pistachio-20cake-20recipe-20uk_6f017210-3c2a-44db-8a6e-ed84bde99dc9.png',tags:['vegetarian'],contains:['gluten','dairy','nuts'],kcal:400,protein:9,ingredients:[
     {name:'Pistachios',qty:100,unit:'g',category:'Pantry',buyDayBefore:false},{name:'Plain flour',qty:80,unit:'g',category:'Pantry',buyDayBefore:false},{name:'Eggs',qty:3,unit:'',category:'Dairy',buyDayBefore:false},{name:'Butter',qty:80,unit:'g',category:'Dairy',buyDayBefore:false},{name:'Caster sugar',qty:100,unit:'g',category:'Pantry',buyDayBefore:false}],steps:['Blitz the pistachios fine.','Cream butter and sugar, beat in eggs, fold in pistachios and flour.','Bake 35 min at 175°C.']},
   {id:'x40',type:'dessert',name:'Apple & berry crumble',desc:'Warm fruit under a buttery oat crumble',time:45,difficulty:2,emoji:'🍎',img:'',photo:'https://sallysbakingaddiction.com/wp-content/uploads/2015/07/apple-crumble-pie-4.jpg',tags:['vegetarian'],contains:['gluten','dairy'],kcal:380,protein:5,ingredients:[
     {name:'Apple',qty:2,unit:'',category:'Produce',buyDayBefore:false},{name:'Mixed berries',qty:120,unit:'g',category:'Produce',buyDayBefore:true},{name:'Oats',qty:60,unit:'g',category:'Pantry',buyDayBefore:false},{name:'Plain flour',qty:60,unit:'g',category:'Pantry',buyDayBefore:false},{name:'Butter',qty:60,unit:'g',category:'Dairy',buyDayBefore:false},{name:'Caster sugar',qty:50,unit:'g',category:'Pantry',buyDayBefore:false}],steps:['Toss the fruit with a little sugar in a dish.','Rub butter into flour, oats and sugar to a crumble.','Scatter over and bake 30 min at 190°C.']},
-  {id:'x41',type:'dessert',name:'Passion fruit pavlova',desc:'Crisp meringue, cream & tangy passion fruit',time:90,difficulty:4,emoji:'🍈',img:'',tags:['vegetarian'],contains:['dairy'],kcal:300,protein:4,ingredients:[
+  {id:'x41',type:'dessert',name:'Passion fruit pavlova',desc:'Crisp meringue, cream & tangy passion fruit',time:90,difficulty:4,emoji:'🍈',img:'',photo:'https://b769ed60.delivery.rocketcdn.me/wp-content/uploads/2022/12/TA0A8023.jpg',tags:['vegetarian'],contains:['dairy'],kcal:300,protein:4,ingredients:[
     {name:'Eggs',qty:4,unit:'',category:'Dairy',buyDayBefore:false},{name:'Caster sugar',qty:150,unit:'g',category:'Pantry',buyDayBefore:false},{name:'Double cream',qty:150,unit:'ml',category:'Dairy',buyDayBefore:false},{name:'Passion fruit',qty:3,unit:'',category:'Produce',buyDayBefore:true}],steps:['Whip whites with sugar and bake to a crisp pavlova.','Whip the cream.','Top with cream and spoon over the passion fruit pulp.']},
 ];
 // Which courses a lunch/dinner gets, driven by goal & appetite (§3.1). 'main' is always present.
@@ -372,8 +372,32 @@ const CUISINE_OPTIONS = [
   {v:'French',emoji:'🇫🇷'},{v:'Italian',emoji:'🇮🇹'},{v:'Asian',emoji:'🥢'},
   {v:'Mexican',emoji:'🌶'},{v:'Middle-Eastern',emoji:'🧆'},{v:'Surprise me',emoji:'✨'},
 ];
+// V4.5: "cuisines you love" is now actually respected — a lightweight keyword classifier infers
+// a cuisine from the dish's own name (no per-dish hand-tagging needed across 200 dishes), and
+// pickMeal/weightedPick uses it as a SOFT weight, never a hard filter: a ticked cuisine's dishes
+// get picked more often, dishes tagged with an un-ticked cuisine get picked less often, and the
+// ~70% of dishes with no strong cuisine identity (e.g. "Steak & fries") are unaffected either way.
+// Soft, because a hard filter could combine with allergies/dislikes to empty the pool.
+const CUISINE_KEYWORDS = {
+  French: /french onion|quiche|croque|ratatouille|coq au vin|bourguignon|duck.*orange|cr[eê]pe|cr[eè]me br[uû]l[eé]e|\btarte\b|ni[cç]oise|cassoulet|\bgratin\b|souffl[eé]|macaron|madeleine|rum baba/i,
+  Italian: /\bpasta\b|spaghetti|\bpizza\b|risotto|lasagna|carbonara|bolognese|caprese|bruschetta|gnocchi|minestrone|tiramisu|\bpesto\b|\bparmesan\b|\borzo\b|panna cotta/i,
+  Asian: /\bcurry\b|teriyaki|pad thai|stir.fry|fried rice|\bsushi\b|\bramen\b|\bnoodle|\bthai\b|\bchinese\b|\bjapanese\b|\bkatsu\b|\bmiso\b|soy sauce|\bdumpling|\bbao\b|\bkimchi\b|\bmasala\b|\btikka\b|\bchana\b|coconut curry/i,
+  Mexican: /\btaco|\bburrito|\bfajita|quesadilla|\bsalsa\b|guacamole|\bnachos\b|enchilada|\bchilli\b|\bchili\b/i,
+  'Middle-Eastern': /\bhummus\b|\bfalafel\b|shakshuka|baba ganoush|tabbouleh|\bpita\b|\bcouscous\b|\btagine\b|\bkebab\b|moussaka/i,
+};
+function inferCuisine(name){
+  const n=String(name||'');
+  for(const [c,re] of Object.entries(CUISINE_KEYWORDS)) if(re.test(n)) return c;
+  return null;
+}
+// A real preference means at least one non-"Surprise me" cuisine is ticked, but not literally
+// every option (ticking all of them is the same as no preference — nothing to weight against).
+function hasCuisinePref(profile){
+  const real=((profile&&profile.cuisines)||[]).filter(c=>c!=='Surprise me');
+  return real.length>0 && real.length<CUISINE_OPTIONS.length-1;
+}
 const BREAKFAST_OPTIONS = [
-  {v:'sweet',label:'🥐 Sweet'},{v:'savory',label:'🍳 Savory'},{v:'surprise',label:'✨ Surprise me'},
+  {v:'sweet',label:'🥐 Sweet'},{v:'savory',label:'🍳 Salty'},{v:'surprise',label:'✨ Surprise me'},
 ];
 // Common sports to tick, grouped by category (V4.4). Tick any that apply — combined with
 // "times per week" they hint at how active you are (calorie needs come from frequency).
@@ -706,23 +730,30 @@ function pickMeal(type,profile,usedIds,usedNames,targetKcal){
   // favorites get first pick when available.
   const favFresh=choices.filter(r=>String(r.id).startsWith('fav'));
   if(favFresh.length&&Math.random()<0.5) return favFresh[Math.floor(Math.random()*favFresh.length)];
-  // With a calorie target (profile complete): weighted pick blending calorie-closeness with a
-  // gentle curated nudge — so a hearty dish wins for a high target without excluding it the way a
-  // hard curated-first filter did, while variety and no-repeat are preserved. Without a target,
-  // keep the original §0 curated-first behaviour unchanged.
-  if(targetKcal>0) return weightedPick(choices,targetKcal);
+  // With a calorie target (profile complete) OR a real cuisine preference: weighted pick blending
+  // calorie-closeness and/or cuisine match with a gentle curated nudge — so a hearty dish wins for
+  // a high target without excluding it the way a hard curated-first filter did, and a ticked
+  // cuisine is genuinely more likely to show up, while variety and no-repeat are preserved.
+  // Neither signal present → keep the original §0 curated-first behaviour unchanged.
+  if(targetKcal>0||hasCuisinePref(profile)) return weightedPick(choices,targetKcal,profile);
   const from=preferCurated(choices);
   return from[Math.floor(Math.random()*from.length)];
 }
-// Pick one dish, weighting each by how close its calories are to the target (closer = likelier)
-// and giving curated/user dishes a mild bonus (§0 precedence, softened to a nudge).
-function weightedPick(list,target){
+// Pick one dish, weighting each by how close its calories are to the target (closer = likelier),
+// how well it matches a ticked cuisine (see hasCuisinePref/inferCuisine above), and giving
+// curated/user dishes a mild bonus (§0 precedence, softened to a nudge).
+function weightedPick(list,target,profile){
   const scale=200;   // kcal: how quickly weight falls off as a dish gets further from target
+  const cuisPref=profile&&hasCuisinePref(profile)?new Set(profile.cuisines.filter(c=>c!=='Surprise me')):null;
   const w=list.map(r=>{
     // cubic falloff: dishes near the target dominate, far dishes fade fast (so a high target
     // really pulls the hearty dishes and a low target really pulls the light ones).
-    let x=(typeof r.kcal==='number')?1/(1+Math.pow(Math.abs(r.kcal-target)/scale,3)):0.15;
+    let x=target>0?(typeof r.kcal==='number'?1/(1+Math.pow(Math.abs(r.kcal-target)/scale,3)):0.15):1;
     if(isCurated(r)||isUserDish(r)) x*=1.1;   // mild curated nudge, small enough not to override the goal
+    if(cuisPref){
+      const rc=inferCuisine(r.name);
+      if(rc) x*=cuisPref.has(rc)?2.2:0.35;    // ticked cuisine's dishes come up more; others less — never zero
+    }
     return x;
   });
   let total=w.reduce((s,x)=>s+x,0);
@@ -1667,7 +1698,7 @@ function renderProfile(){
       <div class="q-why">The tastier your week, the more you'll actually cook it.</div>
       <div class="field" style="margin-bottom:20px"><label>Breakfast mood</label>
         ${chipRow('q-breakfast',BREAKFAST_OPTIONS,[p.breakfastPref])}</div>
-      <div class="field" style="margin-bottom:20px"><label>Cuisines you love</label>
+      <div class="field" style="margin-bottom:20px"><label>Cuisines you love <span class="hint">(tick any — we'll pick these more often)</span></label>
         ${chipRow('q-cuisines',CUISINE_OPTIONS,p.cuisines)}</div>
       <div class="field" style="margin-bottom:20px"><label>Quick dislikes <span class="hint">(tap to toggle)</span></label>
         ${chipRow('q-dislikes',DISLIKE_OPTIONS,p.dislikes)}</div>
