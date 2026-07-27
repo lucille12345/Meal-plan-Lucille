@@ -136,10 +136,69 @@ leftover parameter, not the brand — leave it.
 >   than the same goal's **3-dish** main; `coursePref:'1'`→`['main']`, `'3'`→starter+main+dessert;
 >   **0 allergy leaks, 0 duplicates**; shopping prices work (gain week ≈ €94); course selector
 >   renders + persists; 0 console errors.
-> - **Known limit (honest):** a heavy-gain day still lands ~2500 vs a ~3300 target — no single dish
->   is 1000+ kcal and no-repeat caps how many hearty dishes fit a week. Selection now pulls the
->   heaviest available; fully closing the gap would need **portion scaling** (deliberately NOT done
->   — it touches per-person semantics + shopping quantities and is risky). Flag for a future phase.
+> - ~~**Known limit (honest):** a heavy-gain day still lands ~2500 vs a ~3300 target...~~
+>   **SUPERSEDED by V4.2 below — portion scaling was built.** This gap is closed.
+
+> ## 🆕 V4.2–V4.6 — everything since V4.1, condensed (2026-07-23 to 2026-07-24)
+> These sessions weren't logged individually as they happened — this is a retroactive summary so
+> the next session isn't misled by the stale note above. Full detail is in `git log`; every item
+> below was verified in-browser (AI off) before committing, not just asserted.
+> - **V4.2 — portion scaling.** `portionScale(r,f)` grows/shrinks a dish's ingredients + kcal +
+>   protein + price together; `scaleWeekPortions()` runs after `enforceNoRepeat` and scales each
+>   meal's **main** to hit its calorie target — so "prise de masse" now really means bigger
+>   portions, not just different dishes. Capped 0.65×–1.8×. Verified every profile lands within
+>   ~5% of target, scaling correctly by **weight, sex and goal** (85 kg male ≈3318/3530 vs 60 kg
+>   female ≈2672/2730 vs 70 kg female losing ≈2033/2090). "Feel light" renamed **"Lose weight"**
+>   (sub: "lighter meals, no dessert" — `coursesForGoal('lose')` is now `['main']` only). City
+>   picker **removed** (prices were always Paris-based anyway; a note under Budget says so now).
+> - **V4.3 — more dishes + a workable budget.** Added famous/difficult dishes (beef bourguignon,
+>   coq au vin, duck à l'orange, paella, lasagna, carbonara, butter chicken, pad thai, soufflé —
+>   difficulty 4 ones need real time so they only surface for cooks who allow it) and
+>   athlete/heavy dishes (1250–1450 kcal). **Default budget raised €12→€30/day/person** — €12 could
+>   never be met once real pack-pricing landed; €30 was measured, not guessed (typical weeks run
+>   €16–29/day/person). Budget pill and the shopping total now show **per-person**, so it works for
+>   any household size.
+> - **V4.4 — dessert wishlist, sports, age, AI default.** All 18 desserts Lucille asked for (crème
+>   brûlée, panna cotta, pavlovas, rum baba, affogato, salted caramel pots, etc.). Age is now a
+>   typeable number (min 14, was a stepper). The sport dropdown became a **38-sport tickable
+>   checklist across 7 categories**. "Let AI fill any gaps" now defaults **ON**; unticking it pops
+>   a confirm dialog ("Keep it on" / "Turn it off") rather than silently disabling. 10 quick/cheap
+>   **student dishes** added (steak & fries, garlic-oil pasta, grilled cheese, egg fried rice…).
+> - **V4.5 — "Cuisines you love" made real; "Salty" not "Savory"; realistic prices.** The cuisine
+>   picker was pure decoration — collected, never used. Built `inferCuisine()`, a keyword
+>   classifier reading each dish's own name (covers ~30% of the pool; the untagged 70% are
+>   unaffected either way), and `weightedPick()` now applies a **soft** weight (2.2× boost for a
+>   ticked cuisine, 0.35× for an un-ticked one, never a hard filter) whenever a real preference is
+>   set. Verified: ticking Italian moved its share of mains from 33.6%→52.1% across 10 sample
+>   weeks; ticking French instead dropped Italian to 20%; 0 allergy leaks with a cuisine
+>   preference active. Breakfast option relabelled **"Salty"**. **Shopping prices rebuilt on a
+>   "true till total" model** (Lucille's choice): weight/volume staples price as the **whole pack**
+>   you'd buy (a bottle of oil, a jar of spice), not the spoonful a recipe uses — closes the
+>   "prices are absurdly low" complaint and the real €0.00-for-a-handful-of-basil bug. Small
+>   surplus (×1.08) on weight/volume; piece items just round up. Pantry checkboxes now cover
+>   **groups** ("Spices" removes every spice jar, not just literal "Spices").
+> - **V4.6 — photo pass + a real bug fix from a final audit, not a bug report.** ~35 more dish
+>   photos applied from Lucille's links across several rounds, each viewed in a contact sheet
+>   before going in (never applied on curl-200 alone). Removed the emoji header on the Tastes
+>   step. **Found and fixed:** `applyLeftovers()` built a "Leftover X" copy with a fresh id but
+>   never stamped `sourceId` the way `toggleFavorite()` already does — so `isCurated()` read false
+>   on the copy, and a later `passesDietFilters()` re-check could fall through to the blunt
+>   legacy-pool gluten regex instead of trusting the dish's own reviewed `contains[]` (a curated
+>   "Black bean tacos" — real recipe, corn tortillas, `contains:['dairy']` — got wrongly flagged
+>   gluten-unsafe on its leftover copy only). **Verified not reachable from any live user action**
+>   (leftovers can't be dragged, browsed, or re-picked — `eligibleRecipes` never includes them), so
+>   no one was ever served anything unsafe; fixed anyway since it sits in the allergen-safety path
+>   and the fix is one line. 0 leaks across 18 generated weeks after the fix (was 2 false positives
+>   before it, both on leftover copies only).
+> - **Current pool size: ~203 dishes** (up from 57 curated + a growing legacy pool). Photo
+>   coverage: **5 of 203** still show an emoji tile (no photo found or sent yet) — down from the
+>   35 that had no `photo:` field of their own, because most of those resolve through the legacy
+>   keyword-matching fallback (`DISH_IMG`). The 5 are recorded in session history, not yet in a
+>   dedicated tracking doc — worth listing explicitly if photo work continues.
+> - **✅ AI-ON re-checked after V4.2–V4.6 (2026-07-24), real Gemini, GREEN.** Restrictive profile
+>   (Nuts+Dairy+Gluten+dislikes, gain+high-activity): **5 real `/generate-meal` top-ups, 0
+>   `/generate-week`** — database-first precedence still holds after all the dish/pricing/cuisine
+>   changes. 49 slots, **0 allergy leaks**. 0 console errors.
 
 **Code:** V2 (Phases 1–10a) is **DEPLOYED AND LIVE** as of 2026-07-20. Lucille pushed `main` via
 GitHub Desktop and Render auto-deployed.
