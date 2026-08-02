@@ -1,6 +1,6 @@
 /* #Foodie — service worker: offline app-shell cache (Phase 9 PWA).
    Bump CACHE when the shell changes so old caches are cleaned up. */
-const CACHE = 'foodie-shell-v27';
+const CACHE = 'foodie-shell-v29';
 const SHELL = [
   './',
   './index.html',
@@ -40,6 +40,10 @@ self.addEventListener('fetch', (e) => {
   // Don't touch the backend API or cross-origin requests (Supabase, Unsplash, fonts) — just pass through.
   if (url.origin !== self.location.origin) return;
   if (url.pathname.startsWith('/generate-')) return;
+  // /dish-image is a live lookup, not an asset. Without this it fell into the cache-first branch
+  // below, so a one-off failure ({photo:null}) would be cached forever and the dish could never
+  // get its picture on a retry.
+  if (url.pathname.startsWith('/dish-image')) return;
 
   // The app's own code (html/js/css/json) is network-first so updates always reach the user;
   // it falls back to cache only when offline. Other same-origin assets (icons) are cache-first.

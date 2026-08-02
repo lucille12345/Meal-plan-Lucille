@@ -4,7 +4,7 @@
 > The source of truth is [`public/ingredient-prices.js`](../public/ingredient-prices.js).
 > Change a price there, then run `node tools/build-prices-md.js` to rebuild this page.
 
-**275 ingredients priced.** Covers 172 of the 172 distinct ingredients currently used by `recipes-db.js`.
+**287 ingredients priced.** Covers 172 of the 172 distinct ingredients currently used by `recipes-db.js`.
 
 ⚠️ **These are informed estimates, not live scraped prices** — a French supermarket
 (Carrefour / Leclerc / Intermarché), mid-range own-brand, 2026. They exist so the shopping
@@ -89,7 +89,7 @@ Always label them in the app as *"Estimated — varies by shop."* Gemini's own p
 | Spring Onions | per piece | €0.20 |
 | Yellow Onion | per piece | €0.30 |
 
-### Pantry (218)
+### Pantry (230)
 
 | Ingredient | Price basis | EUR |
 |---|---|---|
@@ -98,6 +98,7 @@ Always label them in the app as *"Estimated — varies by shop."* Gemini's own p
 | Anchovy Fillets | per 100 g | €3.50 |
 | Apple Sauce | per 100 g | €0.35 |
 | Apricots | per piece | €0.35 |
+| Arborio Rice | per 100 g | €0.45 |
 | Arugula | per 100 g | €1.60 |
 | Asparagus | per 100 g | €1.60 |
 | Avocado Oil | per 100 ml | €1.50 |
@@ -107,6 +108,7 @@ Always label them in the app as *"Estimated — varies by shop."* Gemini's own p
 | Baking Soda | per 100 g | €0.30 |
 | Balsamic Vinegar | per 100 ml | €0.60 |
 | Basil Pesto | per 100 g | €1.40 |
+| Beef Fillet | per 100 g | €4.50 |
 | Beef Steak | per 100 g | €2.20 |
 | Beef Strips | per 100 g | €1.40 |
 | Bicarbonate Of Soda | per 100 g | €0.30 |
@@ -160,17 +162,20 @@ Always label them in the app as *"Estimated — varies by shop."* Gemini's own p
 | Dried Oregano | per 100 g | €4.00 |
 | Dried Thyme | per 100 g | €4.00 |
 | Duck Breast | per 100 g | €2.80 |
+| Duck Leg | per 100 g | €1.90 |
 | Edamame | per 100 g | €1.20 |
 | Egg Noodles | per 100 g | €0.45 |
 | Eggplant | per piece | €1.10 |
 | Espresso | per 100 ml | €0.30 |
 | Falafel | per piece | €0.25 |
 | Fava Beans | per 100 g | €0.90 |
+| Fennel | per piece | €1.20 |
 | Figs | per piece | €0.55 |
 | Fire Roasted Diced Tomatoes | per 100 g | €0.24 |
 | Flaky Sea Salt | per 100 g | €1.50 |
 | Flour | per 100 g | €0.10 |
 | Fresh Dill | per piece | €1.00 |
+| Fresh Rosemary | per 100 g | €2.50 |
 | Fresh Thyme | per 100 g | €2.50 |
 | Fries | per 100 g | €0.30 |
 | Garam Masala | per 100 g | €3.50 |
@@ -198,10 +203,13 @@ Always label them in the app as *"Estimated — varies by shop."* Gemini's own p
 | Jasmine Rice | per 100 g | €0.25 |
 | Kalamata Olives | per 100 g | €1.60 |
 | Kidney Beans | per 100 g | €0.25 |
+| King Prawns | per 100 g | €2.80 |
 | Lamb | per 100 g | €2.60 |
+| Lamb Leg | per 100 g | €2.20 |
 | Leeks | per piece | €0.85 |
 | Lemon Sorbet | per 100 g | €0.60 |
 | Lettuce | per 100 g | €0.60 |
+| Linguine | per 100 g | €0.20 |
 | Mango | per piece | €1.20 |
 | Mango Sorbet | per 100 g | €0.60 |
 | Maple Syrup | per 100 ml | €2.20 |
@@ -249,6 +257,7 @@ Always label them in the app as *"Estimated — varies by shop."* Gemini's own p
 | Pork Loin | per 100 g | €1.30 |
 | Potato | per piece | €0.25 |
 | Powdered Sugar | per 100 g | €0.20 |
+| Prosciutto | per 100 g | €3.60 |
 | Protein Powder | per 100 g | €3.00 |
 | Puff Pastry | per 100 g | €0.55 |
 | Queso Fresco | per 100 g | €1.60 |
@@ -271,9 +280,11 @@ Always label them in the app as *"Estimated — varies by shop."* Gemini's own p
 | Rosewater | per 100 ml | €1.80 |
 | Rum | per 100 ml | €2.00 |
 | Rye Bread | per slice | €0.15 |
+| Saffron | per 100 g | €30.00 |
 | Salad Greens | per 100 g | €1.20 |
 | Salsa | per 100 g | €0.80 |
 | Sausages | per piece | €0.70 |
+| Sea Bass Fillet | per 100 g | €3.20 |
 | Shallots | per piece | €0.30 |
 | Sherry Vinegar | per 100 ml | €0.80 |
 | Shortcrust Pastry | per 100 g | €0.55 |
@@ -300,6 +311,7 @@ Always label them in the app as *"Estimated — varies by shop."* Gemini's own p
 | Turmeric | per 100 g | €3.00 |
 | Vanilla Extract | per 100 ml | €8.00 |
 | Vanilla Yogurt | per 100 g | €0.40 |
+| Veal Shank | per 100 g | €2.40 |
 | Vegetable Broth | per 100 ml | €0.06 |
 | Vegetable Oil | per 100 ml | €0.20 |
 | Walnuts | per 100 g | €1.90 |
