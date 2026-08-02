@@ -343,6 +343,29 @@ const INGREDIENT_PRICES = {
   'pistachios':              {per:'100g',  eur:3.50},
   'passion fruit':           {per:'piece', eur:0.90},
   'gnocchi':                 {per:'100g',  eur:0.40},
+  /* ---------- V4.5: cuisine-bucket ingredients (French/Italian/Asian/Mexican/Middle-Eastern) ---------- */
+  'fava beans':              {per:'100g',  eur:0.90},
+  'leeks':                   {per:'piece', eur:0.85},
+  'grape leaves':            {per:'100g',  eur:1.80},
+  'edamame':                 {per:'100g',  eur:1.20},
+  'gyoza wrappers':          {per:'100g',  eur:1.00},
+  'sticky rice':             {per:'100g',  eur:0.35},
+  'queso fresco':            {per:'100g',  eur:1.60},
+  'condensed milk':          {per:'100ml', eur:0.60},
+  'yeast':                   {per:'piece', eur:0.20},
+  'rosewater':               {per:'100ml', eur:1.80},
+  'phyllo pastry':           {per:'100g',  eur:0.65},
+  'shredded chicken':        {per:'100g',  eur:1.10},
+  'tahini':                  {per:'100g',  eur:1.40},
+  'chickpeas':               {per:'100g',  eur:0.30},
+  'red wine vinegar':        {per:'100ml', eur:0.60},
+  'anchovy fillets':         {per:'100g',  eur:3.50},
+  'kalamata olives':         {per:'100g',  eur:1.60},
+  'nori sheets':             {per:'piece', eur:0.20},
+  'sushi rice':              {per:'100g',  eur:0.45},
+  'orange blossom water':    {per:'100ml', eur:1.80},
+  'ricotta':                 {per:'100g',  eur:1.10},
+  'mango':                   {per:'piece', eur:1.20},
 };
 
 /* ----------------------------------------------------------------------------
@@ -413,7 +436,9 @@ function packOf(name){
   let pack=null, label='pack';
   if (e.per==='100ml'){
     if (/coconut milk/.test(n)) { pack=400; label='can'; }
+    else if (/condensed milk/.test(n)) { pack=397; label='can'; }
     else if (/\bmilk\b|broth|stock/.test(n)) { pack=1000; label='carton'; }
+    else if (/rosewater|orange blossom/.test(n)) { pack=250; label='bottle'; }
     else if (/cream/.test(n)) { pack=200; label='pot'; }
     else if (/\boil\b/.test(n)) { pack=500; label='bottle'; }
     else if (/red wine|white wine/.test(n)) { pack=750; label='bottle'; }
@@ -427,7 +452,8 @@ function packOf(name){
     else if (/flour|\bsugar\b/.test(n)) { pack=1000; label='bag'; }
     else if (/rice|pasta|spaghetti|penne|orzo|ditalini|noodle|oats|couscous|quinoa|lentils|breadcrumb|granola|muesli/.test(n)) { pack=500; label='pack'; }
     else if (/(kidney|black|cannellini|butter|baked|broad|pinto|white) beans?|chickpea|crushed tomato|diced tomato|roasted tomato|tomato paste|tomato sauce|marinara|passata|beetroot|sweetcorn/.test(n)) { pack=400; label='can'; }
-    else if (/cheese|feta|mozzarella|parmesan|pecorino|gruy|cheddar|mascarpone|cotija|halloumi|paneer/.test(n)) { pack=200; label='pack'; }
+    else if (/cheese|feta|mozzarella|parmesan|pecorino|gruy|cheddar|mascarpone|cotija|halloumi|paneer|ricotta|queso/.test(n)) { pack=200; label='pack'; }
+    else if (/edamame|gyoza wrapper|grape leaves/.test(n)) { pack=250; label='pack'; }
     else if (/butter/.test(n) && !/nut butter|peanut butter|almond butter/.test(n)) { pack=250; label='pack'; }
     else if (/yogurt|hummus|pesto|tahini|mayonnaise|salsa|paste|mustard|jam|nut butter|peanut butter|almond butter|apple sauce|miso|olives/.test(n)) { pack=200; label='pot'; }
     else if (/berries|strawberr|blueberr|raspberr|grapes|cranberr/.test(n)) { pack=250; label='punnet'; }

@@ -4,7 +4,7 @@
 > The source of truth is [`public/ingredient-prices.js`](../public/ingredient-prices.js).
 > Change a price there, then run `node tools/build-prices-md.js` to rebuild this page.
 
-**257 ingredients priced.** Covers 172 of the 172 distinct ingredients currently used by `recipes-db.js`.
+**275 ingredients priced.** Covers 172 of the 172 distinct ingredients currently used by `recipes-db.js`.
 
 ⚠️ **These are informed estimates, not live scraped prices** — a French supermarket
 (Carrefour / Leclerc / Intermarché), mid-range own-brand, 2026. They exist so the shopping
@@ -89,12 +89,13 @@ Always label them in the app as *"Estimated — varies by shop."* Gemini's own p
 | Spring Onions | per piece | €0.20 |
 | Yellow Onion | per piece | €0.30 |
 
-### Pantry (200)
+### Pantry (218)
 
 | Ingredient | Price basis | EUR |
 |---|---|---|
 | Almond Butter | per 100 g | €1.60 |
 | Almond Flour | per 100 g | €1.80 |
+| Anchovy Fillets | per 100 g | €3.50 |
 | Apple Sauce | per 100 g | €0.35 |
 | Apricots | per piece | €0.35 |
 | Arugula | per 100 g | €1.60 |
@@ -124,7 +125,7 @@ Always label them in the app as *"Estimated — varies by shop."* Gemini's own p
 | Cheese | per 100 g | €1.50 |
 | Chia Seeds | per 100 g | €1.20 |
 | Chicken Broth | per 100 ml | €0.07 |
-| Chickpeas | per 100 g | €0.22 |
+| Chickpeas | per 100 g | €0.30 |
 | Chili Powder | per 100 g | €3.00 |
 | Chopped Tomatoes | per piece | €0.70 |
 | Chorizo | per 100 g | €2.20 |
@@ -135,6 +136,7 @@ Always label them in the app as *"Estimated — varies by shop."* Gemini's own p
 | Coconut Milk | per 100 ml | €0.32 |
 | Coconut Oil | per 100 ml | €1.00 |
 | Cod Fillet | per 100 g | €2.20 |
+| Condensed Milk | per 100 ml | €0.60 |
 | Cooked Beetroot | per 100 g | €0.55 |
 | Cooked Lentils | per 100 g | €0.45 |
 | Cooking Oil | per 100 ml | €0.25 |
@@ -158,10 +160,12 @@ Always label them in the app as *"Estimated — varies by shop."* Gemini's own p
 | Dried Oregano | per 100 g | €4.00 |
 | Dried Thyme | per 100 g | €4.00 |
 | Duck Breast | per 100 g | €2.80 |
+| Edamame | per 100 g | €1.20 |
 | Egg Noodles | per 100 g | €0.45 |
 | Eggplant | per piece | €1.10 |
 | Espresso | per 100 ml | €0.30 |
 | Falafel | per piece | €0.25 |
+| Fava Beans | per 100 g | €0.90 |
 | Figs | per piece | €0.55 |
 | Fire Roasted Diced Tomatoes | per 100 g | €0.24 |
 | Flaky Sea Salt | per 100 g | €1.50 |
@@ -175,6 +179,7 @@ Always label them in the app as *"Estimated — varies by shop."* Gemini's own p
 | Ginger | per 100 g | €0.80 |
 | Gnocchi | per 100 g | €0.40 |
 | Granola | per 100 g | €0.80 |
+| Grape Leaves | per 100 g | €1.80 |
 | Grapes | per 100 g | €0.55 |
 | Green Beans | per 100 g | €0.70 |
 | Green Lentils | per 100 g | €0.30 |
@@ -182,6 +187,7 @@ Always label them in the app as *"Estimated — varies by shop."* Gemini's own p
 | Ground Cumin | per 100 g | €3.00 |
 | Ground Ginger | per 100 g | €3.50 |
 | GruyèRe | per 100 g | €2.20 |
+| Gyoza Wrappers | per 100 g | €1.00 |
 | Ham | per 100 g | €1.80 |
 | Heavy Cream | per 100 ml | €0.55 |
 | Honey | per 100 g | €1.20 |
@@ -190,11 +196,13 @@ Always label them in the app as *"Estimated — varies by shop."* Gemini's own p
 | Italian Seasoning | per 100 g | €3.50 |
 | Jalapeno Pepper | per piece | €0.30 |
 | Jasmine Rice | per 100 g | €0.25 |
-| Kalamata Olives | per 100 g | €1.20 |
+| Kalamata Olives | per 100 g | €1.60 |
 | Kidney Beans | per 100 g | €0.25 |
 | Lamb | per 100 g | €2.60 |
+| Leeks | per piece | €0.85 |
 | Lemon Sorbet | per 100 g | €0.60 |
 | Lettuce | per 100 g | €0.60 |
+| Mango | per piece | €1.20 |
 | Mango Sorbet | per 100 g | €0.60 |
 | Maple Syrup | per 100 ml | €2.20 |
 | Marinara Sauce | per 100 g | €0.30 |
@@ -209,12 +217,14 @@ Always label them in the app as *"Estimated — varies by shop."* Gemini's own p
 | Mushrooms | per 100 g | €0.65 |
 | Mussels | per 100 g | €1.10 |
 | Neutral Oil | per 100 ml | €0.25 |
+| Nori Sheets | per piece | €0.20 |
 | Nutmeg | per 100 g | €5.00 |
 | Oats | per 100 g | €0.20 |
 | Olive Oil | per 100 ml | €0.75 |
 | Olives | per 100 g | €1.40 |
 | Onion Powder | per 100 g | €2.50 |
 | Orange | per piece | €0.40 |
+| Orange Blossom Water | per 100 ml | €1.80 |
 | Orzo Pasta | per 100 g | €0.22 |
 | Panko Breadcrumbs | per 100 g | €0.55 |
 | Paprika | per 100 g | €2.50 |
@@ -227,6 +237,7 @@ Always label them in the app as *"Estimated — varies by shop."* Gemini's own p
 | Pear | per piece | €0.45 |
 | Peas | per 100 g | €0.35 |
 | Penne Pasta | per 100 g | €0.18 |
+| Phyllo Pastry | per 100 g | €0.65 |
 | Pine Nuts | per 100 g | €4.50 |
 | Pineapple | per 100 g | €0.30 |
 | Pistachios | per 100 g | €3.50 |
@@ -240,6 +251,7 @@ Always label them in the app as *"Estimated — varies by shop."* Gemini's own p
 | Powdered Sugar | per 100 g | €0.20 |
 | Protein Powder | per 100 g | €3.00 |
 | Puff Pastry | per 100 g | €0.55 |
+| Queso Fresco | per 100 g | €1.60 |
 | Quinoa | per 100 g | €0.90 |
 | Radish | per piece | €0.08 |
 | Radishes | per 100 g | €0.60 |
@@ -247,14 +259,16 @@ Always label them in the app as *"Estimated — varies by shop."* Gemini's own p
 | Red Lentils | per 100 g | €0.35 |
 | Red Pepper Flakes | per 100 g | €3.50 |
 | Red Wine | per 100 ml | €0.50 |
-| Red Wine Vinegar | per 100 ml | €0.30 |
+| Red Wine Vinegar | per 100 ml | €0.60 |
 | Rice | per 100 g | €0.20 |
 | Rice Noodles | per 100 g | €0.35 |
 | Rice Paper Wrappers | per piece | €0.15 |
 | Rice Wine | per 100 ml | €0.70 |
+| Ricotta | per 100 g | €1.10 |
 | Risotto Rice | per 100 g | €0.45 |
 | Rolled Oats | per 100 g | €0.20 |
 | Romaine Lettuce | per 100 g | €0.55 |
+| Rosewater | per 100 ml | €1.80 |
 | Rum | per 100 ml | €2.00 |
 | Rye Bread | per slice | €0.15 |
 | Salad Greens | per 100 g | €1.20 |
@@ -263,16 +277,19 @@ Always label them in the app as *"Estimated — varies by shop."* Gemini's own p
 | Shallots | per piece | €0.30 |
 | Sherry Vinegar | per 100 ml | €0.80 |
 | Shortcrust Pastry | per 100 g | €0.55 |
+| Shredded Chicken | per 100 g | €1.10 |
 | Smoked Paprika | per 100 g | €3.00 |
 | Soy Sauce | per 100 ml | €0.60 |
 | Spaghetti | per 100 g | €0.18 |
 | Sriracha | per 100 ml | €0.90 |
+| Sticky Rice | per 100 g | €0.35 |
 | Strawberries | per 100 g | €0.90 |
 | Sun-Dried Tomatoes | per 100 g | €1.60 |
+| Sushi Rice | per 100 g | €0.45 |
 | Sweet Potato | per piece | €0.60 |
 | Sweetcorn | per 100 g | €0.40 |
 | Taco Seasoning | per 100 g | €2.50 |
-| Tahini | per 100 g | €1.10 |
+| Tahini | per 100 g | €1.40 |
 | Thai Red Curry Paste | per 100 g | €1.60 |
 | Toasted Sesame Oil | per 100 ml | €1.80 |
 | Tomato | per piece | €0.35 |
@@ -291,6 +308,7 @@ Always label them in the app as *"Estimated — varies by shop."* Gemini's own p
 | White Wine | per 100 ml | €0.50 |
 | Wholewheat Flour | per 100 g | €0.14 |
 | Worcestershire Sauce | per 100 ml | €0.90 |
+| Yeast | per piece | €0.20 |
 | Yukon Gold Potatoes | per 100 g | €0.20 |
 | Zucchini | per piece | €0.60 |
 
