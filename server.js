@@ -450,6 +450,34 @@ const server = http.createServer(async (req, res) => {
       return sendJson(res, 200, out);
     } catch (e) { console.error(e.message); return sendJson(res, 500, { error: e.message }); }
   }
+  // Find a REAL photo for a dish the user added (V4.6). A model cannot be trusted to produce a
+  // working image URL — it invents them — so validateDish() drops any photo Gemini supplies.
+  // Instead we take the dish's genuine `sourceUrl` (a real recipe page the model found) and read
+  // that page's own og:image. That is a real photograph of that exact dish, published by that
+  // site, and it's verified to actually load before we hand it back. If anything is off we return
+  // photo:null and the dish keeps its emoji tile — never a wrong or broken picture.
+  if (req.method === 'GET' && req.url.startsWith('/dish-image')) {
+    try {
+      const target = new URL(req.url, 'http://x').searchParams.get('url') || '';
+      if (!/^https?:\/\//i.test(target)) return sendJson(res, 400, { error: 'Bad url' });
+      const UA = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120 Safari/537.36';
+      const page = await fetch(target, { headers: { 'user-agent': UA }, redirect: 'follow' });
+      if (!page.ok) return sendJson(res, 200, { photo: null });
+      const html = (await page.text()).slice(0, 400000);
+      const grab = (re) => { const m = html.match(re); return m ? m[1] : null; };
+      let img =
+        grab(/<meta[^>]+property=["']og:image["'][^>]+content=["']([^"']+)["']/i) ||
+        grab(/<meta[^>]+content=["']([^"']+)["'][^>]+property=["']og:image["']/i) ||
+        grab(/<meta[^>]+name=["']twitter:image["'][^>]+content=["']([^"']+)["']/i);
+      if (!img) return sendJson(res, 200, { photo: null });
+      img = new URL(img, target).href;                       // resolve protocol-relative / relative
+      // Confirm it really is a loadable image before we let it near the UI.
+      const head = await fetch(img, { method: 'HEAD', headers: { 'user-agent': UA }, redirect: 'follow' });
+      const type = head.headers.get('content-type') || '';
+      if (!head.ok || !type.startsWith('image/')) return sendJson(res, 200, { photo: null });
+      return sendJson(res, 200, { photo: img });
+    } catch (e) { return sendJson(res, 200, { photo: null }); }
+  }
   // Any other GET → serve the app-shell from /public (index.html, styles.css, app.js, assets…).
   if (req.method === 'GET') return sendStatic(res, req.url.split('?')[0]);
   sendJson(res, 404, { error: 'Not found' });

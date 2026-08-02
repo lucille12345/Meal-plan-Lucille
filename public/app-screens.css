@@ -262,6 +262,19 @@ button.ghost.on { background: var(--tomato-wash); border-color: var(--tomato); c
 
 /* browse carousels */
 /* §4 filter row */
+/* dish search box — sits above the filter chips */
+.search-row { position: relative; display: flex; align-items: center; margin-bottom: 10px; }
+.search-ico { position: absolute; left: 14px; font-size: 15px; opacity: .55; pointer-events: none; }
+.dish-search { width: 100%; padding: 12px 40px 12px 40px; border: 1px solid var(--hairline-2); border-radius: var(--r-pill);
+  background: var(--surface); font-family: var(--font-ui); font-size: var(--fs-body); color: var(--ink); }
+.dish-search:focus { outline: none; border-color: var(--green); box-shadow: 0 0 0 3px var(--green-wash); }
+.dish-search::-webkit-search-cancel-button { display: none; }
+.search-clear { position: absolute; right: 12px; width: 24px; height: 24px; border: 0; border-radius: 50%;
+  background: var(--surface-2); color: var(--muted); font-size: 12px; line-height: 1; cursor: pointer; font-family: var(--font-ui); }
+.search-clear:hover { background: var(--hairline); color: var(--ink); }
+/* "we don't have that dish" → offer to look it up */
+.no-match { border: 1px solid var(--hairline-2); border-radius: var(--r-card); padding: 20px; background: var(--surface); }
+.no-match .nm-title { font-family: var(--font-display); font-weight: 600; font-size: var(--fs-lg); color: var(--ink); }
 .filter-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
 .filter-chip { font-size: var(--fs-sm); }
 .filter-chip.clear { color: var(--reject); border-color: var(--reject-wash); }
