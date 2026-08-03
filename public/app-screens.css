@@ -275,6 +275,28 @@ button.ghost.on { background: var(--tomato-wash); border-color: var(--tomato); c
 /* "we don't have that dish" → offer to look it up */
 .no-match { border: 1px solid var(--hairline-2); border-radius: var(--r-card); padding: 20px; background: var(--surface); }
 .no-match .nm-title { font-family: var(--font-display); font-weight: 600; font-size: var(--fs-lg); color: var(--ink); }
+/* V4.7 "Cook from what I have" — the browse-column entry point + its overlay results. */
+.fridge-cta {
+  display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap;
+  border: 1px solid var(--hairline-2); border-radius: var(--r-card);
+  background: var(--green-wash); padding: 14px 16px; margin-bottom: 14px;
+}
+.fridge-cta .fc-title { font-family: var(--font-display); font-weight: 600; color: var(--ink); }
+.fridge-cta .sub { margin: 2px 0 0; font-size: var(--fs-sm); }
+.fr-block { margin-top: 18px; }
+.fr-block h3 { font-family: var(--font-display); font-size: var(--fs-md); margin: 0 0 8px; }
+.fr-hit {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+  border: 1px solid var(--hairline-2); border-radius: var(--r-card);
+  padding: 12px 14px; margin-bottom: 8px; background: var(--surface);
+}
+.fr-hit-name { font-weight: 600; color: var(--ink); }
+.fr-hit-meta { font-size: var(--fs-sm); color: var(--muted); margin-top: 3px; }
+.fr-hit-btns { display: flex; gap: 8px; flex-wrap: wrap; }
+.fr-hit-btns button { margin-top: 0; }
+.fr-full { color: var(--basil-deep); font-weight: 600; }
+.fr-missing { color: var(--gold-deep); }
+.fr-ai-msg { display: block; font-size: var(--fs-sm); color: var(--muted); margin-top: 6px; }
 .filter-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
 .filter-chip { font-size: var(--fs-sm); }
 .filter-chip.clear { color: var(--reject); border-color: var(--reject-wash); }

@@ -240,6 +240,17 @@ ${String(query || '').slice(0, 12000)}
     url: `The user gave this recipe link: ${query}
 Use what you reliably know about that page's recipe. If you do not actually know its contents,
 return the refusal object rather than guessing at it.`,
+    fridge: `The user has told us what is in their fridge and cupboards right now, and wants ONE
+dish they can genuinely cook TONIGHT from it. Here is what they have:
+"""
+${String(query || '').slice(0, 2000)}
+"""
+Choose a real, classic, widely-recognised dish that uses AS MANY of those ingredients as possible.
+You may assume basic staples are on hand without listing them as a shopping problem: salt, pepper,
+cooking oil, water. Beyond that, every ingredient you add is something they do not have and would
+have to go out and buy — so add AT MOST TWO of them, and only if the dish genuinely needs them.
+Do NOT invent a dish; pick a real one and adapt honestly. If what they have cannot make a real
+dish, return the refusal object rather than forcing one.`,
     photo: `The user photographed a recipe card or cookbook page (attached as an image).
 READ the image and convert only what is legibly written there. Do not fill gaps by invention —
 if too much is unreadable, return the refusal object.`,
@@ -439,7 +450,7 @@ const server = http.createServer(async (req, res) => {
     if (!API_KEY) return sendJson(res, 500, { error: 'No API key configured on the server.' });
     try {
       const { mode, query, imageBase64, mimeType, profile } = await readBody(req);
-      if (!['name', 'text', 'url', 'photo'].includes(mode)) return sendJson(res, 400, { error: 'Unknown mode.' });
+      if (!['name', 'text', 'url', 'photo', 'fridge'].includes(mode)) return sendJson(res, 400, { error: 'Unknown mode.' });
       if (mode !== 'photo' && !String(query || '').trim()) return sendJson(res, 400, { error: 'Nothing to look up.' });
       if (mode === 'photo' && !imageBase64) return sendJson(res, 400, { error: 'No image supplied.' });
       // 4 MB cap (§0.7.2) — base64 is ~4/3 the byte size of the original.

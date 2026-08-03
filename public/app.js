@@ -239,7 +239,7 @@ const RECIPES = [
   {id:'d50',type:'dinner',types:['lunch','dinner'],name:'Chicken cacciatore',desc:'Chicken braised with tomato, peppers, olives',time:45,difficulty:3,emoji:'🍗',img:'chicken',tags:[],contains:[],kcal:650,protein:44,ingredients:[
     {name:'Chicken thighs',qty:200,unit:'g',category:'Meat & Fish',buyDayBefore:true},{name:'Chopped tomatoes',qty:1,unit:'can',category:'Pantry',buyDayBefore:false},{name:'Bell pepper',qty:1,unit:'',category:'Produce',buyDayBefore:false},{name:'Kalamata olives',qty:30,unit:'g',category:'Pantry',buyDayBefore:false}],steps:['Brown the chicken, then soften the pepper.','Add tomatoes and olives; simmer 30 min.','Serve with crusty bread or pasta.']},
   {id:'l25',type:'lunch',name:'Caprese panini',desc:'Grilled mozzarella, tomato & basil panini',time:10,difficulty:1,emoji:'🥪',img:'',tags:['vegetarian'],contains:['gluten','dairy'],kcal:520,protein:22,ingredients:[
-    {name:'Crusty bread',qty:2,unit:'slices',category:'Bakery',buyDayBefore:true},{name:'Fresh mozzarella',qty:80,unit:'g',category:'Dairy',buyDayBefore:false},{name:'Ripe tomatoes',qty:1,unit:'',category:'Produce',buyDayBefore:true},{name:'Fresh basil',qty:1,unit:'handful',category:'Produce',buyDayBefore:true}],steps:['Layer mozzarella, tomato and basil in the bread.','Press in a hot pan or panini press.','Grill until golden and melty.']},
+    {name:'Crusty bread',qty:2,unit:'slices',category:'Bakery',buyDayBefore:true},{name:'Fresh mozzarella',qty:80,unit:'g',category:'Dairy',buyDayBefore:false},{name:'Ripe tomatoes',qty:120,unit:'g',category:'Produce',buyDayBefore:true},{name:'Fresh basil',qty:1,unit:'handful',category:'Produce',buyDayBefore:true}],steps:['Layer mozzarella, tomato and basil in the bread.','Press in a hot pan or panini press.','Grill until golden and melty.']},
   // -- one more Middle-Eastern main --
   {id:'d51',type:'dinner',types:['lunch','dinner'],name:'Chicken kebabs & tabbouleh',desc:'Grilled chicken skewers, parsley tabbouleh',time:25,difficulty:2,emoji:'🍢',img:'',tags:[],contains:[],kcal:600,protein:44,ingredients:[
     {name:'Chicken breast',qty:200,unit:'g',category:'Meat & Fish',buyDayBefore:true},{name:'Fresh parsley',qty:1,unit:'handful',category:'Produce',buyDayBefore:true},{name:'Couscous',qty:60,unit:'g',category:'Pantry',buyDayBefore:false},{name:'Lemon',qty:0.5,unit:'',category:'Produce',buyDayBefore:false}],steps:['Marinate and skewer the chicken; grill until charred.','Toss couscous with lots of chopped parsley and lemon for a quick tabbouleh.','Serve the skewers over the tabbouleh.']},
@@ -2307,13 +2307,27 @@ const SEARCH_SYNONYMS = {
   chickpea:'chickpea chickpeas garbanzo', beef:'beef steak mince bourguignon',
   fries:'fries chips', chips:'chips fries',
   pudding:'pudding dessert', starter:'starter appetiser appetizer',
+  // A French cook types French. These are the words most likely to be searched here.
+  boeuf:'beef boeuf', poulet:'chicken poulet', poisson:'fish poisson', saumon:'salmon saumon',
+  crevettes:'prawn shrimp crevettes', agneau:'lamb agneau', porc:'pork porc', canard:'duck canard',
+  pates:'pasta spaghetti linguine penne pates', riz:'rice riz',
+  // Careful with short words — matching is substring-based, so "egg" also hits "eggplant" and
+  // "ice" hits rice/juice/spice/slice. Use words that can't collide.
+  oeufs:'eggs omelette frittata scramble shakshuka', fromage:'cheese fromage',
+  // "cake" is inside "pancakes" and "cream" inside "creamy", so those two words are left out
+  // rather than returning half the cookbook. Searching "cake" in English still works directly.
+  glace:'sorbet gelato affogato',
 };
 // Loose text match for the search box: ignores case, punctuation and word order, and searches the
 // dish name, its description AND its ingredients — so "salmon" finds every salmon dish, not just
 // ones with salmon in the title. Every typed word must match something (AND), which keeps
 // multi-word searches precise.
 function matchesSearch(r,q){
-  const norm=s=>String(s||'').toLowerCase().replace(/[^a-z0-9 ]+/g,' ').replace(/\s+/g,' ').trim();
+  // NFD + strip combining marks so "creme brulee" finds "Crème brûlée". Without this the
+  // accented letters were deleted outright ("cr me br l e") and the dish was unfindable —
+  // which then offered to look up (and pay a Gemini call for) a dish we already had.
+  const norm=s=>String(s||'').normalize('NFD').replace(/[̀-ͯ]/g,'')
+    .toLowerCase().replace(/[^a-z0-9 ]+/g,' ').replace(/\s+/g,' ').trim();
   const hay=norm(r.name+' '+(r.desc||'')+' '+(r.ingredients||[]).map(i=>i.name).join(' '));
   return norm(q).split(' ').filter(Boolean).every(w=>{
     if(hay.includes(w)) return true;
@@ -2449,6 +2463,80 @@ function removeSlot(di,mi){
   day.meals.splice(mi,1);
   saveState(); renderPlanner();
 }
+/* ============================================================================
+   COOK FROM MY FRIDGE (V4.7)
+   "Tell us what you already have and we'll build a day out of it."
+   Order of resort, deliberately in this order (same precedence rule as §0):
+     1. the cookbook — match what she already owns against 210 real dishes;
+     2. only if the cookbook genuinely can't cover a meal, ask Gemini to research
+        ONE dish around the same ingredients (reusing /research-dish, no new endpoint).
+   A day does NOT have to be a full starter/main/dessert — she said so explicitly, and
+   forcing three courses out of half a fridge would mean inventing shopping.
+   ========================================================================== */
+
+// Staples nobody thinks to type but everybody has. Counted as "in the fridge" so a dish isn't
+// penalised for needing salt. Her ticked pantry list counts too — that's what it's for.
+const FRIDGE_FREEBIES = ['salt','pepper','water','olive oil','cooking oil','oil','sugar','vinegar'];
+
+// "2 eggs, some spinach\nhalf an onion" → ['eggs','spinach','onion'].
+// Quantities and filler words are stripped so a typed shopping-list line still matches.
+function parseFridgeList(text){
+  return String(text||'')
+    .split(/[\n,;]+/)
+    .map(s=>s.toLowerCase()
+      // strip the quantity AND its unit together, or "200g chicken" leaves a stray "g" behind
+      .replace(/\d+([.,]\d+)?\s*(kg|g|ml|cl|l|oz|lb|tbsp|tsp|x)?\b/g,' ')
+      .replace(/[^a-z ]+/g,' ')                                   // ½, punctuation, leftovers
+      .replace(/\b(some|a|an|the|of|half|few|little|bit|left ?over|fresh|frozen|tin|tinned|can|canned|jar|packet|pack|bag|box)\b/g,' ')
+      .replace(/\s+/g,' ').trim())
+    .filter(s=>s.length>1);
+}
+// Does the fridge cover this ingredient? Containment either way, so "chicken" covers
+// "Chicken breast" and typing "chicken breast" still covers "Chicken".
+function fridgeCovers(have,ingName){
+  return fridgeCoverKind(have,ingName)!=='no';
+}
+// WHICH kind of "covered" matters, and conflating them was a real bug: salt, oil and her ticked
+// pantry staples are covered too, so a 3-ingredient dish scored 2/3 on salt and oil alone and
+// "squid ink, yuzu" returned 16 matches. Ranking must count only what she actually typed.
+//   'mine'   → an ingredient she listed
+//   'staple' → salt/oil/pantry: nothing to buy, but not a reason to suggest the dish
+//   'no'     → she'd have to go and buy it
+function fridgeCoverKind(have,ingName){
+  const n=String(ingName||'').toLowerCase().replace(/[^a-z ]+/g,' ').replace(/\s+/g,' ').trim();
+  if(!n) return 'no';
+  if(have.some(h=>n.includes(h)||h.includes(n))) return 'mine';
+  if(FRIDGE_FREEBIES.some(f=>n===f||n.includes(f))) return 'staple';
+  if(pantryHas(ingName)) return 'staple';
+  return 'no';
+}
+// Score every dish she could actually eat by how much of it she already owns.
+// `missing` is the honest part: what she'd still have to go and buy.
+function fridgeMatches(have,role){
+  const pool=[...DB(),...RECIPES,...STARTERS,...DESSERTS,...state.favorites];
+  const seen=new Set();
+  return pool
+    .filter(r=>{
+      if(seen.has(r.name.toLowerCase())) return false; seen.add(r.name.toLowerCase());
+      return dishRoles(r).includes(role) && passesDietFilters(r,state.profile||{dislikes:[],allergies:[]});
+    })
+    .map(r=>{
+      const ings=r.ingredients||[];
+      const kinds=ings.map(i=>fridgeCoverKind(have,i.name));
+      const missing=ings.filter((_,k)=>kinds[k]==='no').map(i=>i.name);
+      const used=kinds.filter(k=>k==='mine').length;   // only what she actually listed
+      // Staples are excluded from the denominator too — "3 of 4" shouldn't be dragged down by
+      // the salt she was told not to bother typing.
+      const relevant=ings.length-kinds.filter(k=>k==='staple').length;
+      return {recipe:r, used, total:relevant, missing,
+              score: relevant ? used/relevant : 0};
+    })
+    // At least two of her own ingredients, or it isn't "cooking from the fridge" — it's just
+    // a dish that happens to use her onion.
+    .filter(m=>m.used>=2)
+    .sort((a,b)=>b.score-a.score||a.missing.length-b.missing.length)
+    .slice(0,6);
+}
 // The target banner + honest notices that used to sit above the week's day-blocks.
 // The day-blocks themselves are gone (§2 — the week now lives in the sidebar), so these
 // ride at the top of the main column instead.
@@ -2567,11 +2655,22 @@ function clearAllFilters(){ state.browseFilters={saved:false,dietary:[],ingredie
 // household-size division needed the way scaled week recipes need one).
 function dishServingCost(r){ return (r.ingredients||[]).reduce((s,i)=>s+priceOf(i),0); }
 
+/* A few dish names exist in BOTH the curated database and the older legacy pool (Banana pancakes,
+   Butter chicken, Tomato bruschetta, French onion soup). eligibleRecipes() has always deduped
+   these by name for generation, so a week never doubles them — but browse concatenated the two
+   pools raw, so the same dish showed up twice in a carousel. Callers pass DB() first, so keeping
+   the FIRST occurrence keeps the curated version, matching §0's database-first precedence. */
+function dedupeByName(list){
+  const seen=new Set();
+  return list.filter(r=>{ const k=String(r.name||'').toLowerCase();
+    if(seen.has(k)) return false; seen.add(k); return true; });
+}
+
 /* §4 categories — titles are appetising, never a database word (her explicit complaint about
    "Lunch mains"). Every carousel is skipped entirely when empty, and every pool already passes
    through applyBrowseFilters() so filters narrow every section live. */
 function browseBodyHtml(){
-  const pool=r=>applyBrowseFilters(r);
+  const pool=r=>applyBrowseFilters(dedupeByName(r));
   const mains=[...DB(),...RECIPES].filter(r=>{const t=dishRoles(r);return t.includes('lunch')||t.includes('dinner');});
   const dinners=[...DB(),...RECIPES].filter(r=>dishRoles(r).includes('dinner'));
   const starters=[...DB(),...STARTERS].filter(r=>dishRoles(r).includes('starter'));
@@ -2583,8 +2682,10 @@ function browseBodyHtml(){
   const weeknight=pool(mains.filter(r=>r.time<=20));
   const budget=pool(dinners.slice().sort((a,b)=>dishServingCost(a)-dishServingCost(b)));
   const freshLight=pool(mains.filter(r=>r.tags.some(t=>['vegetarian','vegan','fish'].includes(t))));
-  const claimed=new Set([...weeknight,...budget,...freshLight].map(r=>r.id));
-  const comfort=pool(mains.filter(r=>!claimed.has(r.id)));
+  // By NAME, not id: the same dish exists under two ids (curated db-m16 vs legacy d24), so an
+  // id-based check let "Butter chicken" appear in Budget-friendly dinners AND Comfort classics.
+  const claimed=new Set([...weeknight,...budget,...freshLight].map(r=>String(r.name).toLowerCase()));
+  const comfort=pool(mains.filter(r=>!claimed.has(String(r.name).toLowerCase())));
   const smallPlates=pool(starters);
   const sweetEndings=pool(desserts);
   const bfast=pool(breakfasts);
@@ -2602,6 +2703,13 @@ function browseBodyHtml(){
   ];
   const anyResults=sections.some(([,list])=>list.length)||favs.length||ownDishes.length;
   return `${filterRowHtml()}
+    <div class="fridge-cta">
+      <div>
+        <div class="fc-title">🧊 Got a fridge to use up?</div>
+        <div class="sub">Tell us what you already have and we'll build a day around it.</div>
+      </div>
+      <button class="ghost" id="fridgeBtn">Cook from what I have</button>
+    </div>
     <p class="drag-hint">↔ Drag a card onto a day in the week, or tap ⊕ to choose a day.</p>
     ${carousel('Your favourites ♥', favs)}
     ${ownDishesBlockHtml(ownDishes)}
@@ -2772,7 +2880,11 @@ function renderPlanner(){
     // §0.7 entry point — it lives in the `Your own dishes` block, which sits on the
     // My Meal Plan tab, satisfying §0.7.2's "one entry point" and §4's "discoverable from
     // browse" at once. A second copy floating above the filters just read as a duplicate.
-    document.getElementById('addDishBrowse')?.addEventListener('click',openAddDishOverlay);
+    // NB: call these through an arrow, not by reference — addEventListener passes the click
+    // event as the first argument, and openAddDishOverlay's first argument is `prefill`, so a
+    // bare reference typed "[object MouseEvent]" into the dish-name box.
+    document.getElementById('addDishBrowse')?.addEventListener('click',()=>openAddDishOverlay());
+    document.getElementById('fridgeBtn')?.addEventListener('click',()=>openFridgeOverlay());  // V4.7
     // --- dish search: filters the carousels live; empty → offer to look the dish up ---
     const searchEl=document.getElementById('dishSearch');
     if(searchEl){
@@ -3147,7 +3259,10 @@ function noteResearchCall(){
 // Spend nothing when we already have the dish (§0.7.6). Loose match: case/punctuation-insensitive
 // containment either way, so "tikka masala" finds "Chicken tikka masala".
 function findCloseNameMatch(query){
-  const norm=s=>String(s||'').toLowerCase().replace(/[^a-z0-9 ]+/g,'').replace(/\s+/g,' ').trim();
+  // Same accent folding as matchesSearch — "creme brulee" must find "Crème brûlée" here too,
+  // or we spend a Gemini lookup on a dish that's already in the cookbook.
+  const norm=s=>String(s||'').normalize('NFD').replace(/[̀-ͯ]/g,'')
+    .toLowerCase().replace(/[^a-z0-9 ]+/g,'').replace(/\s+/g,' ').trim();
   const q=norm(query); if(q.length<3) return null;
   const pool=[...DB(),...RECIPES,...STARTERS,...DESSERTS];
   return pool.find(r=>{const n=norm(r.name); return n===q||n.includes(q)||q.includes(n);})||null;
@@ -3314,7 +3429,7 @@ function openAddDishOverlay(prefill){
     const input=overlay.querySelector('#ad-q');
     const msg=overlay.querySelector('#ad-msg');
     const go=overlay.querySelector('#ad-go');
-    if(prefill && mode==='name' && !input.value) input.value=prefill;
+    if(typeof prefill==='string' && prefill && mode==='name' && !input.value) input.value=prefill;
     input.focus();
 
     go.onclick=async()=>{
@@ -3372,6 +3487,140 @@ function openAddDishOverlay(prefill){
   document.addEventListener('keydown',onKey);
   document.body.appendChild(overlay);
   bind();
+}
+
+/* ---- COOK FROM MY FRIDGE (V4.7) — the overlay ----
+   Step 1 is always the cookbook. Gemini is offered only for the meals the cookbook couldn't
+   cover, one dish at a time, and it goes through the SAME allergen-confirmation gate as any
+   other added dish — a model-written dish never reaches the plate unreviewed. */
+function openFridgeOverlay(){
+  const overlay=document.createElement('div');
+  overlay.className='sheet-overlay';
+  overlay.setAttribute('role','dialog'); overlay.setAttribute('aria-modal','true');
+  overlay.setAttribute('aria-label','Cook from what I have');
+  let have=[], results=null, raw='';
+  function close(){ document.removeEventListener('keydown',onKey); overlay.remove(); }
+  function onKey(e){ if(e.key==='Escape')close(); }
+
+  const ROLES=[['breakfast','Breakfast'],['lunch','Lunch'],['dinner','Dinner']];
+
+  function askBody(){
+    return `<div class="sheet">
+      <button class="sheet-close" aria-label="Close">✕</button>
+      <div class="sheet-body">
+        <h2 class="rname" style="margin-top:0">Cook from what you have</h2>
+        <p class="sub">List what's in your fridge and cupboards and we'll build a day out of it —
+          from the cookbook first, so there's nothing to go and buy.</p>
+        <label class="ing-head" for="fr-q">What have you got?</label>
+        <textarea id="fr-q" rows="5" placeholder="eggs, spinach, half an onion, cheddar, rice, chicken thighs…">${raw.replace(/</g,'&lt;')}</textarea>
+        <p class="sub" style="margin:6px 0 0;font-size:.85em">One per line or separated by commas.
+          Don't bother with salt, pepper or oil — we assume you have those.</p>
+        <p class="sub" id="fr-msg" style="min-height:1.2em"></p>
+        <div class="recipe-actions" style="margin-top:12px">
+          <button class="primary" id="fr-go" style="margin-top:0">Find me a day</button>
+          <button class="ghost" id="fr-cancel">Cancel</button>
+        </div>
+      </div>
+    </div>`;
+  }
+
+  function matchRow(m,role){
+    const r=m.recipe;
+    const missing=m.missing.length
+      ? `<span class="fr-missing">still need: ${m.missing.slice(0,4).join(', ')}${m.missing.length>4?` +${m.missing.length-4}`:''}</span>`
+      : `<span class="fr-full">nothing to buy ✓</span>`;
+    return `<div class="fr-hit">
+      <div class="fr-hit-main">
+        <div class="fr-hit-name">${r.emoji||'🍽️'} ${r.name}</div>
+        <div class="fr-hit-meta">uses <b>${m.used} of ${m.total}</b> ingredients you have · ${missing}</div>
+      </div>
+      <div class="fr-hit-btns">
+        <button class="ghost" data-fr-see="${r.id}">See recipe</button>
+        <button class="primary" style="margin-top:0" data-fr-add="${r.id}" data-fr-role="${role}">＋ Add</button>
+      </div>
+    </div>`;
+  }
+
+  function resultsBody(){
+    const any=ROLES.some(([k])=>results[k].length);
+    const blocks=ROLES.map(([k,label])=>{
+      const list=results[k];
+      if(list.length) return `<div class="fr-block"><h3>${label}</h3>${list.map(m=>matchRow(m,k)).join('')}</div>`;
+      return `<div class="fr-block"><h3>${label}</h3>
+        <p class="sub" style="margin:2px 0 8px">Nothing in the cookbook works for ${label.toLowerCase()} with just that.</p>
+        <button class="ghost" data-fr-ai="${k}">✨ Ask for a recipe built around what you have</button>
+        <span class="fr-ai-msg" data-fr-msg="${k}"></span></div>`;
+    }).join('');
+    return `<div class="sheet">
+      <button class="sheet-close" aria-label="Close">✕</button>
+      <div class="sheet-body">
+        <h2 class="rname" style="margin-top:0">What you can cook today</h2>
+        <p class="sub">From <b>${have.length}</b> ingredient${have.length===1?'':'s'} you already have.
+          ${any?'Add any of these straight to a day — you don\'t have to fill all three meals.':''}</p>
+        ${blocks}
+        <div class="recipe-actions" style="margin-top:16px">
+          <button class="ghost" id="fr-back">← Change my list</button>
+          <button class="ghost" id="fr-cancel">Done</button>
+        </div>
+      </div>
+    </div>`;
+  }
+
+  function bindAsk(){
+    overlay.querySelector('.sheet-close').onclick=close;
+    overlay.querySelector('#fr-cancel').onclick=close;
+    const ta=overlay.querySelector('#fr-q'), msg=overlay.querySelector('#fr-msg');
+    ta.focus();
+    overlay.querySelector('#fr-go').onclick=()=>{
+      raw=ta.value;
+      have=parseFridgeList(raw);
+      if(have.length<2){ msg.textContent='List at least two things so we have something to work with.'; return; }
+      results={}; ROLES.forEach(([k])=>{ results[k]=fridgeMatches(have,k); });
+      overlay.innerHTML=resultsBody(); bindResults();
+    };
+  }
+
+  function bindResults(){
+    overlay.querySelector('.sheet-close').onclick=close;
+    overlay.querySelector('#fr-cancel').onclick=close;
+    overlay.querySelector('#fr-back').onclick=()=>{ overlay.innerHTML=askBody(); bindAsk(); };
+    overlay.querySelectorAll('[data-fr-see]').forEach(b=>b.onclick=()=>{
+      const r=findBrowseRecipe(b.dataset.frSee); if(r){ close(); openRecipeOverlay(null,null,r); }
+    });
+    overlay.querySelectorAll('[data-fr-add]').forEach(b=>b.onclick=()=>{
+      const r=findBrowseRecipe(b.dataset.frAdd); if(!r) return;
+      // Capture where the button was BEFORE closing — openDayPicker positions itself off an
+      // anchor rect, and the real button is gone the moment the overlay is removed.
+      const rect=b.getBoundingClientRect();
+      close(); openDayPicker(r,{getBoundingClientRect:()=>rect});
+    });
+    // Only now, and only for a meal the cookbook couldn't fill, do we spend a Gemini lookup.
+    overlay.querySelectorAll('[data-fr-ai]').forEach(b=>b.onclick=async()=>{
+      const role=b.dataset.frAi;
+      const msg=overlay.querySelector(`[data-fr-msg="${role}"]`);
+      b.disabled=true; b.textContent='Looking for something…';
+      const timers=[[10000,'Still going — the recipe service is busy.'],
+                    [40000,"Still going. It's slow under load, but it hasn't failed."]]
+        .map(([ms,t])=>setTimeout(()=>{ msg.textContent=' '+t; },ms));
+      let out;
+      try{ out=await researchDish({mode:'fridge',
+        query:`They want a ${role}. They have: ${have.join(', ')}.`}); }
+      finally{ timers.forEach(clearTimeout); }
+      b.disabled=false; b.textContent='✨ Ask for a recipe built around what you have';
+      if(out.fail){ msg.textContent=' '+out.fail;
+        if(out.detail) console.info('Fridge lookup — why it failed:',out.detail);
+        return; }
+      msg.textContent='';
+      close();
+      openConfirmDishOverlay(out.dish,'fridge');
+    });
+  }
+
+  overlay.innerHTML=askBody();
+  overlay.addEventListener('click',e=>{ if(e.target===overlay)close(); });
+  document.addEventListener('keydown',onKey);
+  document.body.appendChild(overlay);
+  bindAsk();
 }
 
 /* ---- the allergen confirmation gate (§0.7.4) — THE safety-critical step ----

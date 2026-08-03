@@ -44,7 +44,7 @@ const UNIT_TO_BASE = {
   g:1, ml:1,
   tsp:5, tbsp:15, pinch:0.5,
   clove:5,        // one garlic clove ≈ 5 g
-  slice:35,       // one slice of bread ≈ 35 g
+  slice:35, slices:35,  // one slice of bread ≈ 35 g (plural written by some recipes)
   stalk:40,       // one celery stalk ≈ 40 g
   scoop:30,       // one protein scoop ≈ 30 g
   scoops:50,      // a dessert scoop (sorbet/ice cream) ≈ 50 g — 2 scoops ≈ 100 g
