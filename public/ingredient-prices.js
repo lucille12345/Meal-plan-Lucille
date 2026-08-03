@@ -377,6 +377,7 @@ const INGREDIENT_PRICES = {
   'fennel':                  {per:'piece', eur:1.20},
   'arborio rice':            {per:'100g',  eur:0.45},
   'sea bass fillet':         {per:'100g',  eur:3.20},
+  'lamb shoulder':           {per:'100g',  eur:1.90},
   'ricotta':                 {per:'100g',  eur:1.10},
   'mango':                   {per:'piece', eur:1.20},
 };
