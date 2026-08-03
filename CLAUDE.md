@@ -200,6 +200,45 @@ leftover parameter, not the brand — leave it.
 >   `/generate-week`** — database-first precedence still holds after all the dish/pricing/cuisine
 >   changes. 49 slots, **0 allergy leaks**. 0 console errors.
 
+> ## 🆕 V4.7 — COOK FROM MY FRIDGE (2026-08-03), COMMITTED, NOT PUSHED
+> `sw.js` `CACHE` → **`foodie-shell-v30`**. Commit `ec179dc`.
+> - **New feature: "Cook from what I have"** — a CTA on the browse column opens an overlay where
+>   she lists what's in the fridge; it returns up to 6 ranked dishes per meal with "uses 3 of 4
+>   ingredients you have · still need: Cheese", each addable straight to a day via the existing
+>   two-step day picker. **The cookbook is searched FIRST** (§0 precedence); Gemini is offered
+>   **only** for a meal the cookbook can't cover, one dish at a time, via a new `fridge` mode on
+>   the existing `/research-dish` — **no new endpoint**. A day does **not** have to be a full
+>   starter/main/dessert (her explicit instruction). AI output still passes through
+>   `validateDish()` + the allergen-confirmation gate.
+>   Key functions in `app.js`: `parseFridgeList`, `fridgeCoverKind`, `fridgeMatches`,
+>   `openFridgeOverlay`. Prompt in `server.js`'s `buildResearchPrompt` under `fridge`.
+> - **4 new dishes** (photos eye-checked + verified to load): `d61` slow-roast lamb shoulder with
+>   root veg, `l27` loaded fries, `l28` loaded nachos, `s40` chilled melon soup. Crème brûlée
+>   (`x24`) already existed. **Pool now 210 dishes, 0 unpriced ingredients.**
+> - **4 real bugs found while verifying, all fixed:**
+>   1. **Fridge scoring counted staples as hers.** Salt, oil and her ticked pantry made a
+>      3-ingredient dish score 2/3 on nothing she owned — "squid ink, yuzu" returned 16 matches.
+>      `fridgeCoverKind()` now separates `mine`/`staple`/`no`; only `mine` scores, and staples are
+>      excluded from the denominator too.
+>   2. **No accent folding in search.** "creme brulee" found nothing (the regex deleted accented
+>      letters outright → "cr me br l e"), so the app offered to *look up and pay a Gemini call
+>      for* a dish already in the cookbook. `matchesSearch` + `findCloseNameMatch` now NFD-fold.
+>   3. **`addDishBrowse` was bound by reference**, so `addEventListener` passed the click event as
+>      `openAddDishOverlay`'s `prefill` and typed `[object MouseEvent]` into the dish-name box.
+>   4. **Browse showed 4 dishes twice.** Banana pancakes, Butter chicken, Tomato bruschetta and
+>      French onion soup exist in both the curated and legacy pools; `eligibleRecipes()` deduped
+>      by name for *generation* but browse concatenated the pools raw. New `dedupeByName()` (DB
+>      first, so the curated one wins). The cross-carousel `claimed` set also compared **ids**,
+>      which never matched the twins — now compares names.
+> - **French search synonyms added** (boeuf, poulet, saumon, agneau, pates…). **Watch short words:
+>   substring matching means "cake" hits "pancakes", "ice" hits rice/juice/spice and "egg" hits
+>   "eggplant"** — those were measured and left out rather than returning half the cookbook.
+> - **✅ Verified in-browser (AI off):** 0 allergy leaks and 0 duplicates across 18 weeks (bar the
+>   documented all-allergies case), €12–23/day/person, 0 duplicate cards, 375px + 1280px clean,
+>   0 console errors, 0 server errors. **One real Gemini run proved the fridge mode**: 2.5 s, used
+>   all four listed ingredients, added only olive oil, correct `contains[]`, `sourceUrl:null`
+>   rather than invented, passed `validateDish()`, opened the confirmation gate.
+
 **Code:** V2 (Phases 1–10a) is **DEPLOYED AND LIVE** as of 2026-07-20. Lucille pushed `main` via
 GitHub Desktop and Render auto-deployed.
 **Live: https://meal-planner-km6f.onrender.com — verified serving `#Foodie`,** all assets 200 over
